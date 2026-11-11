@@ -36,8 +36,12 @@ def chunks(items, size):
 
 
 def main():
-    with REVIEWED.open(encoding="utf-8-sig", newline="") as file:
-        names = sorted({row["username_raw"].strip().lstrip("@") for row in csv.DictReader(file) if row["username_raw"].strip()})
+    names=set()
+    for reviewed in (REVIEWED,ROOT/"data/photo_verified.csv"):
+        if not reviewed.exists():continue
+        with reviewed.open(encoding="utf-8-sig", newline="") as file:
+            names.update(row["username_raw"].strip().lstrip("@") for row in csv.DictReader(file) if row["username_raw"].strip())
+    names=sorted(names)
     known = json.loads(OUTPUT.read_text(encoding="utf-8")) if OUTPUT.exists() else {}
     unresolved = [name for name in names if name.casefold() not in known]
     for batch in chunks(unresolved, 50):
@@ -61,7 +65,8 @@ def main():
     for entry in known.values():
         entry["headshot"] = thumbs.get(entry["id"])
     OUTPUT.write_text(json.dumps(known, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    print(f"Resolved {len(known)} exact username(s); {len(unresolved)} new lookups; {len(thumbs)} headshots; {len(names)-len(known)} unresolved")
+    not_found=[name for name in names if name.casefold() not in known]
+    print(f"Resolved {len(names)-len(not_found)} reviewed username(s); {len(unresolved)} new lookups; {len(thumbs)} headshots; {len(not_found)} unresolved: {not_found}")
 
 
 if __name__ == "__main__":

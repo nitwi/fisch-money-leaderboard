@@ -57,7 +57,7 @@ def classify(tokens, lo, hi):
     return output
 
 
-def main(source, limit=None):
+def main(source, limit=None, force=False):
     with (source / "data/evidence_manifest.csv").open(encoding="utf-8-sig", newline="") as file:
         evidence = list(csv.DictReader(file))
     engine = RapidOCR()
@@ -67,13 +67,16 @@ def main(source, limit=None):
         if limit is not None and ix >= limit:
             break
         key = item["evidence_id"]
-        if key in drafts:
+        if key in drafts and (not force or drafts[key].get("tokens")):
             continue
         path = (source / item["relative_path"]).resolve()
+        if not path.exists() and source == (ROOT/"data/source").resolve():
+            path=(ROOT/"site/evidence"/item["relative_path"]).resolve()
         output, _ = engine(str(path))
         drafts[key] = {"checkpoint": item["checkpoint_id"], "path": item["relative_path"],
                        "min": int(item["min_visible_rank"]), "max": int(item["max_visible_rank"]),
-                       "rows": classify(output, int(item["min_visible_rank"]), int(item["max_visible_rank"]))}
+                       "rows": classify(output, int(item["min_visible_rank"]), int(item["max_visible_rank"])),
+                       "tokens": [[round(sum(point[0] for point in box)/4,1),round(sum(point[1] for point in box)/4,1),text,round(float(confidence),3)] for box,text,confidence in output or []]}
         if ix % 8 == 0:
             outpath.write_text(json.dumps(drafts, indent=1), encoding="utf-8")
             print(f"OCR {ix+1}/{len(evidence)} images ({len(drafts)} cached)", flush=True)
@@ -83,7 +86,8 @@ def main(source, limit=None):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--source", type=Path, required=True)
+    parser.add_argument("--source", type=Path, default=ROOT/"data/source")
     parser.add_argument("--limit", type=int)
+    parser.add_argument("--force", action="store_true", help="Refresh old caches without token geometry")
     args = parser.parse_args()
-    main(args.source.resolve(), args.limit)
+    main(args.source.resolve(), args.limit, args.force)

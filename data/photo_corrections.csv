@@ -1,0 +1,352 @@
+observation_id,evidence_id,username_raw,balance_c,note
+2026-10-15_1958_R17,EV0024,0egoistic,90953417366,Original has digit zero rather than OCR letter O
+2026-10-15_1958_R28,EV0024,Aumjung8267,69957550120,Enlarged original reveals rank missing from OCR
+2026-10-15_1958_R29,EV0024,LasTnIghT2011,69192684398,Original username contains capital I
+2026-10-15_1958_R33,EV0025,NoRoblox_Support,58831864430,Enlarged original row missing from OCR
+2026-10-15_1958_R35,EV0025,zNaN_Rot,57617463654,Enlarged original row missing from OCR
+2026-10-15_1958_R38,EV0025,pflugerson,56274389502,Read row missing from OCR in original screenshot
+2026-10-15_1958_R49,EV0026,Fischerwunk,48910871591,Read bottom-band row directly from original
+2026-10-15_1958_R50,EV0026,Ledino_rex,48823400051,Read bottom-band row directly from original
+2026-10-16_2028_R09,EV0027,metbepol,124106212089,Direct photo reading resolves conflicting OCR
+2026-10-16_2028_R10,EV0027,Sylilia,122274356720,Direct photo reading resolves conflicting OCR
+2026-10-16_2028_R12,EV0027,Erutobi,111406654752,Original value OCR mistakenly copied lower row
+2026-10-16_2028_R13,EV0027,Luwuma,103813795660,Original screenshot resolves contradictory OCR candidates
+2026-10-16_2028_R16,EV0027,emitnick,91970345605,Enlarged original confirmed full rank16 balance
+2026-10-16_2028_R17,EV0028,0egoistic,90841743889,Original displays digit zero not letter O
+2026-10-16_2028_R22,EV0028,injurylowk,80645153229,Direct reading of row omitted by OCR
+2026-10-16_2028_R26,EV0028,LasTnIghT2011,71143352286,Original username contains capital I
+2026-10-16_2028_R30,EV0028,sebax4514,66659305670,Direct reading of row omitted by OCR
+2026-10-16_2028_R43,EV0029,stoicc_xx,52143434683,Original case checked against source
+2026-10-16_2028_R46,EV0029,anthonqt13,50327410362,Zoom and exact Roblox lookup disambiguated q from OCR g
+2026-10-16_2028_R49,EV0030,casketdream,49138612109,Original shows rank49 with value not OCR-overlap from preceding rank
+2026-10-17_1014_R06,EV0132,shatter_yourselfgrgr,143755017428,Read enlarged original where OCR failed
+2026-10-17_1014_R07,EV0132,Force_oNature,139929133120,Read enlarged original where OCR failed
+2026-10-17_1014_R08,EV0132,TheDanishPlays,127583606417,Original screenshot name corrected from OCR
+2026-10-17_1014_R10,EV0132,Sylilia,122301247584,Read enlarged original where OCR failed
+2026-10-17_1014_R11,EV0132,YptSehjZiEs,118291817342,Read enlarged original where OCR failed
+2026-10-17_1014_R12,EV0132,Erutobi,111406654752,OCR dropped a 5 digit from original balance
+2026-10-17_1014_R13,EV0132,xNnoel,104382165357,Read full amount directly in enlarged morning original
+2026-10-17_2214_R05,EV0031,untoldmemoria,155632883410,Read enlarged original number omitted from OCR
+2026-10-17_2214_R06,EV0031,shatter_yourselfgrgr,143755017428,Read enlarged original number omitted from OCR
+2026-10-17_2214_R09,EV0031,metbepol,124106212089,Read original row omitted from OCR
+2026-10-17_2214_R11,EV0031,YptSehjZiEs,118291817342,Corrected OCR letter of screenshot username
+2026-10-17_2214_R12,EV0031,Erutobi,111406654752,Original screenshot number contains missing OCR digit
+2026-10-17_2214_R13,EV0031,xNnoel,104382165257,Read original amount with zoom
+2026-10-17_2214_R15,EV0031,SelenaTatsukii,94996517683,Read enlarged original amount omitted from OCR
+2026-10-17_2214_R16,EV0031,emitnick,91970408625,Read enlarged original amount omitted from OCR
+2026-10-17_2214_R17,EV0032,0egoistic,90840869474,Original screenshot contains digit zero not OCR letter o
+2026-10-17_2214_R25,EV0032,anyokc,71443077147,Original username differs from OCR final letter
+2026-10-17_2214_R26,EV0032,Renvuz,71255332968,Read enlarged original row omitted by OCR
+2026-10-17_2214_R27,EV0032,LasTnIghT2011,71142372516,Read enlarged original row omitted by OCR
+2026-10-17_2214_R29,EV0032,jonnhy1835,70393596463,OCR misread one digit from original screenshot
+2026-10-17_2214_R31,EV0032,Hxtaroo,66165619175,Read original amount omitted from OCR
+2026-10-17_2214_R37,EV0033,Tbpoqqq,57062025455,Corrected stylized screenshot username from OCR
+2026-10-17_2214_R39,EV0033,pflugerson,56360240878,Read original amount omitted by OCR
+2026-10-17_2214_R41,EV0033,KNG_GBS,55850580473,OCR dropped digit 8 in original value
+2026-10-17_2214_R42,EV0033,kvllrx,52161844265,Read enlarged original amount omitted by OCR
+2026-10-17_2214_R43,EV0033,stoicc_xx,52143434683,OCR misread leading 52 as 57
+2026-10-17_2214_R47,EV0033,EnderTitanKid,50105648082,Read enlarged original row omitted by OCR
+2026-10-17_2214_R49,EV0034,casketdream,49138612109,Original has smaller amount than OCR previous-row overlap
+2026-10-19_2045_R06,EV0035,shatter_yourselfgrgr,143884461089,Original resolves conflicting OCR from corroborating capture
+2026-10-19_2045_R07,EV0035,Force_oNature,139923506325,Original name OCR mistakenly repeated preceding player
+2026-10-19_2045_R12,EV0035,Erutobi,111406654752,Original resolves conflicting OCR
+2026-10-19_2045_R17,EV0036,0egoistic,91559860435,Digit zero personally read from original username
+2026-10-19_2045_R28,EV0036,LasTnIghT2011,71349151723,Original letter I personally checked against screenshot
+2026-10-19_2045_R39,EV0037,Tbpoqqq,57425098374,Original username contains final q lost by OCR
+2026-10-20_1837_R05,EV0039,untoldmemoria,155632885405,Read original to resolve OCR conflict
+2026-10-20_1837_R06,EV0039,shatter_yourselfgrgr,143883169446,Read original to resolve OCR conflict
+2026-10-20_1837_R07,EV0039,Force_oNature,139923506325,Read original to resolve OCR conflict
+2026-10-20_1837_R08,EV0039,TheDanishPlays,128002767668,Read original to resolve OCR conflict
+2026-10-20_1837_R09,EV0039,metbepol,124106212089,Read original to resolve OCR conflict
+2026-10-20_1837_R10,EV0039,Sylilia,122309426594,Read original to resolve OCR conflict
+2026-10-20_1837_R11,EV0039,YptSehjZiEs,118291817342,Read original to resolve OCR conflict
+2026-10-20_1837_R15,EV0039,SelenaTatsukii,102817152375,Corrected photo name OCR letters
+2026-10-20_1837_R17,EV0040,0egoistic,91557804365,Original name has digit zero
+2026-10-20_1837_R29,EV0040,LasTnIghT2011,71348860153,Original username contains uppercase I
+2026-10-20_1837_R33,EV0041,m1_zm,61871485099,Read original after OCR shifted amount column
+2026-10-20_1837_R34,EV0041,Zipidy24,59840950970,Read enlarged original after OCR shifted amount column
+2026-10-20_1837_R35,EV0041,NoRoblox_Support,59651360685,Read enlarged original after OCR shifted amount column
+2026-10-20_1837_R36,EV0041,johncenagaming347v2,58446630284,Read enlarged original after OCR shifted amount column
+2026-10-20_1837_R37,EV0041,Gamer3535356466,58080956962,Read enlarged original after OCR shifted amount column
+2026-10-20_1837_R38,EV0041,zNaN_Rot,58051080752,Read enlarged original after OCR shifted amount column
+2026-10-20_1837_R39,EV0041,Tbpoqqq,57429538966,Read enlarged original after OCR shifted amount column
+2026-10-20_1837_R40,EV0041,Zantrille,56911822954,Read enlarged original after OCR shifted amount column
+2026-10-20_1837_R41,EV0041,KNG_GBS,55804103256,Read enlarged original after OCR shifted amount column
+2026-10-20_1837_R42,EV0041,1234mysterio,55732033407,Read enlarged original after OCR shifted amount column
+2026-10-20_1837_R43,EV0041,zackbourbon,54104785458,Read enlarged original after OCR shifted amount column
+2026-10-20_1837_R44,EV0041,BigBoyyChriss,52524792735,Read enlarged original after OCR shifted amount column
+2026-10-20_1837_R45,EV0041,minmin8280,52507434815,Read enlarged original after OCR shifted amount column
+2026-10-20_1837_R46,EV0041,stoicc_xx,52143434683,Read enlarged original after OCR shifted amount column
+2026-10-20_1837_R47,EV0041,kvllrx,52138926411,Read enlarged original after OCR shifted amount column
+2026-10-20_1837_R48,EV0041,AliceSekai,50886257424,Read enlarged original after OCR shifted amount column
+2026-10-20_1837_R49,EV0042,anthonqt13,50367730284,Read original bottom row not OCR value from rank48
+2026-10-20_1837_R50,EV0042,sabbath553,50223529011,Read original bottom row not OCR value from rank49
+2026-10-21_2051_R05,EV0043,untoldmemoria,155632885405,Original resolves OCR conflict
+2026-10-21_2051_R06,EV0043,shatter_yourselfgrgr,143883203861,Original resolves OCR conflict
+2026-10-21_2051_R07,EV0043,Force_oNature,139923506325,Original resolves OCR conflict
+2026-10-21_2051_R08,EV0043,TheDanishPlays,127999191692,Original resolves OCR conflict
+2026-10-21_2051_R09,EV0043,metbepol,124106212089,Original resolves OCR conflict
+2026-10-21_2051_R10,EV0043,Sylilia,122315735379,Original resolves OCR conflict
+2026-10-21_2051_R11,EV0043,YptSehjZiEs,118291817342,Corrected OCR character and resolved conflict
+2026-10-21_2051_R12,EV0043,Erutobi,111406654752,Original resolves OCR conflict
+2026-10-21_2051_R13,EV0043,xNnoel,111103690009,Original resolves OCR conflict
+2026-10-21_2051_R17,EV0044,0egoistic,91674489922,Original has digit zero in username
+2026-10-21_2051_R29,EV0044,LasTnIghT2011,71345562831,Corrected OCR I and l against original
+2026-10-21_2051_R39,EV0045,Tbpoqqq,57432107757,Read enlarged source row missing from OCR
+2026-10-21_2051_R40,EV0045,Zantrille,56911822954,Read enlarged source after OCR value shifted
+2026-10-21_2051_R41,EV0045,KNG_GBS,55804103256,Read enlarged source after OCR value shifted
+2026-10-21_2051_R42,EV0045,1234mysterio,55728228894,Read enlarged source after OCR value shifted
+2026-10-21_2051_R43,EV0045,zackbourbon,54104785458,Read enlarged source after OCR value shifted
+2026-10-21_2051_R44,EV0045,minmin8280,52725258408,Read enlarged source after OCR value shifted
+2026-10-21_2051_R45,EV0045,BigBoyyChriss,52524784955,Read enlarged source after OCR value shifted
+2026-10-21_2051_R46,EV0045,stoicc_xx,52143434683,Read enlarged source row missing from OCR
+2026-10-21_2051_R49,EV0046,anthonqt13,50367736394,Read original username and amount OCR assigned rank48 value
+2026-10-21_2051_R50,EV0046,Minkib7661,50235710224,Read original bottom rank not previous-rank OCR value
+2026-10-22_1933_R08,EV0047,TheDanishPlays,128056371890,Read original value where OCR skipped row
+2026-10-22_1933_R09,EV0047,metbepol,124106212089,Read original instead of shifted OCR preceding rank value
+2026-10-22_1933_R15,EV0047,SelenaTatsukii,102818693799,Original username differs from OCR letters
+2026-10-22_1933_R16,EV0047,emitnick,92041559781,Enlarged original fully reads bottom of board
+2026-10-22_1933_R17,EV0048,0egoistic,91673011712,Original screenshot begins with digit zero
+2026-10-22_1933_R25,EV0048,heanmichrkke_3,73201100035,Read original row missing in OCR
+2026-10-22_1933_R29,EV0048,LasTnIghT2011,71341003797,Enlarged original resolved I and l username
+2026-10-22_1933_R32,EV0048,pflugerson,62155867224,Enlarged original read missing OCR bottom row
+2026-10-22_1933_R39,EV0049,Tbpoqqq,57514000775,Read exact name from original rather than OCR g
+2026-10-22_1933_R49,EV0050,anthonqt13,50363588114,Original rank49 amount differs from OCR overlap value
+2026-10-22_1933_R50,EV0050,Minkib7661,50244156320,Original rank50 amount differs from OCR overlap value
+2026-10-23_2200_R10,EV0051,xNnoel,122488136382,Original shows rank10 xNnoel and resolves OCR conflict
+2026-10-23_2200_R12,EV0051,YptSehjZiEs,118291817342,Original resolves OCR conflict
+2026-10-23_2200_R14,EV0051,Luwuma,111000051421,Original resolves OCR conflict
+2026-10-23_2200_R17,EV0052,0egoistic,91670891532,Original rank17 missing from OCR with digit zero name
+2026-10-23_2200_R29,EV0052,LasTnIghT2011,71340847282,Read exact username letters from original
+2026-10-23_2200_R47,EV0054,stoicc_xx,52143434683,Original has lowercase c not OCR capital I
+2026-10-24_2313_R10,EV0055,metbepol,124106212089,Read original to resolve OCR conflict
+2026-10-24_2313_R15,EV0055,SelenaTatsukii,102282518632,Read original to resolve OCR conflict
+2026-10-24_2313_R17,EV0056,0egoistic,91715906061,Original username begins digit zero not OCR O
+2026-10-24_2313_R29,EV0056,LasTnIghT2011,71340906449,Read uppercase I in original username
+2026-10-24_2313_R33,EV0057,Tbpoqqq,62038380254,Photo shows entire row missing from OCR
+2026-10-25_1956_R10,EV0059,metbepol,124106212089,Original resolves OCR conflict
+2026-10-25_1956_R14,EV0059,Luwuma,111004946419,Original resolves OCR conflict
+2026-10-25_1956_R17,EV0060,0egoistic,91594557101,Read original digit zero username
+2026-10-25_1956_R29,EV0060,LasTnIghT2011,71771071811,Read original capital I rather than OCR l
+2026-10-25_1956_R30,EV0060,jonnhy1835,70393596463,Original row omitted by OCR
+2026-10-25_1956_R32,EV0060,Zipidy24,62232623672,Original row omitted by OCR
+2026-10-25_1956_R33,EV0061,pflugerson,62080986843,Original row OCR matched next-ranked username
+2026-10-25_1956_R34,EV0061,Tbpoqqq,62038476454,Read original after OCR shifted names
+2026-10-25_1956_R35,EV0061,johncenagaming347v2,61967995020,Read original after OCR shifted names
+2026-10-25_1956_R36,EV0061,m1_zm,61871485099,Read original after OCR shifted names
+2026-10-25_1956_R37,EV0061,NoRoblox_Support,59511716909,Read original after OCR shifted names
+2026-10-25_1956_R38,EV0061,AliceSekai,58844542193,Read original after OCR shifted names
+2026-10-25_1956_R39,EV0061,Gamer3535356466,58080956962,Read original after OCR shifted names
+2026-10-25_1956_R40,EV0061,zNaN_Rot,57942399288,Read original after OCR shifted names
+2026-10-25_1956_R41,EV0061,Zantrille,56911822954,Read original after OCR shifted names
+2026-10-25_1956_R42,EV0061,KNG_GBS,55802486850,Read original after OCR shifted names
+2026-10-25_1956_R43,EV0061,1234mysterio,55613338164,Read original after OCR shifted names
+2026-10-25_1956_R44,EV0061,sabbath553,55050790822,Read original after OCR shifted names
+2026-10-25_1956_R45,EV0061,minmin8280,54611955514,Read original after OCR shifted names
+2026-10-25_1956_R46,EV0061,zackbourbon,54158621912,Read original after OCR shifted names
+2026-10-25_1956_R47,EV0061,BigBoyyChriss,52429061135,Read original after OCR shifted names
+2026-10-25_1956_R48,EV0061,stoicc_xx,52143434683,Read original rank omitted by OCR
+2026-10-26_2236_R05,EV0063,untoldmemoria,156221635539,Photo resolves OCR conflict
+2026-10-26_2236_R06,EV0063,shatter_yourselfgrgr,144353977976,Photo resolves OCR conflict
+2026-10-26_2236_R07,EV0063,Force_oNature,139815505246,Photo resolves OCR conflict
+2026-10-26_2236_R08,EV0063,xNnoel,136837451062,Photo resolves OCR conflict
+2026-10-26_2236_R09,EV0063,TheDanishPlays,128130510312,Original OCR wrongly repeated xNnoel username
+2026-10-26_2236_R10,EV0063,Sylilia,124659667127,Original resolves OCR conflict
+2026-10-26_2236_R12,EV0063,YptSehjZiEs,118291817342,Original resolves OCR conflict
+2026-10-26_2236_R14,EV0063,Luwuma,111004946419,Original resolves OCR conflict
+2026-10-26_2236_R15,EV0063,SelenaTatsukii,102491115019,Read full original rank15 omitted by OCR
+2026-10-26_2236_R16,EV0063,emitnick,91963485829,Read enlarged original rank16 omitted by OCR
+2026-10-26_2236_R17,EV0064,0egoistic,91503375650,Photo username begins with digit zero
+2026-10-26_2236_R28,EV0064,anyokc,72350448454,Original name corrected from OCR anyoke
+2026-10-26_2236_R29,EV0064,LasTnIghT2011,71833899060,Read uppercase I from original username
+2026-10-26_2236_R31,EV0064,Hxtaroo,66704381786,Read original rank omitted by OCR
+2026-10-26_2236_R32,EV0064,Zipidy24,63282377226,Read original rank omitted by OCR
+2026-10-26_2236_R33,EV0065,Tbpoqqq,62575291088,Read original rank and number instead of shifted OCR
+2026-10-26_2236_R34,EV0065,pflugerson,62080901913,Read original rank and number instead of shifted OCR
+2026-10-26_2236_R35,EV0065,johncenagaming347v2,61965181470,Read original rank and number instead of shifted OCR
+2026-10-26_2236_R36,EV0065,m1_zm,61871485099,Read original rank and number instead of shifted OCR
+2026-10-26_2236_R37,EV0065,NoRoblox_Support,59511716909,Read original rank and number instead of shifted OCR
+2026-10-26_2236_R38,EV0065,AliceSekai,58855231098,Read original rank and number instead of shifted OCR
+2026-10-26_2236_R39,EV0065,Gamer3535356466,58080956962,Read original rank and number instead of shifted OCR
+2026-10-26_2236_R40,EV0065,zNaN_Rot,57942808501,Read original rank and number instead of shifted OCR
+2026-10-26_2236_R41,EV0065,Zantrille,56911822954,Read original rank and number instead of shifted OCR
+2026-10-26_2236_R42,EV0065,KNG_GBS,55802486850,Read original rank and number instead of shifted OCR
+2026-10-26_2236_R43,EV0065,1234mysterio,55615580215,Read original rank and number instead of shifted OCR
+2026-10-26_2236_R44,EV0065,minmin8280,55367548619,Read original rank and number instead of shifted OCR
+2026-10-26_2236_R45,EV0065,sabbath553,55047438980,Read original rank and number instead of shifted OCR
+2026-10-26_2236_R46,EV0065,zackbourbon,54158471952,Read original rank and number instead of shifted OCR
+2026-10-26_2236_R47,EV0065,BigBoyyChriss,52427071263,Read original rank and number instead of shifted OCR
+2026-10-26_2236_R48,EV0065,stoicc_xx,52143434683,Read original rank and number instead of shifted OCR
+2026-10-26_2236_R49,EV0066,kvllrx,52125164440,Read bottom-band original number not shifted OCR
+2026-10-26_2236_R50,EV0066,Minkib7661,50419920223,Read bottom-band original number not shifted OCR
+2026-10-27_2203_R18,EV0068,0egoistic,91518206942,Original username starts with digit zero
+2026-10-27_2203_R21,EV0068,DerpyPoopManXD,85864329328,Read row missed by screenshot OCR
+2026-10-27_2203_R29,EV0068,LasTnIghT2011,72162475555,Original has uppercase I not OCR l
+2026-10-27_2203_R32,EV0068,Zipidy24,63184400300,Read row missed by screenshot OCR
+2026-10-27_2203_R34,EV0069,pflugerson,62078310323,Read original rank34 missing from OCR
+2026-10-27_2203_R36,EV0069,m1_zm,61871485099,Read original rank36 missing from OCR
+2026-10-27_2203_R44,EV0069,1234mysterio,55623796724,Read original rank44 missing from OCR
+2026-10-27_2203_R45,EV0069,sabbath553,55049966026,Corrected OCR shifted username from next row
+2026-10-27_2203_R46,EV0069,zackbourbon,54158471952,Corrected OCR shifted username from next row
+2026-10-27_2203_R47,EV0069,BigBoyyChriss,52426867579,Corrected OCR shifted username from next row
+2026-10-27_2203_R48,EV0069,stoicc_xx,52143434683,Read original row missed by OCR
+2026-10-27_2203_R49,EV0070,kvllrx,52125164440,Original rank49 differs from OCR preceding value
+2026-10-27_2203_R50,EV0070,Minkib7661,50427966735,Original rank50 differs from OCR preceding value
+2026-10-28_2345_R08,EV0071,Force_oNature,139815505246,Original screenshot amount OCR repeated previous rank
+2026-10-28_2345_R06,EV0071,shatter_yourselfgrgr,145080163430,Original resolves OCR conflict
+2026-10-28_2345_R07,EV0071,xNnoel,143629302543,Original resolves OCR conflict
+2026-10-28_2345_R09,EV0071,TheDanishPlays,128126468581,Original OCR lost leading digit and row association
+2026-10-28_2345_R10,EV0071,Sylilia,124658310498,Original resolves OCR conflict
+2026-10-28_2345_R11,EV0071,metbepol,124106212089,Read original amount instead of prior rank OCR copy
+2026-10-28_2345_R12,EV0071,YptSehjZiEs,118291817342,Read original amount instead of prior rank OCR copy
+2026-10-28_2345_R13,EV0071,Erutobi,111438582576,Read original amount instead of prior rank OCR copy
+2026-10-28_2345_R14,EV0071,Luwuma,111004946419,Original resolves OCR conflict
+2026-10-28_2345_R17,EV0072,emitnick,92343653621,Read original row omitted by OCR
+2026-10-28_2345_R18,EV0072,0egoistic,91574151531,Original username has digit zero
+2026-10-28_2345_R29,EV0072,LasTnIghT2011,72137686345,Original username has uppercase I
+2026-10-28_2345_R31,EV0072,kawaiicatsophi67,67399688626,Corrected OCR spelling against screenshot
+2026-10-28_2345_R34,EV0073,Tbpoqqq,62592194897,Read original rank missing by OCR
+2026-10-28_2345_R37,EV0073,m1_zm,61871485099,Read original rank missing by OCR
+2026-10-28_2345_R40,EV0073,Gamer3535356466,58080956962,Read original rank missing by OCR
+2026-10-28_2345_R49,EV0074,stoicc_xx,52143434683,Original value not preceding rank OCR
+2026-10-28_2345_R50,EV0074,kvllrx,52125164440,Original value not preceding rank OCR
+2026-10-29_2013_R05,EV0075,untoldmemoria,156264695637,Original resolves OCR conflict
+2026-10-29_2013_R06,EV0075,xNnoel,152372442267,Original resolves OCR conflict
+2026-10-29_2013_R07,EV0075,shatter_yourselfgrgr,145343271067,Original resolves OCR conflict
+2026-10-29_2013_R08,EV0075,Force_oNature,139815505246,Original resolves OCR conflict
+2026-10-29_2013_R10,EV0075,Sylilia,124658354948,Original resolves OCR conflict
+2026-10-29_2013_R11,EV0075,metbepol,124106212089,Original resolves OCR conflict
+2026-10-29_2013_R12,EV0075,YptSehjZiEs,118291817342,Original resolves OCR conflict
+2026-10-29_2013_R14,EV0075,Luwuma,111004946449,Original resolves OCR conflict
+2026-10-29_2013_R18,EV0076,0egoistic,91573966322,Original screenshot name begins digit zero
+2026-10-29_2013_R28,EV0076,LasTnIghT2011,72674157548,Original row missing from OCR
+2026-10-29_2013_R31,EV0076,kawaiicatsophi67,67400202046,Original username corrected from OCR
+2026-10-29_2013_R34,EV0077,Tbpoqqq,62592331257,Original screenshot rank omitted by OCR
+2026-10-29_2013_R50,EV0078,kvllrx,52125164440,Original spelling contains two l letters
+2026-10-30_2253_R18,EV0080,0egoistic,91568772163,Original username starts with digit zero
+2026-10-30_2253_R28,EV0080,LasTnIghT2011,72674168988,Original uppercase I was misread by OCR
+2026-10-30_2253_R31,EV0080,kawaiicatsophi67,66936094479,Read missing i in original screenshot name
+2026-10-31_2340_R19,EV0084,0egoistic,91687126784,Original begins with digit zero not OCR letter O
+2026-10-31_2340_R06,EV0083,xNnoel,152713627852,Original resolves OCR conflict
+2026-10-31_2340_R29,EV0084,LasTnIghT2011,72827348189,Read uppercase I against original screenshot
+2026-10-31_2340_R35,EV0085,Tbpoqqq,62981611414,Read original rank35 missing from OCR
+2026-10-31_2340_R37,EV0085,m1_zm,61871485099,Read original rank37 missing from OCR
+2026-11-01_1827_R19,EV0088,0egoistic,91687126854,Original username starts with digit zero
+2026-11-01_1827_R09,EV0087,TheDanishPlays,128115232510,Original resolves OCR disagreement
+2026-11-01_1827_R30,EV0088,LasTnIghT2011,72752196304,Original username capital I corrected from OCR
+2026-11-01_1827_R36,EV0089,Tbpoqqq,62915308777,Read full source rank36 missing from OCR
+2026-11-01_1827_R37,EV0089,pflugerson,61999151017,Read full source rank37 missing from OCR
+2026-11-01_1827_R44,EV0089,Zantrille,56911822954,Read rank44 omitted from OCR
+2026-11-02_2128_R13,EV0091,Myvexxx,113060153371,Read original to resolve OCR conflicting amount
+2026-11-02_2128_R19,EV0092,0egoistic,91687142344,Original name begins with digit zero
+2026-11-02_2128_R30,EV0092,LasTnIghT2011,72858363570,Corrected original uppercase I from OCR
+2026-11-04_0142_R16,EV0095,Luwuma,110889440236,Read original bottom of Top 16 missing in OCR
+2026-11-04_0142_R19,EV0096,0egoistic,91757343472,Original username begins with digit zero
+2026-11-04_0142_R27,EV0096,LasTnIghT2011,75006690190,Read original capital I
+2026-11-04_0142_R29,EV0096,heanmichrkke_3,73201100035,Corrected missing underscore from OCR
+2026-11-04_0142_R31,EV0096,jonnhy1835,70393596463,Read original row omitted by OCR
+2026-11-04_0142_R32,EV0096,johncenagaming347v2,69015184329,Read original row omitted by OCR
+2026-11-04_0142_R36,EV0097,Nnoelq,63593033562,Enlarged original resolves username q rather than OCR g
+2026-11-04_0142_R37,EV0097,Tbpoqqq,62918697511,Read original rank omitted by OCR
+2026-11-04_0142_R39,EV0097,m1_zm,61871485099,Enlarged original digit 1 not OCR l
+2026-11-04_0142_R40,EV0097,minmin8280,60745733781,Read original rank omitted by OCR
+2026-11-04_0142_R41,EV0097,NoRoblox_Support,59486920280,Read enlarged original rank and amount after OCR shift
+2026-11-04_0142_R42,EV0097,AliceSekai,58868426838,Read enlarged original rank and amount after OCR shift
+2026-11-04_0142_R43,EV0097,Gamer3535356466,58080956962,Read enlarged original rank and amount after OCR shift
+2026-11-04_0142_R44,EV0097,zNaN_Rot,57925063313,Read enlarged original rank and amount after OCR shift
+2026-11-04_0142_R45,EV0097,Zantrille,56911822954,Read enlarged original rank and amount after OCR shift
+2026-11-04_0142_R46,EV0097,KNG_GBS,55648307208,Read enlarged original rank and amount after OCR shift
+2026-11-04_0142_R47,EV0097,1234mysterio,55585729827,Read enlarged original rank omitted by OCR
+2026-11-04_0142_R48,EV0097,10ne17,55294507815,Read enlarged original rank omitted by OCR
+2026-11-04_0142_R49,EV0098,sabbath553,54851965955,Read original bottom-band value instead of shifted OCR
+2026-11-04_0142_R50,EV0098,zackbourbon,53292892115,Read original bottom-band value instead of shifted OCR
+2026-11-04_0152_R07,EV0133,shatter_yourselfgrgr,146767732210,Read row omitted by OCR from enlarged original
+2026-11-04_0152_R08,EV0133,Force_oNature,139807035438,Corrected OCR shifted username
+2026-11-04_0152_R09,EV0133,TheDanishPlays,128037892363,Corrected OCR shifted username
+2026-11-04_0152_R10,EV0133,Sylilia,124626251488,Corrected OCR shifted username
+2026-11-04_0152_R12,EV0133,YptSehjZiEs,118291817342,Read row missing from OCR
+2026-11-04_0152_R13,EV0133,Myvexxx,113119919132,Corrected OCR shifted username
+2026-11-04_0152_R14,EV0133,sebax4514,112199481816,Read row missing from OCR
+2026-11-04_0152_R15,EV0133,Erutobi,111438582576,Read row missing from OCR
+2026-11-04_2100_R19,EV0100,0egoistic,91757368782,Original username begins with digit zero
+2026-11-04_2100_R26,EV0100,LasTnIghT2011,75263072127,Original uppercase I corrected from OCR
+2026-11-04_2100_R33,EV0101,Hxtaroo,66692505515,Original rank33 missing from OCR
+2026-11-04_2100_R35,EV0101,Nnoelq,63702988197,Original username ends q rather than OCR g
+2026-11-04_2100_R36,EV0101,Tbpoqqq,62918697511,Read original rank36 missed by OCR
+2026-11-04_2100_R38,EV0101,m1_zm,61871485099,Original account has digit 1 not OCR lowercase l
+2026-11-04_2101_R10,EV0134,Sylilia,124626251488,Enlarged original reads terminal 488 not OCR 468
+2026-11-04_2101_R15,EV0134,Erutobi,111438582576,Read original rank15 missed by OCR
+2026-11-05_1930_R05,EV0103,xNnoel,172021824483,Original resolves OCR conflict
+2026-11-05_1930_R14,EV0103,Myvexxx,113320085266,Original resolves OCR conflict
+2026-11-05_1930_R16,EV0103,Luwuma,110657570545,Read original bottom Top 16 amount omitted by OCR
+2026-11-05_1930_R19,EV0104,0egoistic,91757436422,Original username has digit zero
+2026-11-05_1930_R26,EV0104,LasTnIghT2011,75814517744,Original uppercase I corrected from OCR
+2026-11-05_1930_R32,EV0104,Zipidy24,68013922787,Read original row omitted by OCR
+2026-11-05_1930_R35,EV0105,Nnoelq,63741132608,Enlarged original username ends q and row missing from OCR
+2026-11-05_1930_R36,EV0105,Tbpoqqq,62918699451,Read enlarged original rank36 missing from OCR
+2026-11-05_1930_R38,EV0105,m1_zm,61871485099,Original screenshot has digit 1 not OCR l
+2026-11-05_1930_R40,EV0105,NoRoblox_Support,59486920280,Read enlarged original rank40 omitted from OCR
+2026-11-05_1930_R41,EV0105,AliceSekai,58872294684,Read enlarged original after OCR shifted rank
+2026-11-05_1930_R42,EV0105,Gamer3535356466,58080956962,Read enlarged original after OCR shifted rank
+2026-11-05_1930_R43,EV0105,10ne17,57864585882,Read enlarged original after OCR shifted rank
+2026-11-05_1930_R44,EV0105,Zantrille,56911822954,Read enlarged original after OCR shifted rank
+2026-11-05_1930_R45,EV0105,zNaN_Rot,56731672115,Read enlarged original after OCR shifted rank
+2026-11-05_1930_R46,EV0105,KNG_GBS,55648307208,Read enlarged original after OCR shifted rank
+2026-11-05_1930_R47,EV0105,1234mysterio,55585729827,Read enlarged original after OCR shifted rank
+2026-11-05_1930_R48,EV0105,sabbath553,54882187053,Read enlarged original after OCR shifted rank
+2026-11-05_1930_R49,EV0106,zackbourbon,53417714346,Read original bottom-board amount not OCR overlap
+2026-11-05_1930_R50,EV0106,Minkib7661,52865100769,Read original bottom-board amount not OCR overlap
+2026-11-06_2147_R19,EV0108,0egoistic,91757527712,Original username starts with digit zero
+2026-11-06_2147_R20,EV0108,Canizan,85951310954,Read original missed by OCR
+2026-11-06_2147_R25,EV0108,LasTnIghT2011,77776947637,Read uppercase I from original username
+2026-11-06_2147_R33,EV0109,Hxtaroo,66692505515,Read original row33 omitted by OCR
+2026-11-06_2147_R34,EV0109,kawaiicatsophi67,65429957854,Read original rank34 not rank35 shifted OCR value
+2026-11-06_2147_R35,EV0109,Nnoelq,63732426307,Read original username q and value shifted in OCR
+2026-11-06_2147_R36,EV0109,Tbpoqqq,62868118829,Read original row omitted from OCR
+2026-11-06_2147_R37,EV0109,pflugerson,62353094257,Read enlarged original after OCR shift
+2026-11-06_2147_R38,EV0109,minmin8280,62292867290,Read enlarged original after OCR shift
+2026-11-06_2147_R39,EV0109,m1_zm,61871485099,Read enlarged original after OCR shift
+2026-11-06_2147_R40,EV0109,NoRoblox_Support,59486920280,Read enlarged original after OCR shift
+2026-11-06_2147_R41,EV0109,AliceSekai,58902614673,Read enlarged original after OCR shift
+2026-11-06_2147_R42,EV0109,Gamer3535356466,58080956962,Read enlarged original after OCR shift
+2026-11-06_2147_R43,EV0109,10ne17,57895453754,Read enlarged original after OCR shift
+2026-11-06_2147_R44,EV0109,zNaN_Rot,57078275762,Read enlarged original after OCR shift
+2026-11-06_2147_R45,EV0109,Zantrille,56911822954,Read enlarged original after OCR shift
+2026-11-06_2147_R46,EV0109,KNG_GBS,55648307208,Read enlarged original after OCR shift
+2026-11-06_2147_R47,EV0109,1234mysterio,55585729827,Read enlarged original after OCR shift
+2026-11-06_2147_R48,EV0109,sabbath553,54908140288,Read enlarged original after OCR shift
+2026-11-07_1046_R05,EV0135,n6sy,176756261618,Read original row5 omitted by OCR
+2026-11-08_0116_R19,EV0112,0egoistic,91757594809,Original screenshot starts with digit zero
+2026-11-08_0116_R05,EV0111,n6sy,176741843027,Photo resolves conflicting OCR copies
+2026-11-08_0116_R25,EV0112,LasTnIghT2011,78898873458,Original username uppercase I differs from OCR
+2026-11-08_0116_R36,EV0113,Nnoelq,63644298899,Original name ends q and resolves OCR conflict
+2026-11-08_0116_R37,EV0113,minmin8280,63072635956,Read original balance instead of shifted OCR value
+2026-11-08_0116_R38,EV0113,Tbpoqqq,63014296135,Read original row38 omitted by OCR
+2026-11-08_0116_R39,EV0113,pflugerson,62345030319,Original resolves OCR image conflict
+2026-11-08_0116_R40,EV0113,m1_zm,61871485099,Original contains digit 1 and resolves conflict
+2026-11-08_0116_R41,EV0113,NoRoblox_Support,59489513366,Original resolves OCR conflict
+2026-11-08_0116_R42,EV0113,AliceSekai,58968853339,Original resolves OCR conflict
+2026-11-08_0116_R43,EV0113,10ne17,58685176749,Original resolves OCR conflict
+2026-11-08_0116_R44,EV0113,Gamer3535356466,58080956962,Original resolves OCR conflict
+2026-11-08_0116_R46,EV0113,Zantrille,56911822954,Original resolves OCR conflict
+2026-11-08_0116_R47,EV0113,Ceruleanflare2,56270534911,Original resolves OCR conflict
+2026-11-08_0116_R48,EV0113,KNG_GBS,55646928998,Read original row48 missed by OCR
+2026-11-08_0116_R49,EV0114,1234mysterio,55585729827,Read original to resolve OCR conflict
+2026-11-09_0052_R25,EV0120,LasTnIghT2011,78892894856,Read original row25 missing from OCR
+2026-11-09_0052_R33,EV0121,Hxtaroo,66691419102,Read original rank33 missed by OCR
+2026-11-09_0052_R34,EV0121,kawaiicatsophi67,65301002024,Read original rank34 missed by OCR
+2026-11-09_0052_R39,EV0121,Tbpoqqq,63014452580,Read original rank39 missed by OCR
+2026-11-09_2122_R16,EV0124,Luwuma,110927019902,Read full original rank16 balance missed by OCR
+2026-11-09_2122_R19,EV0125,0egoistic,91851874656,Original username begins digit zero
+2026-11-09_2122_R25,EV0125,LasTnIghT2011,78907389227,Original uppercase I instead of OCR lowercase l
+2026-11-09_2122_R32,EV0125,Zipidy24,68422562639,Read original rank32 missed by OCR
+2026-11-09_2122_R36,EV0126,Nnoelq,63952223025,Original username ends q not OCR g
+2026-11-09_2122_R39,EV0126,Tbpoqqq,63014552010,Read original row39 omitted by OCR
+2026-11-09_2122_R41,EV0126,m1_zm,61871485099,Read original row41 omitted by OCR
+2026-11-09_2122_R48,EV0126,KNG_GBS,55646928998,Read original row48 omitted by OCR
+2026-11-09_2122_R49,EV0127,1234mysterio,55585729827,Read original rank49 not OCR overlap amount
+2026-11-09_2122_R50,EV0127,zackbourbon,53536981488,Enlarged source confirms exact bottom amount
+2026-10-14_2054_R16,EV0019,emitnick,91939621265,Rechecked screenshot perspective to assign entire pictured amount to rank16
+2026-10-17_1014_R05,EV0132,untoldmemoria,155632883410,Enlarged photo ambiguous glyph corroborated by evening original
+2026-10-30_2253_R05,EV0079,untoldmemoria,171110838836,Read original top-board rank5 amount
+2026-11-02_2128_R14,EV0091,Erutobi,111438582576,Read original top-board rank14 and amount

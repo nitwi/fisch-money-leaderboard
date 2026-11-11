@@ -1,0 +1,1132 @@
+{
+  "images": {
+    "EV0001": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0002": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0003": {
+      "rank_tokens": 15,
+      "name_tokens": 15,
+      "money_tokens": 15,
+      "mode": "aligned_columns",
+      "accepted_rows": 14
+    },
+    "EV0004": {
+      "rank_tokens": 2,
+      "name_tokens": 3,
+      "money_tokens": 3,
+      "mode": "aligned_columns",
+      "accepted_rows": 2
+    },
+    "EV0005": {
+      "rank_tokens": 15,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 15
+    },
+    "EV0006": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0007": {
+      "rank_tokens": 16,
+      "name_tokens": 15,
+      "money_tokens": 14,
+      "mode": "aligned_columns",
+      "accepted_rows": 13
+    },
+    "EV0008": {
+      "rank_tokens": 2,
+      "name_tokens": 2,
+      "money_tokens": 3,
+      "mode": "aligned_columns",
+      "accepted_rows": 2
+    },
+    "EV0009": {
+      "rank_tokens": 14,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0010": {
+      "rank_tokens": 14,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0011": {
+      "rank_tokens": 13,
+      "name_tokens": 16,
+      "money_tokens": 14,
+      "mode": "aligned_columns",
+      "accepted_rows": 14
+    },
+    "EV0012": {
+      "rank_tokens": 2,
+      "name_tokens": 4,
+      "money_tokens": 4,
+      "mode": "aligned_columns",
+      "accepted_rows": 2
+    },
+    "EV0013": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 17,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0014": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 15
+    },
+    "EV0015": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 15
+    },
+    "EV0016": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 15
+    },
+    "EV0017": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 17,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0018": {
+      "rank_tokens": 2,
+      "name_tokens": 15,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 2
+    },
+    "EV0019": {
+      "rank_tokens": 13,
+      "name_tokens": 16,
+      "money_tokens": 15,
+      "mode": "aligned_columns",
+      "accepted_rows": 15
+    },
+    "EV0020": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 15,
+      "mode": "aligned_columns",
+      "accepted_rows": 15
+    },
+    "EV0021": {
+      "rank_tokens": 15,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0022": {
+      "rank_tokens": 2,
+      "name_tokens": 3,
+      "money_tokens": 2,
+      "mode": "aligned_columns",
+      "accepted_rows": 2
+    },
+    "EV0023": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0024": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 15,
+      "mode": "aligned_columns",
+      "accepted_rows": 15
+    },
+    "EV0025": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 13,
+      "mode": "aligned_columns",
+      "accepted_rows": 13
+    },
+    "EV0026": {
+      "rank_tokens": 2,
+      "name_tokens": 5,
+      "money_tokens": 3,
+      "mode": "aligned_columns",
+      "accepted_rows": 0
+    },
+    "EV0027": {
+      "rank_tokens": 14,
+      "name_tokens": 16,
+      "money_tokens": 14,
+      "mode": "aligned_columns",
+      "accepted_rows": 14
+    },
+    "EV0028": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 14
+    },
+    "EV0029": {
+      "rank_tokens": 15,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0030": {
+      "rank_tokens": 1,
+      "name_tokens": 3,
+      "money_tokens": 2,
+      "mode": "aligned_columns",
+      "accepted_rows": 2
+    },
+    "EV0031": {
+      "rank_tokens": 14,
+      "name_tokens": 16,
+      "money_tokens": 9,
+      "mode": "aligned_columns",
+      "accepted_rows": 9
+    },
+    "EV0032": {
+      "rank_tokens": 15,
+      "name_tokens": 16,
+      "money_tokens": 13,
+      "mode": "aligned_columns",
+      "accepted_rows": 13
+    },
+    "EV0033": {
+      "rank_tokens": 13,
+      "name_tokens": 16,
+      "money_tokens": 13,
+      "mode": "aligned_columns",
+      "accepted_rows": 13
+    },
+    "EV0034": {
+      "rank_tokens": 2,
+      "name_tokens": 4,
+      "money_tokens": 3,
+      "mode": "aligned_columns",
+      "accepted_rows": 2
+    },
+    "EV0035": {
+      "rank_tokens": 15,
+      "name_tokens": 16,
+      "money_tokens": 15,
+      "mode": "aligned_columns",
+      "accepted_rows": 15
+    },
+    "EV0036": {
+      "rank_tokens": 14,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0037": {
+      "rank_tokens": 13,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0038": {
+      "rank_tokens": 2,
+      "name_tokens": 3,
+      "money_tokens": 2,
+      "mode": "aligned_columns",
+      "accepted_rows": 2
+    },
+    "EV0039": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0040": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0041": {
+      "rank_tokens": 15,
+      "name_tokens": 15,
+      "money_tokens": 13,
+      "mode": "aligned_columns",
+      "accepted_rows": 11
+    },
+    "EV0042": {
+      "rank_tokens": 2,
+      "name_tokens": 4,
+      "money_tokens": 4,
+      "mode": "aligned_columns",
+      "accepted_rows": 2
+    },
+    "EV0043": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0044": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0045": {
+      "rank_tokens": 15,
+      "name_tokens": 16,
+      "money_tokens": 15,
+      "mode": "aligned_columns",
+      "accepted_rows": 14
+    },
+    "EV0046": {
+      "rank_tokens": 2,
+      "name_tokens": 4,
+      "money_tokens": 3,
+      "mode": "aligned_columns",
+      "accepted_rows": 2
+    },
+    "EV0047": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 14
+    },
+    "EV0048": {
+      "rank_tokens": 15,
+      "name_tokens": 15,
+      "money_tokens": 15,
+      "mode": "aligned_columns",
+      "accepted_rows": 13
+    },
+    "EV0049": {
+      "rank_tokens": 15,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0050": {
+      "rank_tokens": 2,
+      "name_tokens": 4,
+      "money_tokens": 5,
+      "mode": "aligned_columns",
+      "accepted_rows": 2
+    },
+    "EV0051": {
+      "rank_tokens": 15,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0052": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 15,
+      "mode": "aligned_columns",
+      "accepted_rows": 15
+    },
+    "EV0053": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 15,
+      "mode": "aligned_columns",
+      "accepted_rows": 15
+    },
+    "EV0054": {
+      "rank_tokens": 3,
+      "name_tokens": 4,
+      "money_tokens": 4,
+      "mode": "aligned_columns",
+      "accepted_rows": 4
+    },
+    "EV0055": {
+      "rank_tokens": 15,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0056": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0057": {
+      "rank_tokens": 14,
+      "name_tokens": 15,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 15
+    },
+    "EV0058": {
+      "rank_tokens": 2,
+      "name_tokens": 3,
+      "money_tokens": 4,
+      "mode": "aligned_columns",
+      "accepted_rows": 2
+    },
+    "EV0059": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0060": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 14,
+      "mode": "aligned_columns",
+      "accepted_rows": 14
+    },
+    "EV0061": {
+      "rank_tokens": 16,
+      "name_tokens": 17,
+      "money_tokens": 17,
+      "mode": "aligned_columns",
+      "accepted_rows": 15
+    },
+    "EV0062": {
+      "rank_tokens": 2,
+      "name_tokens": 3,
+      "money_tokens": 3,
+      "mode": "aligned_columns",
+      "accepted_rows": 2
+    },
+    "EV0063": {
+      "rank_tokens": 14,
+      "name_tokens": 16,
+      "money_tokens": 15,
+      "mode": "aligned_columns",
+      "accepted_rows": 13
+    },
+    "EV0064": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 14
+    },
+    "EV0065": {
+      "rank_tokens": 15,
+      "name_tokens": 15,
+      "money_tokens": 15,
+      "mode": "aligned_columns",
+      "accepted_rows": 11
+    },
+    "EV0066": {
+      "rank_tokens": 1,
+      "name_tokens": 3,
+      "money_tokens": 5,
+      "mode": "aligned_columns",
+      "accepted_rows": 2
+    },
+    "EV0067": {
+      "rank_tokens": 15,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0068": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 15,
+      "mode": "aligned_columns",
+      "accepted_rows": 14
+    },
+    "EV0069": {
+      "rank_tokens": 15,
+      "name_tokens": 15,
+      "money_tokens": 15,
+      "mode": "aligned_columns",
+      "accepted_rows": 12
+    },
+    "EV0070": {
+      "rank_tokens": 2,
+      "name_tokens": 4,
+      "money_tokens": 5,
+      "mode": "aligned_columns",
+      "accepted_rows": 2
+    },
+    "EV0071": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 14,
+      "mode": "aligned_columns",
+      "accepted_rows": 13
+    },
+    "EV0072": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 15,
+      "mode": "aligned_columns",
+      "accepted_rows": 15
+    },
+    "EV0073": {
+      "rank_tokens": 15,
+      "name_tokens": 14,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 13
+    },
+    "EV0074": {
+      "rank_tokens": 2,
+      "name_tokens": 3,
+      "money_tokens": 4,
+      "mode": "aligned_columns",
+      "accepted_rows": 2
+    },
+    "EV0075": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0076": {
+      "rank_tokens": 16,
+      "name_tokens": 15,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 15
+    },
+    "EV0077": {
+      "rank_tokens": 15,
+      "name_tokens": 15,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 15
+    },
+    "EV0078": {
+      "rank_tokens": 2,
+      "name_tokens": 4,
+      "money_tokens": 5,
+      "mode": "aligned_columns",
+      "accepted_rows": 2
+    },
+    "EV0079": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 15,
+      "mode": "aligned_columns",
+      "accepted_rows": 15
+    },
+    "EV0080": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0081": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0082": {
+      "rank_tokens": 4,
+      "name_tokens": 5,
+      "money_tokens": 6,
+      "mode": "aligned_columns",
+      "accepted_rows": 5
+    },
+    "EV0083": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 15,
+      "mode": "aligned_columns",
+      "accepted_rows": 15
+    },
+    "EV0084": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0085": {
+      "rank_tokens": 16,
+      "name_tokens": 14,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 14
+    },
+    "EV0086": {
+      "rank_tokens": 2,
+      "name_tokens": 3,
+      "money_tokens": 3,
+      "mode": "aligned_columns",
+      "accepted_rows": 2
+    },
+    "EV0087": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 14,
+      "mode": "aligned_columns",
+      "accepted_rows": 14
+    },
+    "EV0088": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0089": {
+      "rank_tokens": 16,
+      "name_tokens": 15,
+      "money_tokens": 14,
+      "mode": "aligned_columns",
+      "accepted_rows": 13
+    },
+    "EV0090": {
+      "rank_tokens": 2,
+      "name_tokens": 3,
+      "money_tokens": 3,
+      "mode": "aligned_columns",
+      "accepted_rows": 2
+    },
+    "EV0091": {
+      "rank_tokens": 15,
+      "name_tokens": 16,
+      "money_tokens": 15,
+      "mode": "aligned_columns",
+      "accepted_rows": 15
+    },
+    "EV0092": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0093": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0094": {
+      "rank_tokens": 3,
+      "name_tokens": 3,
+      "money_tokens": 4,
+      "mode": "aligned_columns",
+      "accepted_rows": 3
+    },
+    "EV0095": {
+      "rank_tokens": 14,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 15
+    },
+    "EV0096": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 14
+    },
+    "EV0097": {
+      "rank_tokens": 16,
+      "name_tokens": 15,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 12
+    },
+    "EV0098": {
+      "rank_tokens": 2,
+      "name_tokens": 4,
+      "money_tokens": 5,
+      "mode": "aligned_columns",
+      "accepted_rows": 2
+    },
+    "EV0099": {
+      "rank_tokens": 14,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0100": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0101": {
+      "rank_tokens": 15,
+      "name_tokens": 14,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 14
+    },
+    "EV0102": {
+      "rank_tokens": 2,
+      "name_tokens": 4,
+      "money_tokens": 5,
+      "mode": "aligned_columns",
+      "accepted_rows": 2
+    },
+    "EV0103": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 15
+    },
+    "EV0104": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 15
+    },
+    "EV0105": {
+      "rank_tokens": 14,
+      "name_tokens": 15,
+      "money_tokens": 15,
+      "mode": "aligned_columns",
+      "accepted_rows": 12
+    },
+    "EV0106": {
+      "rank_tokens": 2,
+      "name_tokens": 3,
+      "money_tokens": 4,
+      "mode": "aligned_columns",
+      "accepted_rows": 2
+    },
+    "EV0107": {
+      "rank_tokens": 15,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0108": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 15,
+      "mode": "aligned_columns",
+      "accepted_rows": 15
+    },
+    "EV0109": {
+      "rank_tokens": 14,
+      "name_tokens": 13,
+      "money_tokens": 17,
+      "mode": "aligned_columns",
+      "accepted_rows": 13
+    },
+    "EV0110": {
+      "rank_tokens": 2,
+      "name_tokens": 4,
+      "money_tokens": 4,
+      "mode": "aligned_columns",
+      "accepted_rows": 2
+    },
+    "EV0111": {
+      "rank_tokens": 14,
+      "name_tokens": 15,
+      "money_tokens": 15,
+      "mode": "aligned_columns",
+      "accepted_rows": 14
+    },
+    "EV0112": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0113": {
+      "rank_tokens": 15,
+      "name_tokens": 15,
+      "money_tokens": 15,
+      "mode": "aligned_columns",
+      "accepted_rows": 13
+    },
+    "EV0114": {
+      "rank_tokens": 2,
+      "name_tokens": 12,
+      "money_tokens": 15,
+      "mode": "aligned_columns",
+      "accepted_rows": 2
+    },
+    "EV0115": {
+      "rank_tokens": 13,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0116": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0117": {
+      "rank_tokens": 15,
+      "name_tokens": 15,
+      "money_tokens": 15,
+      "mode": "aligned_columns",
+      "accepted_rows": 13
+    },
+    "EV0118": {
+      "rank_tokens": 15,
+      "name_tokens": 12,
+      "money_tokens": 15,
+      "mode": "aligned_columns",
+      "accepted_rows": 11
+    },
+    "EV0119": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0120": {
+      "rank_tokens": 16,
+      "name_tokens": 15,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 15
+    },
+    "EV0121": {
+      "rank_tokens": 16,
+      "name_tokens": 14,
+      "money_tokens": 15,
+      "mode": "aligned_columns",
+      "accepted_rows": 13
+    },
+    "EV0122": {
+      "rank_tokens": 2,
+      "name_tokens": 15,
+      "money_tokens": 15,
+      "mode": "aligned_columns",
+      "accepted_rows": 2
+    },
+    "EV0123": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0124": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 15
+    },
+    "EV0125": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 15
+    },
+    "EV0126": {
+      "rank_tokens": 15,
+      "name_tokens": 14,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 13
+    },
+    "EV0127": {
+      "rank_tokens": 2,
+      "name_tokens": 14,
+      "money_tokens": 15,
+      "mode": "aligned_columns",
+      "accepted_rows": 2
+    },
+    "EV0128": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0129": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 15
+    },
+    "EV0130": {
+      "rank_tokens": 15,
+      "name_tokens": 15,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 13
+    },
+    "EV0131": {
+      "rank_tokens": 2,
+      "name_tokens": 15,
+      "money_tokens": 13,
+      "mode": "aligned_columns",
+      "accepted_rows": 2
+    },
+    "EV0132": {
+      "rank_tokens": 7,
+      "name_tokens": 14,
+      "money_tokens": 9,
+      "mode": "aligned_columns",
+      "accepted_rows": 7
+    },
+    "EV0133": {
+      "rank_tokens": 5,
+      "name_tokens": 15,
+      "money_tokens": 13,
+      "mode": "aligned_columns",
+      "accepted_rows": 10
+    },
+    "EV0134": {
+      "rank_tokens": 11,
+      "name_tokens": 15,
+      "money_tokens": 14,
+      "mode": "aligned_columns",
+      "accepted_rows": 14
+    },
+    "EV0135": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 15,
+      "mode": "aligned_columns",
+      "accepted_rows": 15
+    },
+    "EV0136": {
+      "rank_tokens": 13,
+      "name_tokens": 14,
+      "money_tokens": 14,
+      "mode": "aligned_columns",
+      "accepted_rows": 12
+    },
+    "EV0137": {
+      "rank_tokens": 11,
+      "name_tokens": 15,
+      "money_tokens": 13,
+      "mode": "aligned_columns",
+      "accepted_rows": 12
+    },
+    "EV0138": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 17,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0139": {
+      "rank_tokens": 16,
+      "name_tokens": 16,
+      "money_tokens": 16,
+      "mode": "aligned_columns",
+      "accepted_rows": 16
+    },
+    "EV0140": {
+      "rank_tokens": 10,
+      "name_tokens": 13,
+      "money_tokens": 12,
+      "mode": "aligned_columns",
+      "accepted_rows": 11
+    },
+    "EV0141": {
+      "rank_tokens": 7,
+      "name_tokens": 14,
+      "money_tokens": 9,
+      "mode": "aligned_columns",
+      "accepted_rows": 7
+    },
+    "EV0142": {
+      "rank_tokens": 11,
+      "name_tokens": 13,
+      "money_tokens": 8,
+      "mode": "aligned_columns",
+      "accepted_rows": 5
+    },
+    "EV0143": {
+      "rank_tokens": 10,
+      "name_tokens": 15,
+      "money_tokens": 11,
+      "mode": "aligned_columns",
+      "accepted_rows": 11
+    },
+    "EV0144": {
+      "rank_tokens": 11,
+      "name_tokens": 13,
+      "money_tokens": 13,
+      "mode": "aligned_columns",
+      "accepted_rows": 12
+    },
+    "EV0145": {
+      "rank_tokens": 13,
+      "name_tokens": 14,
+      "money_tokens": 12,
+      "mode": "aligned_columns",
+      "accepted_rows": 10
+    },
+    "EV0146": {
+      "rank_tokens": 12,
+      "name_tokens": 15,
+      "money_tokens": 9,
+      "mode": "aligned_columns",
+      "accepted_rows": 9
+    },
+    "EV0147": {
+      "rank_tokens": 13,
+      "name_tokens": 13,
+      "money_tokens": 15,
+      "mode": "aligned_columns",
+      "accepted_rows": 12
+    },
+    "EV0148": {
+      "rank_tokens": 15,
+      "name_tokens": 16,
+      "money_tokens": 14,
+      "mode": "aligned_columns",
+      "accepted_rows": 14
+    },
+    "EV0149": {
+      "rank_tokens": 12,
+      "name_tokens": 14,
+      "money_tokens": 14,
+      "mode": "aligned_columns",
+      "accepted_rows": 11
+    },
+    "EV0150": {
+      "rank_tokens": 13,
+      "name_tokens": 15,
+      "money_tokens": 13,
+      "mode": "aligned_columns",
+      "accepted_rows": 13
+    },
+    "EV0151": {
+      "rank_tokens": 15,
+      "name_tokens": 15,
+      "money_tokens": 13,
+      "mode": "aligned_columns",
+      "accepted_rows": 13
+    },
+    "EV0152": {
+      "rank_tokens": 11,
+      "name_tokens": 14,
+      "money_tokens": 13,
+      "mode": "aligned_columns",
+      "accepted_rows": 11
+    },
+    "EV0153": {
+      "rank_tokens": 14,
+      "name_tokens": 16,
+      "money_tokens": 14,
+      "mode": "aligned_columns",
+      "accepted_rows": 14
+    },
+    "EV0154": {
+      "rank_tokens": 14,
+      "name_tokens": 15,
+      "money_tokens": 15,
+      "mode": "aligned_columns",
+      "accepted_rows": 15
+    },
+    "EV0155": {
+      "rank_tokens": 15,
+      "name_tokens": 15,
+      "money_tokens": 14,
+      "mode": "aligned_columns",
+      "accepted_rows": 14
+    },
+    "EV0156": {
+      "rank_tokens": 15,
+      "name_tokens": 16,
+      "money_tokens": 15,
+      "mode": "aligned_columns",
+      "accepted_rows": 15
+    },
+    "EV0157": {
+      "rank_tokens": 5,
+      "name_tokens": 15,
+      "money_tokens": 13,
+      "mode": "aligned_columns",
+      "accepted_rows": 10
+    },
+    "EV0158": {
+      "rank_tokens": 11,
+      "name_tokens": 15,
+      "money_tokens": 14,
+      "mode": "aligned_columns",
+      "accepted_rows": 14
+    },
+    "EV0159": {
+      "rank_tokens": 11,
+      "name_tokens": 16,
+      "money_tokens": 14,
+      "mode": "aligned_columns",
+      "accepted_rows": 14
+    },
+    "EV0160": {
+      "rank_tokens": 14,
+      "name_tokens": 13,
+      "money_tokens": 14,
+      "mode": "aligned_columns",
+      "accepted_rows": 13
+    }
+  },
+  "totals": {
+    "images": 160,
+    "rows_with_screenshot_only_ocr": 1445,
+    "different_image_agreements": 212,
+    "conflicts": 86,
+    "two_engine_agreements": 291,
+    "fully_read_images": 40
+  }
+}

@@ -1,0 +1,104 @@
+evidence_id,ranks,reviewer_note
+EV0023,9-16,Read all listed rows directly from original Oct 15 Top C$ screenshot; remaining eight already checked
+EV0024,17-32,Read each rank name and currency amount directly from original screenshot and enlarged uncertain row
+EV0025,33-48,Read every pictured row directly and enlarged missing OCR names and money
+EV0026,49-50,Read both bottom-band ranks directly from unmodified original
+EV0027,9-16,Individually read names and full balances from Oct 16 Top C$ source and enlarged last row
+EV0028,17-32,Individually read the sixteen pictured ranks and checked OCR gaps against screenshot
+EV0029,33-48,Individually read source including ambiguous username enlarged and checked exact Roblox account
+EV0030,49-50,Read both final rank values directly from original bottom-band screenshot
+EV0132,4;6-14,Read enlarged original partial morning image; excluded clipped and ambiguous rows
+EV0031,5-16,Checked all remaining Top 16 directly against original and enlarged uncertain balances
+EV0032,17-32,Read all names and balances from original middle-band screenshot with zoom on uncertain rows
+EV0033,33-48,Read all ranks from original lower-band screenshot and zoomed values and names
+EV0034,49-50,Checked bottom two rank amounts from original PNG with overlap
+EV0035,5-16,Read each remaining top-band row in original Oct 19 image and resolved OCR name conflict
+EV0036,17-32,Read middle-band names and numbers directly from original image
+EV0037,33-48,Read every lower-band rank and amount from original image
+EV0038,49-50,Read original bottom two rank entries
+EV0039,5-16,Read original Oct 20 top-band screenshot with OCR conflicts checked by eye
+EV0040,17-32,Read all middle-band player names and balances directly from original screenshot
+EV0041,33-48,Read every rank from enlarged original lower-board PNG because OCR amounts were shifted
+EV0042,49-50,Read original bottom-band screenshot and corrected both shifted OCR amounts
+EV0043,5-16,Read each remaining top-board row from Oct 21 original photo to settle OCR contradictions
+EV0044,17-32,Read original middle-band ranks usernames and exact balances
+EV0045,33-48,Checked all lower-band names and values against enlarged original due OCR row shifts
+EV0046,49-50,Checked both final rank values against original overlap photo
+EV0047,5-16,Read remaining Top 16 players and money from original Oct 22 source and enlarged last row
+EV0048,17-32,Compared every rank to original and enlarged uncertain middle and lower rows
+EV0049,33-48,Read original lower board including stylized username and values
+EV0050,49-50,Read original bottom two rank amounts and username glyphs
+EV0051,5-16,Read remaining Top 16 names and values directly from Oct 23 original photo
+EV0052,17-32,Read each visible middle-board row from duplicate original photographs
+EV0054,47-50,Read only four photographed bottom-band rows; missing ranks remain unobserved
+EV0055,5-16,Read all remaining Top 16 values directly from Oct 24 original including two OCR conflicts
+EV0056,17-32,Read middle-band ranks and corrected username glyphs in original PNG
+EV0057,33-48,Read all lower-band balances and previously missed rank33 from original
+EV0058,49-50,Read exact last two board values from original screenshot
+EV0059,5-16,Read original Oct 25 top-board image and resolved OCR conflicts
+EV0060,17-32,Read each original mid-board name and balance including skipped ranks
+EV0061,33-48,Read all lower-board ranks directly from screenshot after detecting OCR column shift
+EV0062,49-50,Read original bottom-band money values and names
+EV0063,5-16,Read each remaining top-band rank from Oct 26 original and enlarged difficult final row
+EV0064,17-32,Checked each middle-board screenshot row including two OCR omissions
+EV0065,33-48,Read all sixteen ranks and values from enlarged original after OCR shifted columns
+EV0066,49-50,Read bottom-band original amounts instead of OCR-overlap previous ranks
+EV0067,5-16,Read remaining Oct 27 top-board values and names directly from screenshot
+EV0068,17-32,Read all middle-band original values including two missed OCR rows
+EV0069,33-48,Read all lower-band source rows and corrected OCR name shifts
+EV0070,49-50,Read two original bottom-band ranks and values
+EV0071,5-16,Read remaining Oct 28 top-board rows including shifted OCR amount labels
+EV0072,17-32,Read all names and balances directly from original screenshot
+EV0073,33-48,Read every lower-band photographed rank including missing OCR rows
+EV0074,49-50,Read two bottom-band original amounts rather than OCR overlaps
+EV0075,5-16,Read Oct 29 top-board source rows directly to resolve multiple alternate OCR conflicts
+EV0076,17-32,Read each middle-band rank and corrected missed player name from original
+EV0077,33-48,Read every lower-board name and amount directly from screenshot
+EV0078,49-50,Read original last two rank entries and unambiguous usernames
+EV0079,5-16,Read all remaining top-board values directly from Oct 30 original
+EV0080,17-32,Read each middle-band rank from original duplicate screenshots and corrected OCR usernames
+EV0082,46-50,Read five photographed bottom-band ranks from enlarged original; unpictured section remains unknown
+EV0083,5-16,Read remaining Oct 31 top-board values directly against original screenshot
+EV0084,17-32,Read each pictured middle-board row and corrected stylized usernames
+EV0085,33-48,Read every lower-board rank and two missing OCR entries
+EV0086,49-50,Checked bottom two original names and balances directly
+EV0087,5-16,Read remaining Nov 1 top-board usernames and exact C$ values from original
+EV0088,17-32,Read original middle-board screenshot row by row
+EV0089,33-48,Read all lower-board rows including skipped OCR entries
+EV0090,49-50,Read final two photographed ranks directly from PNG
+EV0091,5-16,Read remaining Nov 2 top-board balances and resolved one OCR conflict
+EV0092,17-32,Read middle-band source and corrected confusing account names
+EV0094,48-50,Read three photographed bottom-band rows; unpictured ranks remain unknown
+EV0095,5-16,Read Nov 4 early full-capture top-board values and last row
+EV0096,17-32,Read every middle-board rank from original screenshot and corrected missed accounts
+EV0097,33-48,Read all lower-board names and values using enlarged original after OCR shifted
+EV0098,49-50,Read two bottom-board balances from original instead of previous-row OCR values
+EV0133,5-15,Read every fully legible Nov 4 morning follow-up row; rank16 is clipped and remains unknown
+EV0099,5-16,Read Nov 4 evening full-capture Top 16 directly from original
+EV0100,17-32,Read every middle-board row and exact names from original photo
+EV0101,33-48,Read all lower-board rows and original names where OCR missed three ranks
+EV0102,49-50,Read bottom two original rank values
+EV0134,5-15,Read enlarged original one-minute follow-up; rank16 number is clipped and remains unknown
+EV0103,5-16,Read Nov 5 original Top 16 including OCR conflicts and last row
+EV0104,17-32,Read middle-board original names and numbers with missing final row
+EV0105,33-48,Read enlarged lower-band screenshot instead of OCR shifted rank associations
+EV0106,49-50,Read two original bottom-band ranks rather than OCR overlap
+EV0107,5-16,Read all remaining Nov 6 top-band players and exact balances from screenshot
+EV0108,17-32,Read every middle-band original row including missed OCR player
+EV0109,33-48,Read all lower-board values from enlarged original because OCR moved amounts across ranks
+EV0110,49-50,Read both original bottom-board amounts
+EV0135,5-16,Read all legible Nov 7 morning Top 16 rows from original photo
+EV0111,5-16,Read Nov 8 Top 16 values in original photo and independent matching copy
+EV0112,17-32,Read every middle-band row against original Nov 8 screenshot
+EV0113,33-48,Read lower-board original with overlap evidence to settle OCR contradictions
+EV0114,49-50,Read bottom-band rank49 and rank50 from original screenshot
+EV0119,5-16,Read Nov 9 early top-board values directly from original and matching source image
+EV0120,17-32,Read middle-band original screenshot including row25 not recognized by OCR
+EV0121,33-48,Read original lower board and missing OCR ranks in overlapping photo
+EV0122,49-50,Read exact original bottom-band names and money
+EV0124,5-16,Read Nov 9 evening top-board values directly from original screenshot
+EV0125,17-32,Read all pictured middle-board ranks and last clipped OCR row
+EV0126,33-48,Read each lower-board original name and exact balance
+EV0127,49-50,Read enlarged bottom two ranks and corrected OCR overlap money
+EV0019,16,Rechecked original Oct 14 evening perspective and aligned bottom rank16 amount
+EV0132,5,Read enlarged Oct 17 morning original and corroborated ambiguous glyph with evening original

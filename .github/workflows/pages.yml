@@ -18,6 +18,14 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      - name: Validate screenshot proof, generated ledger, and calculations
+        run: |
+          python tools/promote_photo_review.py
+          git diff --exit-code -- data/photo_verified.csv
+          python tools/build.py --no-copy
+          python -m unittest discover -s tests
+          node --check site/app.js
+          git diff --exit-code -- site/data.json
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

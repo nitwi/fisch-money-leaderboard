@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Build the standalone, proof-backed static site from the supplied evidence package.
+"""Publish ONLY personally photo-checked screenshot observations.
 
-Only rows explicitly checked into data/reviewed.csv are confirmed observations.
-The source package is never modified. Run with --no-copy for fast data-only checks.
+OCR caches are internal reading aids and can never enter site/data.json without
+first being checked against the original PNG and promoted in a photo audit.
+No Excel-derived names or balances are read. Source images are never modified.
 """
 
 import argparse
@@ -42,9 +43,11 @@ def build(source, copy_images=True):
     site = ROOT / "site"
     cp_rows = rows(source / "data/checkpoints.csv")
     ev_rows = rows(source / "data/evidence_manifest.csv")
-    obs_rows = rows(source / "data/observations.csv")
     reviewed_path = ROOT / "data/reviewed.csv"
     reviewed_rows = rows(reviewed_path) if reviewed_path.exists() else []
+    photo_verified_path=ROOT/'data/photo_verified.csv'
+    if photo_verified_path.exists():
+        reviewed_rows.extend(rows(photo_verified_path))
     reviewed = {row["observation_id"]: row for row in reviewed_rows}
     if len(reviewed) != len(reviewed_rows):
         raise ValueError("Duplicate reviewed observation ID")
@@ -89,6 +92,16 @@ def build(source, copy_images=True):
             "max": int(row["max_visible_rank"]),
         }
 
+    # Build rank slots from the checkpoint/evidence index and photographed rank
+    # spans. Never read the Excel-derived observations.csv for names or money.
+    obs_rows=[]
+    for cp in checkpoints.values():
+        for rank in range(1,51):
+            proof_ids=[key for key in cp['evidence'] if key in evidence and evidence[key]['min']<=rank<=evidence[key]['max']]
+            obs_rows.append({'observation_id':f"{cp['id']}_R{rank:02d}", 'checkpoint_id':cp['id'],
+                             'rank':str(rank), 'evidence_ids':';'.join(proof_ids),
+                             'capture_status':'captured_pending_transcription' if proof_ids else 'not_captured'})
+
     observations = []
     slots = defaultdict(set)
     names = defaultdict(set)
@@ -123,12 +136,11 @@ def build(source, copy_images=True):
             names[cp].add(identity)
             status = "verified"
         else:
-            username = row["username_raw"]
-            balance = row["balance_c"]
+            # A photographed but illegible/cropped slot is unknown, never zero.
+            username = ""
+            balance = ""
             proof_ids = original_proofs
-            status = row["capture_status"]
-            if balance:
-                checked_amount(balance)
+            status = 'not_captured' if row['capture_status']=='not_captured' else 'captured_pending_transcription'
             identity = ""
         statuses[status] += 1
         observations.append({
@@ -146,12 +158,14 @@ def build(source, copy_images=True):
         if row["status"] == "verified":
             by_cp[row["checkpoint"]][row["rank"]] = row
     for cp, ranked in by_cp.items():
-        for rank in range(1, 50):
-            if rank in ranked and rank + 1 in ranked and int(ranked[rank]["balance"]) < int(ranked[rank + 1]["balance"]):
-                raise ValueError(f"Verified balances out of leaderboard order at {cp}, ranks {rank}/{rank+1}")
-
+        ordered=sorted(ranked.items())
+        for (rank,a),(next_rank,b) in zip(ordered,ordered[1:]):
+            if int(a['balance'])<int(b['balance']):
+                raise ValueError(f"Verified balances out of leaderboard order at {cp}, ranks {rank}/{next_rank}")
     for key, cp in checkpoints.items():
         cp["verified"] = len(by_cp[key])
+        cp['extracted']=0
+        cp['visible']=len(by_cp[key])
         cp["complete"] = cp["coverage"] == 50 and cp["verified"] == 50
         if not set(cp["evidence"]).issubset(evidence):
             raise ValueError(f"Missing checkpoint proof at {key}")
@@ -184,10 +198,13 @@ def build(source, copy_images=True):
     if copy_images and source != (ROOT / "data/source").resolve():
         baseline = ROOT / "data/source/data"
         baseline.mkdir(parents=True, exist_ok=True)
-        for name in ("checkpoints.csv", "evidence_manifest.csv", "observations.csv"):
+        for name in ("checkpoints.csv", "evidence_manifest.csv"):
             shutil.copyfile(source / "data" / name, baseline / name)
     print(json.dumps({"captures": len(sorted_cps), "images": len(evidence), "rank_slots": len(observations),
-                      "verified": statuses["verified"], "fully_verified_captures": sum(cp["complete"] for cp in sorted_cps),
+                      "verified": statuses["verified"],
+                      "pending":statuses['captured_pending_transcription'],"not_captured":statuses['not_captured'],
+                      "photo_readings":sum(cp['visible'] for cp in sorted_cps),
+                      "fully_verified_captures": sum(cp["complete"] for cp in sorted_cps),
                       "evidence_mb": round(sum(safe_path(site, 'evidence/' + row['relative_path']).stat().st_size for row in ev_rows) / 1_000_000, 1) if copy_images else None}, indent=2))
 
 
