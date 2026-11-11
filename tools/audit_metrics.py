@@ -15,8 +15,8 @@ for rows in by_user.values():
         if index[after['checkpoint']]!=index[before['checkpoint']]+1:continue
         delta=int(after['balance'])-int(before['balance'])
         if delta<8_000_000_000:continue
-        a=datetime.fromisoformat(ordered[index[before['checkpoint']]]['at'].replace('Z','+00:00'))
-        b=datetime.fromisoformat(ordered[index[after['checkpoint']]]['at'].replace('Z','+00:00'))
+        a=datetime.fromisoformat(before['at'].replace('Z','+00:00'))
+        b=datetime.fromisoformat(after['at'].replace('Z','+00:00'))
         duration=(b-a).total_seconds()/3600
         events.append((delta,after['username'],before['checkpoint'],after['checkpoint'],duration,before['evidence'],after['evidence']))
 for delta,name,start,end,duration,first,last in sorted(events,reverse=True):

@@ -24,7 +24,7 @@ try:
         page = browser.new_page(viewport={"width": 1300, "height": 930})
         page.on("pageerror", lambda error: errors.append(str(error)))
         page.goto(f"http://127.0.0.1:{server.server_address[1]}/", wait_until="domcontentloaded")
-        page.locator("#capture-index").get_by_text("CAPTURE 35 / 35").wait_for(timeout=20000)
+        page.locator("#capture-index").get_by_text("SNAPSHOT 33 / 33").wait_for(timeout=20000)
         assert page.locator("#stat-coverage").inner_text() == "50 / 50"
         assert page.locator(".proof").count() == 4
         assert page.locator(".movement-item").count() == 50
@@ -38,7 +38,7 @@ try:
         page.screenshot(path=str(ROOT / "preview-desktop.png"), full_page=True)
         page.locator("#search").fill("LowTierNova")
         page.locator("#profile-title").get_by_text("LowTierNova").wait_for()
-        assert page.locator(".profile-history a").count() > 20
+        assert page.locator(".profile-history a").count() == 33
         page.locator(".movement-item[data-player='id:1316700350']").click()
         page.wait_for_timeout(200)
         assert not errors, errors
@@ -46,11 +46,31 @@ try:
         assert page.locator("#profile-content .rainbow-static").count() > 0
         assert "player=id%3A1316700350" in page.url
         page.locator("#prev").click()
-        assert page.locator("#capture-index").inner_text() == "CAPTURE 34 / 35"
+        assert page.locator("#capture-index").inner_text() == "SNAPSHOT 32 / 33"
         page.locator(".proof").first.click()
         assert page.locator("#lightbox").evaluate("el => el.open")
         page.wait_for_function("document.querySelector('#lightbox-image').naturalWidth > 0")
         page.locator("#lightbox button").click()
+        morning_index=next(i for i,cp in enumerate(data['checkpoints']) if cp['id']=='2026-11-04_0142')
+        evening_index=next(i for i,cp in enumerate(data['checkpoints']) if cp['id']=='2026-11-04_2100')
+        page.locator("#capture-slider").evaluate("(el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}))}",str(morning_index))
+        assert "2 batches · 10min span" in page.locator("#capture-index").inner_text()
+        assert page.locator("#stat-coverage").inner_text() == "50 / 50"
+        assert page.locator("#stat-floor").inner_text() != "UNKNOWN"
+        assert page.locator(".proof").count() == 6
+        assert page.locator(".proof[data-proof='EV0133']").count() == 1
+        assert "Nov 4, 2026" in page.locator("#evidence-subtitle").inner_text()
+        assert page.evaluate("state.data.checkpoints[state.index-1].id") == "2026-11-02_2128"
+        page.screenshot(path=str(ROOT / "preview-merged-desktop.png"), full_page=True)
+        page.locator("#capture-slider").evaluate("(el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}))}",str(evening_index))
+        assert "2 batches · 1min span" in page.locator("#capture-index").inner_text()
+        assert page.locator("#stat-floor").inner_text() != "UNKNOWN"
+        assert page.locator(".proof").count() == 6
+        page.locator(".proof[data-proof='EV0134']").click()
+        assert "9:01 PM" in page.locator("#lightbox-caption").inner_text()
+        page.locator("#lightbox button").click()
+        page.locator("#next").click()
+        assert page.evaluate("state.data.checkpoints[state.index].id") == "2026-11-05_1930"
         capture_index=next(i for i,cp in enumerate(data['checkpoints']) if cp['id']=='2026-10-20_1837')
         page.locator("#capture-slider").evaluate("(el, value) => { el.value = value; el.dispatchEvent(new Event('input', {bubbles:true})); }",str(capture_index))
         assert page.locator(".movement-item").count() > 25
@@ -58,12 +78,16 @@ try:
         assert "OCR draft" not in page.locator("#movement-list").inner_text()
         page.locator("#capture-slider").evaluate("el => { el.value = '1'; el.dispatchEvent(new Event('input', {bubbles:true})); }")
         assert "LEFT PICTURED TOP 50" in page.locator("#movement-list").inner_text()
-        page.locator("#capture-slider").evaluate("el => { el.value = '34'; el.dispatchEvent(new Event('input', {bubbles:true})); }")
+        page.locator("#capture-slider").evaluate("el => { el.value = '32'; el.dispatchEvent(new Event('input', {bubbles:true})); }")
         page.set_viewport_size({"width": 390, "height": 840})
         page.wait_for_timeout(500)
-        assert page.locator("#capture-index").inner_text() == "CAPTURE 35 / 35"
+        assert page.locator("#capture-index").inner_text() == "SNAPSHOT 33 / 33"
         assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 4"), "Mobile page overflows horizontally"
         page.screenshot(path=str(ROOT / "preview-mobile.png"), full_page=True)
+        page.locator("#capture-slider").evaluate("(el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}))}",str(morning_index))
+        assert page.locator(".proof").count() == 6
+        assert page.locator("#stat-floor").inner_text() != "UNKNOWN"
+        assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 4"), "Merged mobile snapshot overflows horizontally"
         assert not errors, errors
         browser.close()
     print("PASS: desktop/mobile capture navigation, movement, profile, screenshots and no browser exceptions")
