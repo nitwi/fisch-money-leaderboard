@@ -4,7 +4,7 @@ Independent, public, screenshot-backed history of the Fisch Top C$ board. The ch
 
 Source window: October 10–November 10, 2026 (America/Chicago); later captures may be appended. Each original screenshot remains linked to its captured rank slots.
 
-**Initial preview:** 35 captures and 160 original PNGs, with 320 rank readings independently compared to the originals (three fully reviewed Top-50 captures). The remaining pictured rows are queued for review. Every snapshot displays its own reviewed/covered count; analytics exclude unknown and provisional rows. The baseline spreadsheet's `manually_verified` label alone is not treated as a completed independent review. Future reviews append only to `data/reviewed.csv` and regenerate `site/data.json`.
+**Current preview:** 35 captures and 160 original PNGs, with 388 rank readings independently compared to the originals (five fully reviewed Top-50 captures). The remaining pictured rows are queued for review. Every snapshot displays its own reviewed/covered count; analytics exclude unknown and provisional rows. The baseline spreadsheet's `manually_verified` label alone is not treated as a completed independent review. Future reviews append only to `data/reviewed.csv` and regenerate `site/data.json`.
 
 ## Refresh the data
 
