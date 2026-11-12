@@ -32,6 +32,11 @@ function calendarDays(first,last) {
   return result;
 }
 const hours = (a,b) => (new Date(b).getTime() - new Date(a).getTime()) / 3600000;
+const elapsedLabel = (value) => {
+  if (value===null) return "BASELINE";
+  const minutes=Math.round(value*60);
+  return minutes<720?`${Math.floor(minutes/60)}h ${String(minutes%60).padStart(2,"0")}m`:`${(minutes/60).toFixed(1)}h`;
+};
 const timeRate = (delta, intervalHours) => Number.isFinite(intervalHours) && intervalHours > 0 && BigInt(delta) <= BigInt(Number.MAX_SAFE_INTEGER) && BigInt(delta) >= -BigInt(Number.MAX_SAFE_INTEGER) ? Number(BigInt(delta)) / intervalHours : null;
 const rateText = (amount) => amount === null ? "—" : `${amount >= 0 ? "+" : "−"}${compact(BigInt(Math.round(Math.abs(amount))))}/hr`;
 const confirmed = (row) => row?.status === "verified";
@@ -87,7 +92,7 @@ function renderControls() {
   $("stat-coverage").textContent=`${cp.visible} / ${cp.coverage}`;
   $("stat-coverage-note").textContent=`${cp.verified} read directly from PNG${cp.coverage<50?` · ${50-cp.coverage} not pictured`:""}`;
   const previous=cps[state.index-1], deltaHours=previous?hours(previous.at,cp.at):null;
-  $("stat-hours").textContent=deltaHours===null?"BASELINE":`${deltaHours.toFixed(1)}h`;
+  $("stat-hours").textContent=elapsedLabel(deltaHours);
   $("stat-hours-note").textContent=cp.precision.includes("approximate")||previous?.precision?.includes("approximate")?"Capture time approximate; rate is indicative":"Between daily snapshot photos · UTC";
   const gains=(state.byCapture.get(cp.id)||[]).map((row)=>({row,change:interval(cp,row,previous)})).filter(({row,change})=>confirmed(row)&&confirmed(change.old)&&change.delta>0n).sort((a,b)=>a.change.delta>b.change.delta?-1:1);
   $("stat-largest").textContent=gains.length?signed(gains[0].change.delta):"—";

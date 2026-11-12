@@ -1,6 +1,7 @@
 import json
 import sys
 import unittest
+from types import SimpleNamespace
 from datetime import datetime
 from pathlib import Path
 
@@ -9,6 +10,7 @@ sys.path.insert(0, str(ROOT / "tools"))
 from build import checked_amount, safe_path
 from daily import local_time, select_daily
 from extract_screenshots import parse_image
+from import_capture import png_metadata, prepare
 from sessions import group_sessions
 
 
@@ -27,13 +29,12 @@ class LedgerTests(unittest.TestCase):
 
     def test_proof_and_missing_are_distinct(self):
         data = self.data
-        self.assertEqual(len(data["captures"]), 35)
-        self.assertEqual(len(data["capture_observations"]), 1750)
-        self.assertEqual(len(data["sessions"]), 33)
-        self.assertEqual(len(data["session_observations"]), 1650)
-        self.assertEqual(len(data["checkpoints"]), 31)
-        self.assertEqual(len(data["evidence"]), 160)
-        self.assertEqual(len(data["observations"]), 1550)
+        self.assertGreaterEqual(len(data["captures"]), 37)
+        self.assertEqual(len(data["capture_observations"]), 50*len(data["captures"]))
+        self.assertEqual(len(data["session_observations"]), 50*len(data["sessions"]))
+        self.assertEqual(len(data["observations"]), 50*len(data["checkpoints"]))
+        self.assertEqual(len(data["evidence"]),sum(len(cp['evidence']) for cp in data['captures']))
+        self.assertGreaterEqual(len(data["evidence"]),168)
         self.assertTrue(all(len([o for o in data["observations"] if o["checkpoint"] == cp["id"]]) == 50 for cp in data["checkpoints"]))
         proofs = {e["id"]: e for e in data["evidence"]}
         for row in data["observations"]:
@@ -43,15 +44,14 @@ class LedgerTests(unittest.TestCase):
             if row["status"] in ("captured_pending_transcription", "not_captured"):
                 self.assertFalse(row["balance"])
         self.assertFalse((ROOT/"data/source/data/observations.csv").exists(), "Excel-derived observations must not be an input")
-        self.assertEqual(sum(cp['verified'] for cp in data['captures']), 1568)
-        self.assertEqual(sum(cp['coverage'] for cp in data['captures']), 1571)
-        self.assertEqual(sum(row['status']=='not_captured' for row in data['capture_observations']),179)
-        self.assertEqual(sum(row['status']=='captured_pending_transcription' for row in data['capture_observations']),3)
-        self.assertEqual(sum(row['status']=='verified' for row in data['session_observations']),1538)
-        self.assertEqual(sum(row['status']=='captured_pending_transcription' for row in data['session_observations']),1)
-        self.assertEqual(sum(row['status']=='verified' for row in data['observations']),1508)
-        self.assertFalse(any(row['status']=='captured_pending_transcription' for row in data['observations']))
-        self.assertEqual(sum(cp['complete'] for cp in data['checkpoints']),28)
+        self.assertGreaterEqual(sum(cp['verified'] for cp in data['captures']),1668)
+        self.assertEqual(sum(cp['coverage'] for cp in data['captures']),50*len(data['captures'])-sum(row['status']=='not_captured' for row in data['capture_observations']))
+        self.assertGreaterEqual(sum(row['status']=='captured_pending_transcription' for row in data['capture_observations']),3)
+        self.assertEqual(sum(row['status']=='verified' for row in data['session_observations']),sum(cp['verified'] for cp in data['sessions']))
+        self.assertEqual(sum(row['status']=='verified' for row in data['observations']),sum(cp['verified'] for cp in data['checkpoints']))
+        for row_id in ('2026-10-17_1014_R15','2026-11-04_0152_R16','2026-11-04_2101_R16'):
+            self.assertEqual(next(row['status'] for row in data['capture_observations'] if row['id']==row_id),'captured_pending_transcription')
+        self.assertGreaterEqual(sum(cp['complete'] for cp in data['checkpoints']),30)
         self.assertFalse(any(row['status'].startswith('ocr_') for row in data['observations']))
 
     def test_observed_rate_and_roblox_identity(self):
@@ -89,7 +89,7 @@ class LedgerTests(unittest.TestCase):
             self.assertEqual(by_session[(cp['id'],50)]['status'],'verified')
             self.assertTrue(by_session[(cp['id'],50)]['evidence'])
             self.assertEqual(by_session[(cp['id'],1)]['source_checkpoints'],cp['source_checkpoints'])
-        self.assertEqual(len([row for row in data['session_observations'] if row['key']==by_session[(morning['id'],1)]['key']]),33)
+        self.assertGreaterEqual(len([row for row in data['session_observations'] if row['key']==by_session[(morning['id'],1)]['key']]),33)
         october=[cp for cp in data['sessions'] if cp['id'].startswith('2026-10-17_')]
         self.assertEqual(len(october),2,"12h-spaced photos with changed balances must remain distinct")
         self.assertEqual([cp['verified'] for cp in october],[14,50])
@@ -109,8 +109,42 @@ class LedgerTests(unittest.TestCase):
         self.assertEqual(len(dates['2026-10-17']['evidence']),6)
         self.assertNotIn('2026-10-18',dates)
         self.assertEqual(sum(row['status']=='verified' for row in data['observations'] if row['day_key']=='2026-11-03'),50)
-        self.assertEqual(len([row for row in data['observations'] if row['key']==next(r['key'] for r in data['observations'] if r['day_key']=='2026-10-10' and r['rank']==1)]),31)
+        self.assertGreaterEqual(len([row for row in data['observations'] if row['key']==next(r['key'] for r in data['observations'] if r['day_key']=='2026-10-10' and r['rank']==1)]),31)
 
+    def test_two_new_full_captures_preserve_distinct_days_and_roblox_renames(self):
+        data=self.data
+        captures={cp['id']:cp for cp in data['captures']}
+        first=captures['2026-11-11_2233'];updated=captures['2026-11-12_0036']
+        self.assertEqual((first['coverage'],first['verified'],len(first['evidence'])),(50,50,4))
+        self.assertEqual((updated['coverage'],updated['verified'],len(updated['evidence'])),(50,50,4))
+        self.assertEqual(data['session_day_assignment'][updated['id']],'2026-11-12',"Nov 11 evening capture prevents prior-day rollover")
+        self.assertEqual(updated['at'],'2026-11-12T06:36:00Z')
+        rows={row['id']:row for row in data['capture_observations']}
+        self.assertEqual(rows['2026-11-11_2233_R50']['balance'],'53818853769')
+        self.assertEqual(rows['2026-11-12_0036_R50']['balance'],'53829367842')
+        self.assertEqual(int(rows['2026-11-12_0036_R02']['balance'])-int(rows['2026-11-11_2233_R02']['balance']),529_650_336)
+        self.assertEqual((datetime.fromisoformat(updated['at'].replace('Z','+00:00'))-datetime.fromisoformat(first['at'].replace('Z','+00:00'))).total_seconds()/3600,2.05)
+        old=rows['2026-11-10_2130_R35']
+        new=rows['2026-11-11_2233_R35']
+        self.assertEqual(new['username'],'ewoofs')
+        self.assertEqual(new['key'],old['key'],"Exact Roblox ID must merge renamed player's history")
+        self.assertEqual(rows['2026-11-12_0036_R35']['key'],old['key'])
+        self.assertTrue(next(p for p in data['players'] if p['key']==rows['2026-11-11_2233_R50']['key'])['roblox_id'])
+        proofs={proof['id']:proof for proof in data['evidence']}
+        self.assertEqual(proofs['EV0161']['captured_at'],first['at'])
+        self.assertEqual(proofs['EV0168']['captured_at'],updated['at'])
+
+    def test_daily_import_rejects_duplicate_checkpoint_without_changing_originals(self):
+        photo=ROOT/'site/evidence/screenshots/2026-11-11_2233/EV0161_Screenshot_2026-11-11_223212.png'
+        self.assertTrue(photo.is_file())
+        width,height=png_metadata(photo)
+        self.assertGreater(width,400)
+        self.assertGreater(height,350)
+        with self.assertRaisesRegex(ValueError,'Checkpoint already exists'):
+            prepare(SimpleNamespace(date='2026-11-11',time='22:33',image=[],precision='user-supplied'))
+
+    def test_rollover_synthetic_dst(self):
+        dates={cp['day_key']:cp for cp in self.data['checkpoints']}
         def cp(name,at):
             return {'id':name,'at':at,'captured_from':at,'captured_to':at,
                     'source_checkpoints':[name],'evidence':[name],

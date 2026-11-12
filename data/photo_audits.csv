@@ -102,3 +102,11 @@ EV0126,33-48,Read each lower-board original name and exact balance
 EV0127,49-50,Read enlarged bottom two ranks and corrected OCR overlap money
 EV0019,16,Rechecked original Oct 14 evening perspective and aligned bottom rank16 amount
 EV0132,5,Read enlarged Oct 17 morning original and corroborated ambiguous glyph with evening original
+EV0161,1-16,Read all sixteen November 11 top-band ranks and exact money from original at 22:32
+EV0162,17-32,Read November 11 middle-band names and exact amounts directly from original at 22:32
+EV0163,33-48,Read November 11 lower-board values directly from original at 22:33
+EV0164,49-50,Read November 11 bottom two ranks from original at 22:33; overlapping entries retained as secondary proof
+EV0165,1-16,Read updated November 12 early-AM top-band screenshot from original at 00:36
+EV0166,17-32,Read updated November 12 early-AM middle-band screenshot from original at 00:36
+EV0167,33-48,Read updated November 12 early-AM lower-band screenshot from original at 00:36
+EV0168,49-50,Read updated November 12 early-AM bottom-band screenshot from original at 00:36
