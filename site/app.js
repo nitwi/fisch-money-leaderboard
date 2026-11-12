@@ -19,6 +19,18 @@ const compact = (amount) => {
 const exact = (amount) => amount === null || amount === undefined ? "unknown" : `${BigInt(amount).toLocaleString("en-US")} C$`;
 const signed = (amount) => amount === null ? "—" : `${BigInt(amount) >= 0n ? "+" : "−"}${compact(BigInt(amount) < 0n ? -BigInt(amount) : BigInt(amount))}`;
 const labelDate = (iso, options={}) => new Intl.DateTimeFormat("en-US",{timeZone:"America/Chicago",month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit",...options}).format(new Date(iso));
+const dayLabel = (day) => new Intl.DateTimeFormat("en-US",{timeZone:"UTC",month:"short",day:"numeric",year:"numeric"}).format(new Date(`${day}T12:00:00Z`));
+const localDay = (iso) => {
+  const fields=Object.fromEntries(new Intl.DateTimeFormat("en-US",{timeZone:"America/Chicago",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date(iso)).map(part=>[part.type,part.value]));
+  return `${fields.year}-${fields.month}-${fields.day}`;
+};
+function calendarDays(first,last) {
+  const result=[];
+  const cursor=new Date(`${first}T12:00:00Z`);
+  const end=new Date(`${last}T12:00:00Z`);
+  while (cursor<=end) {result.push(cursor.toISOString().slice(0,10));cursor.setUTCDate(cursor.getUTCDate()+1);}
+  return result;
+}
 const hours = (a,b) => (new Date(b).getTime() - new Date(a).getTime()) / 3600000;
 const timeRate = (delta, intervalHours) => Number.isFinite(intervalHours) && intervalHours > 0 && BigInt(delta) <= BigInt(Number.MAX_SAFE_INTEGER) && BigInt(delta) >= -BigInt(Number.MAX_SAFE_INTEGER) ? Number(BigInt(delta)) / intervalHours : null;
 const rateText = (amount) => amount === null ? "—" : `${amount >= 0 ? "+" : "−"}${compact(BigInt(Math.round(Math.abs(amount))))}/hr`;
@@ -62,18 +74,21 @@ function setSelected(key) {
 function moveTo(index) { state.index=Math.max(0,Math.min(state.data.checkpoints.length-1,index)); $("capture-slider").value=state.index; render(); }
 function renderControls() {
   const cps=state.data.checkpoints, cp=cps[state.index];
-  $("capture-date").textContent=labelDate(cp.at);
-  const extra=cp.source_checkpoints.length>1?` · ${cp.source_checkpoints.length} batches · ${Math.round(hours(cp.captured_from,cp.captured_to)*60)}min span`:"";
-  $("capture-index").textContent=`SNAPSHOT ${String(state.index+1).padStart(2,"0")} / ${cps.length}${extra}`;
+  $("capture-date").textContent=dayLabel(cp.day_key);
+  const firstPhoto=state.data.captures.find(row=>row.id===cp.source_checkpoints[0]);
+  const lastPhoto=state.data.captures.find(row=>row.id===cp.source_checkpoints.at(-1));
+  const extra=cp.source_checkpoints.length>1?` · ${cp.source_checkpoints.length} batches (${Math.round(hours(firstPhoto.at,lastPhoto.at)*60)}min)` : "";
+  const earlier=cp.earlier_session_ids.length?` · ${cp.earlier_session_ids.length} earlier capture${cp.earlier_session_ids.length===1?"":"s"}`:"";
+  $("capture-index").textContent=`DAY ${String(state.index+1).padStart(2,"0")} / ${cps.length} · photo ${labelDate(cp.at)}${extra}${earlier}`;
   $("prev").disabled=state.index===0; $("next").disabled=state.index===cps.length-1;
   $("capture-slider").value=String(state.index);
-  $("first-date").textContent=labelDate(cps[0].at,{year:undefined,hour:undefined,minute:undefined});
-  $("last-date").textContent=labelDate(cps.at(-1).at,{year:undefined,hour:undefined,minute:undefined});
+  $("first-date").textContent=dayLabel(cps[0].day_key);
+  $("last-date").textContent=dayLabel(cps.at(-1).day_key);
   $("stat-coverage").textContent=`${cp.visible} / ${cp.coverage}`;
   $("stat-coverage-note").textContent=`${cp.verified} read directly from PNG${cp.coverage<50?` · ${50-cp.coverage} not pictured`:""}`;
   const previous=cps[state.index-1], deltaHours=previous?hours(previous.at,cp.at):null;
   $("stat-hours").textContent=deltaHours===null?"BASELINE":`${deltaHours.toFixed(1)}h`;
-  $("stat-hours-note").textContent=cp.precision.includes("approximate")||previous?.precision?.includes("approximate")?"Capture time approximate; rate is indicative":"Since prior snapshot · UTC";
+  $("stat-hours-note").textContent=cp.precision.includes("approximate")||previous?.precision?.includes("approximate")?"Capture time approximate; rate is indicative":"Between daily snapshot photos · UTC";
   const gains=(state.byCapture.get(cp.id)||[]).map((row)=>({row,change:interval(cp,row,previous)})).filter(({row,change})=>confirmed(row)&&confirmed(change.old)&&change.delta>0n).sort((a,b)=>a.change.delta>b.change.delta?-1:1);
   $("stat-largest").textContent=gains.length?signed(gains[0].change.delta):"—";
   $("stat-largest-name").textContent=gains.length?gains[0].row.username:"No photo-checked adjacent comparison";
@@ -85,6 +100,9 @@ function renderControls() {
 }
 function renderChart() {
   const node=$("chart"), cps=state.data.checkpoints;
+  const days=calendarDays(cps[0].day_key,cps.at(-1).day_key);
+  const compactTicks=node.clientWidth<500;
+  const checkpointByDay=new Map(cps.map(cp=>[cp.day_key,cp]));
   const selected=state.selected, limit=state.filter==="all"?50:Number(state.filter);
   const allowed=new Set(cps.flatMap((cp)=>(state.byCapture.get(cp.id)||[]).filter((row)=>row.rank<=limit).map((row)=>row.key)));
   if(selected)allowed.add(selected);
@@ -92,25 +110,24 @@ function renderChart() {
   if (!keys.length) {node.textContent="No screenshot readings yet for this range.";return;}
   const plot=[];
   keys.forEach((key,i)=>{
-    const rows=cps.map((cp)=>point(cp,key));
+    const rows=days.map(day=>checkpointByDay.has(day)?point(checkpointByDay.get(day),key):null);
     if (!rows.some(Boolean))return;
     const color=selected && selected!==key?"rgba(125,151,164,.22)":palette[i%palette.length];
-    const xs=cps.map((cp)=>cp.at), ys=rows.map((row)=>row?Number(row.balance):null);
+    const xs=days, ys=rows.map((row)=>row?Number(row.balance):null);
     plot.push({type:"scatter",mode:"lines+markers",name:player(key).name,x:xs,y:ys,connectgaps:false,meta:{key},
       line:{color,width:selected===key?3.5:1.5,shape:"linear"},marker:{size:rows.map(row=>row?(selected===key?8:5):0),symbol:"circle",color},
       customdata:rows.map((row)=>row?[`#${row.rank}`,exact(row.balance),row.evidence.join(", "),labelDate(row.at)]:["unknown","unknown","","unknown"]),
-      hovertemplate:"<b>%{fullData.name}</b><br>Session %{x|%b %d, %Y %H:%M UTC}<br>Photo %{customdata[3]} (Chicago)<br>%{customdata[0]} · %{customdata[1]}<br>Proof: %{customdata[2]}<extra></extra>",showlegend:false});
+      hovertemplate:"<b>%{fullData.name}</b><br>Leaderboard day %{x}<br>Photo %{customdata[3]} (Chicago)<br>%{customdata[0]} · %{customdata[1]}<br>Proof: %{customdata[2]}<extra></extra>",showlegend:false});
     // A faint dashed bridge marks an unobserved span rather than inventing intermediate points.
     let previous=-1;
     rows.forEach((row,index)=>{if(!row)return;if(previous>=0 && index-previous>1){plot.push({type:"scatter",mode:"lines",x:[xs[previous],xs[index]],y:[ys[previous],ys[index]],line:{color:selected && selected!==key?"rgba(125,151,164,.11)":color,width:1,dash:"dot"},hoverinfo:"skip",showlegend:false});}previous=index;});
   });
-  const selectedAt=cps[state.index].at;
+  const selectedAt=cps[state.index].day_key;
   const maxY=plot.flatMap((item)=>item.y||[]).filter((x)=>Number.isFinite(x));
   if(!maxY.length){node.textContent="No screenshot-derived balances yet.";return;}
   const ymax=Math.max(...maxY)*1.08;
-  const xLo=new Date(cps[0].at).getTime(),xHi=new Date(cps.at(-1).at).getTime();
   const layout={height:node.clientHeight||495,autosize:true,paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(4,19,31,.44)",font:{color:"#9cbdcc",family:"Inter, Segoe UI, Arial",size:10},margin:{l:65,r:20,t:18,b:55},hovermode:"closest",hoverlabel:{bgcolor:"#0c2b3f",bordercolor:"#29f8ff",font:{color:"#e8fbff"}},
-    xaxis:{type:"date",range:[new Date(xLo-86400000),new Date(xHi+86400000)],gridcolor:"rgba(154,219,231,.1)",tickformat:"%b %d"},
+    xaxis:{type:"category",categoryorder:"array",categoryarray:days,range:[-.5,days.length-.5],tickmode:"array",tickvals:days,ticktext:days.map((day,index)=>compactTicks&&index%3!==0&&!day.endsWith("-01")&&index!==days.length-1?"":index===0||day.endsWith("-01")?dayLabel(day).replace(/,\s*\d{4}$/,""):day.slice(-2)),tickangle:compactTicks?-30:-45,tickfont:{size:9},gridcolor:"rgba(154,219,231,.1)"},
     yaxis:{title:"HELD C$",range:[0,ymax],tickformat:"~s",gridcolor:"rgba(154,219,231,.1)",zeroline:false},
     shapes:[{type:"line",x0:selectedAt,x1:selectedAt,y0:0,y1:1,yref:"paper",line:{color:"#ffd166",width:1.4,dash:"dot"}}],uirevision:"money-ledger"};
   Plotly.react(node,plot,layout,{displayModeBar:false,responsive:true,scrollZoom:false});
@@ -124,10 +141,12 @@ function renderMovement() {
   let filtered=rows;
   if(state.view==="gains")filtered=rows.filter(({change})=>change.delta!==null && change.delta>0n).sort((a,b)=>a.change.delta>b.change.delta?-1:a.change.delta<b.change.delta?1:0);
   if(state.view==="changes")filtered=rows.filter(({row,change})=>change.old && change.old.rank!==row.rank);
-  $("movement-subtitle").textContent=previous?`Relative to ${labelDate(previous.at)} · ${cp.verified} photo-checked readings`:`First recorded session · ${cp.verified} photo-checked readings`;
+  $("movement-subtitle").textContent=previous?`Versus ${dayLabel(previous.day_key)} (photo ${labelDate(previous.at)}) · ${cp.verified} readings`:`First recorded day · ${cp.verified} photo-checked readings`;
   const markup=filtered.map(({row,change})=>{
     const {old,delta,rate,currentGap,oldGap}=change;
     const rank=old?`#${old.rank} ${old.rank===row.rank?"→":old.rank>row.rank?"↗":"↘"} #${row.rank}`:`#${row.rank}`;
+    const positionDelta=old?old.rank-row.rank:null;
+    const positionChange=old?positionDelta>0?`<b class="rank-move up" title="Up ${positionDelta} places">↑${positionDelta}</b>`:positionDelta<0?`<b class="rank-move down" title="Down ${-positionDelta} places">↓${-positionDelta}</b>`:`<b class="rank-move steady" title="Rank unchanged">→0</b>`:previous?.complete?`<b class="rank-move new">NEW</b>`:"";
     const known=delta!==null;
     const tentative=!confirmed(row)||(old&&!confirmed(old));
     const large=known && !tentative && delta>=BigInt(state.data.threshold);
@@ -135,7 +154,7 @@ function renderMovement() {
     const deltaText=known?`${tentative?"≈":""}${signed(delta)} observed net C$`:"no adjacent measurement";
     const rateLine=known?(rate>0 ? `<span class="rainbow-rate">${rainbowRateHtml(rate)}</span><span class="muted">Rainbow base-equivalent ≈${signed(rainbowBase(delta))} C$ if all net change were 1.5× sales</span>` : `<span class="muted">Observed no-multiplier rate ${rateText(rate)}</span>`):"";
     const quality="Photo checked";
-    return `<button class="movement-item ${state.selected===row.key?"selected":""}" data-player="${safe(row.key)}" type="button"><div class="top"><strong>${avatar(player(row.key))}${safe(row.username)}</strong><span>${rank}</span></div><p>${safe(previousText)} → <strong title="${safe(exact(row.balance))}">${tentative?"≈":""}${compact(row.balance)}</strong> · <span class="${known?(delta<0n?"negative":"positive"):"muted"}">${safe(deltaText)}</span></p>${rateLine?`<p class="rate-compare">${rateLine}</p>`:""}<p class="gaps">${nearbyLabel("↑",currentGap.ahead,oldGap.ahead)}<br>${nearbyLabel("↓",currentGap.behind,oldGap.behind)}</p><div class="badges"><span class="badge ${tentative?"gold":""}">${quality}${tentative?" · check proof":""}</span>${large?'<span class="badge gold">NOTABLE +8B</span>':""}${old?"":`<span class="badge">${previous?.complete&&confirmed(row)?"FIRST SEEN IN TOP 50":"PREVIOUS UNKNOWN"}</span>`}${cp.precision.includes("approximate")||previous?.precision?.includes("approximate")?'<span class="badge gold">TIME APPROX.</span>':""}</div></button>`;
+    return `<button class="movement-item ${state.selected===row.key?"selected":""}" data-player="${safe(row.key)}" type="button"><div class="top"><strong>${avatar(player(row.key))}${safe(row.username)}</strong><span>${rank} ${positionChange}</span></div><p>${safe(previousText)} → <strong title="${safe(exact(row.balance))}">${tentative?"≈":""}${compact(row.balance)}</strong> · <span class="${known?(delta<0n?"negative":"positive"):"muted"}">${safe(deltaText)}</span></p>${rateLine?`<p class="rate-compare">${rateLine}</p>`:""}<p class="gaps">${nearbyLabel("↑",currentGap.ahead,oldGap.ahead)}<br>${nearbyLabel("↓",currentGap.behind,oldGap.behind)}</p><div class="badges"><span class="badge ${tentative?"gold":""}">${quality}${tentative?" · check proof":""}</span>${large?'<span class="badge gold">NOTABLE +8B</span>':""}${old?"":`<span class="badge">${previous?.complete&&confirmed(row)?"FIRST SEEN IN TOP 50":"PREVIOUS UNKNOWN"}</span>`}${cp.precision.includes("approximate")||previous?.precision?.includes("approximate")?'<span class="badge gold">TIME APPROX.</span>':""}</div></button>`;
   }).join("");
   const prior=previous?.complete && cp.complete && state.view!=="gains" ? (state.byCapture.get(previous.id)||[]).filter(row=>!point(cp,row.key)) : [];
   const departures=prior.map(row=>`<button class="movement-item" type="button" data-player="${safe(row.key)}"><div class="top"><strong>${avatar(player(row.key))}${safe(row.username)}</strong><span>#${row.rank} → outside Top 50</span></div><p>Last observed ${compact(row.balance)}. Current amount unknown; last captured floor ${compact(atRank(cp,50)?.balance||null)}.</p><div class="badges"><span class="badge gold">LEFT PICTURED TOP 50</span></div></button>`).join("");
@@ -153,7 +172,7 @@ function renderProfile() {
   const peak=rows.reduce((best,row)=>BigInt(row.balance)>BigInt(best.balance)?row:best,first);
   $("profile-title").textContent=meta.name;
   const checkedCount=rows.filter(confirmed).length;
-  $("profile-hint").textContent=`First pictured ${labelDate(first.at)} · latest ${labelDate(last.at)} · ${checkedCount} photo-checked snapshots`;
+  $("profile-hint").textContent=`First day ${dayLabel(first.day_key)} · latest ${dayLabel(last.day_key)} · ${checkedCount} photo-checked daily points`;
   const link=meta.roblox_id?`<a href="https://www.roblox.com/users/${safe(meta.roblox_id)}/profile" rel="noopener noreferrer" target="_blank">View Roblox profile ↗</a>`:"<small>Roblox account not yet independently matched</small>";
   wrapper.className="";
   const stats=[
@@ -171,7 +190,9 @@ function renderProfile() {
     const change=old?BigInt(row.balance)-BigInt(old.balance):null;
     const elapsed=old?hours(old.at,row.at):0;
     const rate=change===null?null:timeRate(change,elapsed);
-    return `<a href="#evidence" data-capture="${ix}" data-proof="${safe(row.evidence[0]||"")}"><span>${safe(labelDate(row.at))} · #${row.rank}</span><strong title="${safe(exact(row.balance))}">${compact(row.balance)}</strong><span>${change!==null?`${signed(change)} · ${rate>0?rainbowRateHtml(rate):rateText(rate)}`:"—"} ↗</span></a>`;
+    const rankChange=old?old.rank>row.rank?`<b class="rank-move up">↑${old.rank-row.rank}</b>`:old.rank<row.rank?`<b class="rank-move down">↓${row.rank-old.rank}</b>`:`<b class="rank-move steady">→0</b>`:"";
+    const photoTime=localDay(row.at)===row.day_key?new Intl.DateTimeFormat("en-US",{timeZone:"America/Chicago",hour:"numeric",minute:"2-digit"}).format(new Date(row.at)):labelDate(row.at);
+    return `<a href="#evidence" data-capture="${ix}" data-proof="${safe(row.evidence[0]||"")}"><span>${safe(dayLabel(row.day_key))} · photo ${safe(photoTime)} · #${row.rank} ${rankChange}</span><strong title="${safe(exact(row.balance))}">${compact(row.balance)}</strong><span>${change!==null?`${signed(change)} · ${rate>0?rainbowRateHtml(rate):rateText(rate)}`:"—"} ↗</span></a>`;
   }).join("");
   wrapper.innerHTML=`<div class="profile-head">${avatar(meta)||'<span class="avatar-fallback">@</span>'}<div><strong>${safe(meta.name)}</strong><small>${meta.roblox_name&&meta.roblox_name!==meta.name?`Current Roblox name: ${safe(meta.roblox_name)}`:"Historical screenshot name"}</small>${link}</div></div><div class="profile-stats">${stats.map(([title,value,detail,rainbow])=>`<div><span>${safe(title)}</span><b class="${rainbow?"rainbow-static":""}" title="${safe(value)}">${safe(value)}</b><small>${safe(detail)}</small></div>`).join("")}</div><p class="card-title"><small>Peak pictured ${compact(peak.balance)} · ${BigInt(peak.balance)-BigInt(last.balance)>0n?`${compact(BigInt(peak.balance)-BigInt(last.balance))} below peak`:"at peak"}. Rainbow 1.5× figures are hypothetical base equivalents if all positive net balance change came from boosted sales. Spending, stored fish, and other changes cannot be inferred from the board.</small></p><div class="profile-history">${historyRows}</div>`;
   wrapper.querySelectorAll("[data-capture]").forEach((el)=>el.addEventListener("click",(event)=>{event.preventDefault();moveTo(Number(el.dataset.capture));document.querySelector(".evidence-section").scrollIntoView({behavior:"smooth"});spotlight(el.dataset.proof);}));
@@ -180,9 +201,9 @@ function spotlight(id){document.querySelectorAll(".proof").forEach((el)=>el.clas
 function renderEvidence() {
   const cp=state.data.checkpoints[state.index];
   $("evidence-count").textContent=`${cp.evidence.length} ORIGINAL PNG${cp.evidence.length===1?"":"S"}`;
-  $("evidence-subtitle").textContent=cp.source_checkpoints.length>1?`Session photos ${labelDate(cp.captured_from)} through ${labelDate(cp.captured_to)} · both batches kept as originals`:`Captured ${labelDate(cp.at)} · ${cp.precision.replaceAll("_"," ")} · originals are the authoritative proof`;
-  $("evidence-grid").innerHTML=cp.evidence.map((id)=>{const item=byId(id);if(!item)return"";return `<button type="button" class="proof" data-proof="${safe(item.id)}"><img src="${safe(evidenceUrl(item))}" loading="lazy" alt="Original evidence ${safe(id)}, leaderboard ranks ${item.min} to ${item.max}"><span>${safe(id)} · rank ${item.min}–${item.max}</span><small>${safe(labelDate(item.captured_at))} · SHA-256 ${safe(item.sha256.slice(0,12))}…</small></button>`;}).join("");
-  $("evidence-grid").querySelectorAll(".proof").forEach((el)=>el.addEventListener("click",()=>{const item=byId(el.dataset.proof);if(!item)return;$("lightbox-image").src=evidenceUrl(item);$("lightbox-caption").textContent=`${item.id} · ${labelDate(item.captured_at)} · ranks ${item.min}–${item.max} · original SHA-256 ${item.sha256}`;$("lightbox").showModal();}));
+  $("evidence-subtitle").textContent=`Leaderboard day ${dayLabel(cp.day_key)} · selected photo ${labelDate(cp.at)}${cp.early_am_rollover?" (early AM, counted for preceding day)":""}${cp.earlier_session_ids.length?` · ${cp.earlier_session_ids.length} earlier capture kept for context`:""}${cp.source_checkpoints.length>1?` · ${cp.source_checkpoints.length} matching photo batches`:""}`;
+  $("evidence-grid").innerHTML=cp.evidence.map((id)=>{const item=byId(id);if(!item)return"";const selected=cp.primary_evidence.includes(id);return `<button type="button" class="proof ${selected?"":"earlier-proof"}" data-proof="${safe(item.id)}"><img src="${safe(evidenceUrl(item))}" loading="lazy" alt="Original evidence ${safe(id)}, leaderboard ranks ${item.min} to ${item.max}"><span>${safe(id)} · rank ${item.min}–${item.max}</span><small>${selected?"Selected daily point":"Earlier context · not used for daily balance"} · ${safe(labelDate(item.captured_at))} · SHA-256 ${safe(item.sha256.slice(0,12))}…</small></button>`;}).join("");
+  $("evidence-grid").querySelectorAll(".proof").forEach((el)=>el.addEventListener("click",()=>{const item=byId(el.dataset.proof);if(!item)return;$("lightbox-image").src=evidenceUrl(item);$("lightbox-caption").textContent=`${cp.primary_evidence.includes(item.id)?"Selected daily point":"Earlier capture (not used for daily balance)"} · ${item.id} · ${labelDate(item.captured_at)} · ranks ${item.min}–${item.max} · original SHA-256 ${item.sha256}`;$("lightbox").showModal();}));
   if(state.selected){const row=point(cp,state.selected);if(row)spotlight(row.evidence[0]);}
 }
 function render(){renderControls();renderChart();renderMovement();renderProfile();renderEvidence();}
@@ -192,7 +213,7 @@ async function init(){
     const data=await response.json();state.data=data;
     const pictured=data.captures.reduce((sum,cp)=>sum+cp.coverage,0);
     const confirmed=data.captures.reduce((sum,cp)=>sum+cp.verified,0);
-    $("global-review-note").textContent=`${data.checkpoints.length} timeline snapshots reconcile ${data.captures.length} original captures. ${confirmed.toLocaleString()} of ${pictured.toLocaleString()} photographed rank readings were checked directly against original images; ${pictured-confirmed} cropped readings remain unknown, and ${data.capture_status_counts.not_captured} ranks were not pictured. Photos retain their own times and SHA-256 proofs. Rainbow 1.5× figures are hypothetical base equivalents, not confirmed sales.`;
+    $("global-review-note").textContent=`${data.checkpoints.length} daily points (latest photo per leaderboard day) from ${data.sessions.length} sessions and ${data.captures.length} original captures. ${confirmed.toLocaleString()} of ${pictured.toLocaleString()} photographed readings were checked directly against original images; ${pictured-confirmed} cropped readings remain unknown, and ${data.capture_status_counts.not_captured} raw rank slots were not pictured. Photo times and SHA-256 proofs are retained. Rainbow 1.5× figures are hypothetical base equivalents, not confirmed sales.`;
     data.checkpoints.forEach(cp=>state.byCapture.set(cp.id,[]));
     data.observations.filter(row=>row.status==="verified").forEach(row=>{state.byCapture.get(row.checkpoint).push(row);if(!state.byPlayer.has(row.key))state.byPlayer.set(row.key,[]);state.byPlayer.get(row.key).push(row);});
     data.players.forEach(meta=>state.playerMeta.set(meta.key,meta));
@@ -205,7 +226,7 @@ async function init(){
     $("clear").addEventListener("click",()=>setSelected(null));$("profile-clear").addEventListener("click",()=>setSelected(null));
     $("top-filter").addEventListener("change",(ev)=>{state.filter=ev.target.value;renderChart();});
     let resizeTimer;
-    window.addEventListener("resize",()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{const plot=$("chart");if(plot?.data&&window.Plotly)Plotly.Plots.resize(plot);},120);});
+    window.addEventListener("resize",()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{if(state.data&&window.Plotly)renderChart();},120);});
     $("search").addEventListener("input",(ev)=>{const term=ev.target.value.trim().toLocaleLowerCase();if(!term){setSelected(null);return;}const meta=data.players.find(p=>p.name.toLocaleLowerCase()===term || p.key===term)||data.players.find(p=>p.name.toLocaleLowerCase().includes(term)||p.roblox_name?.toLocaleLowerCase().includes(term));if(meta){state.selected=meta.key;render();$("search").focus();$("search").setSelectionRange(ev.target.value.length,ev.target.value.length);}});
     document.querySelectorAll("[data-view]").forEach(el=>el.addEventListener("click",()=>{state.view=el.dataset.view;document.querySelectorAll("[data-view]").forEach(btn=>btn.classList.toggle("active",btn===el));renderMovement();}));
     $("lightbox").addEventListener("click",(ev)=>{if(ev.target===$("lightbox"))$("lightbox").close();});

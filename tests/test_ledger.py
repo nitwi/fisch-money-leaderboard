@@ -7,6 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 from build import checked_amount, safe_path
+from daily import local_time, select_daily
 from extract_screenshots import parse_image
 from sessions import group_sessions
 
@@ -28,9 +29,11 @@ class LedgerTests(unittest.TestCase):
         data = self.data
         self.assertEqual(len(data["captures"]), 35)
         self.assertEqual(len(data["capture_observations"]), 1750)
-        self.assertEqual(len(data["checkpoints"]), 33)
+        self.assertEqual(len(data["sessions"]), 33)
+        self.assertEqual(len(data["session_observations"]), 1650)
+        self.assertEqual(len(data["checkpoints"]), 31)
         self.assertEqual(len(data["evidence"]), 160)
-        self.assertEqual(len(data["observations"]), 1650)
+        self.assertEqual(len(data["observations"]), 1550)
         self.assertTrue(all(len([o for o in data["observations"] if o["checkpoint"] == cp["id"]]) == 50 for cp in data["checkpoints"]))
         proofs = {e["id"]: e for e in data["evidence"]}
         for row in data["observations"]:
@@ -44,8 +47,10 @@ class LedgerTests(unittest.TestCase):
         self.assertEqual(sum(cp['coverage'] for cp in data['captures']), 1571)
         self.assertEqual(sum(row['status']=='not_captured' for row in data['capture_observations']),179)
         self.assertEqual(sum(row['status']=='captured_pending_transcription' for row in data['capture_observations']),3)
-        self.assertEqual(sum(row['status']=='verified' for row in data['observations']),1538)
-        self.assertEqual(sum(row['status']=='captured_pending_transcription' for row in data['observations']),1)
+        self.assertEqual(sum(row['status']=='verified' for row in data['session_observations']),1538)
+        self.assertEqual(sum(row['status']=='captured_pending_transcription' for row in data['session_observations']),1)
+        self.assertEqual(sum(row['status']=='verified' for row in data['observations']),1508)
+        self.assertFalse(any(row['status']=='captured_pending_transcription' for row in data['observations']))
         self.assertEqual(sum(cp['complete'] for cp in data['checkpoints']),28)
         self.assertFalse(any(row['status'].startswith('ocr_') for row in data['observations']))
 
@@ -66,7 +71,7 @@ class LedgerTests(unittest.TestCase):
 
     def test_near_time_capture_sessions_preserve_bottom_band_and_proof(self):
         data=self.data
-        sessions={cp['id']:cp for cp in data['checkpoints']}
+        sessions={cp['id']:cp for cp in data['sessions']}
         morning=sessions['2026-11-04_0142']
         evening=sessions['2026-11-04_2100']
         self.assertEqual(morning['source_checkpoints'],['2026-11-04_0142','2026-11-04_0152'])
@@ -79,15 +84,56 @@ class LedgerTests(unittest.TestCase):
         self.assertEqual(evening['captured_to'],'2026-11-05T03:01:00Z')
         self.assertEqual(len([cp for cp in data['captures'] if cp['id'].startswith('2026-11-04_')]),4)
         self.assertTrue(any(row['id']=='2026-11-04_0152_R01' for row in data['capture_observations']))
-        by_session={(row['checkpoint'],row['rank']):row for row in data['observations']}
+        by_session={(row['checkpoint'],row['rank']):row for row in data['session_observations']}
         for cp in (morning,evening):
             self.assertEqual(by_session[(cp['id'],50)]['status'],'verified')
             self.assertTrue(by_session[(cp['id'],50)]['evidence'])
             self.assertEqual(by_session[(cp['id'],1)]['source_checkpoints'],cp['source_checkpoints'])
-        self.assertEqual(len([row for row in data['observations'] if row['key']==by_session[(morning['id'],1)]['key']]),33)
-        october=[cp for cp in data['checkpoints'] if cp['id'].startswith('2026-10-17_')]
+        self.assertEqual(len([row for row in data['session_observations'] if row['key']==by_session[(morning['id'],1)]['key']]),33)
+        october=[cp for cp in data['sessions'] if cp['id'].startswith('2026-10-17_')]
         self.assertEqual(len(october),2,"12h-spaced photos with changed balances must remain distinct")
         self.assertEqual([cp['verified'] for cp in october],[14,50])
+
+    def test_daily_ticks_roll_early_am_only_without_prior_afternoon(self):
+        data=self.data
+        dates={cp['day_key']:cp for cp in data['checkpoints']}
+        self.assertEqual(dates['2026-10-13']['id'],'2026-10-14_0045')
+        self.assertEqual(dates['2026-11-03']['id'],'2026-11-04_0142')
+        self.assertEqual(dates['2026-11-07']['id'],'2026-11-08_0116')
+        self.assertEqual(dates['2026-11-07']['earlier_session_ids'],['2026-11-07_1046'])
+        self.assertEqual(len(dates['2026-11-07']['evidence']),9)
+        self.assertEqual(dates['2026-11-08']['id'],'2026-11-09_0052')
+        self.assertEqual(dates['2026-11-09']['id'],'2026-11-09_2122')
+        self.assertEqual(dates['2026-10-17']['id'],'2026-10-17_2214')
+        self.assertEqual(dates['2026-10-17']['earlier_session_ids'],['2026-10-17_1014'])
+        self.assertEqual(len(dates['2026-10-17']['evidence']),6)
+        self.assertNotIn('2026-10-18',dates)
+        self.assertEqual(sum(row['status']=='verified' for row in data['observations'] if row['day_key']=='2026-11-03'),50)
+        self.assertEqual(len([row for row in data['observations'] if row['key']==next(r['key'] for r in data['observations'] if r['day_key']=='2026-10-10' and r['rank']==1)]),31)
+
+        def cp(name,at):
+            return {'id':name,'at':at,'captured_from':at,'captured_to':at,
+                    'source_checkpoints':[name],'evidence':[name],
+                    'coverage':50,'verified':50,'visible':50,'complete':True}
+        def observation(capture):
+            return [{'checkpoint':capture['id'],'rank':rank,'id':f"{capture['id']}_R{rank:02d}",
+                     'status':'verified','balance':str(100-rank),'username':f'user{rank}',
+                     'key':f'user:{rank}','evidence':[capture['id']],'at':capture['at']}
+                    for rank in range(1,51)]
+        midnight=cp('midnight','2026-11-09T06:52:00Z')  # 00:52 CST
+        evening=cp('evening','2026-11-10T03:22:00Z')  # Nov 9 at 21:22 CST
+        picked,_,_,_=select_daily([midnight,evening],observation(midnight)+observation(evening),[midnight,evening])
+        self.assertEqual([row['day_key'] for row in picked],['2026-11-08','2026-11-09'])
+        prior=cp('prior','2026-11-09T00:00:00Z')  # Nov 8 at 18:00 CST
+        picked,_,_,_=select_daily([prior,midnight,evening],observation(prior)+observation(midnight)+observation(evening),[prior,midnight,evening])
+        self.assertEqual([row['id'] for row in picked],['prior','evening'])
+        self.assertEqual(picked[-1]['earlier_session_ids'],['midnight'])
+        self.assertEqual(local_time('2026-11-01T07:30:00Z').hour,1)  # Fall-back hour stays Chicago-local
+        halloween=dates['2026-10-31']['at']
+        november_first=dates['2026-11-01']['at']
+        self.assertEqual((datetime.fromisoformat(november_first.replace('Z','+00:00'))-
+                          datetime.fromisoformat(halloween.replace('Z','+00:00'))).total_seconds()/3600,
+                         19+47/60, "DST crossing uses actual UTC elapsed hours, not wall-clock subtraction")
 
     def test_session_merge_rejects_changed_rows_and_preserves_actual_row_time(self):
         base={'id':'a','at':'2026-11-04T07:42:00Z','precision':'user-supplied',

@@ -14,6 +14,7 @@ import shutil
 from collections import Counter, defaultdict
 from datetime import datetime
 from pathlib import Path
+from daily import select_daily
 from sessions import group_sessions
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -176,6 +177,7 @@ def build(source, copy_images=True):
     if len({cp["at"] for cp in sorted_cps}) != len(sorted_cps):
         raise ValueError("Capture timestamps must be unique")
     sessions, session_observations, session_stats = group_sessions(sorted_cps, observations)
+    daily, daily_observations, daily_stats, assignment = select_daily(sessions, session_observations, sorted_cps)
 
     people = {}
     people_ident = {}
@@ -194,10 +196,15 @@ def build(source, copy_images=True):
                         "roblox_name": identity.get("name") if user_id else None,
                         "headshot": identity.get("headshot") if user_id else None})
 
-    payload = {"version": 2, "timezone": "America/Chicago", "threshold": "8000000000",
-               "checkpoints": sessions, "captures": sorted_cps, "evidence": list(evidence.values()),
-               "observations": session_observations, "capture_observations": observations,
-               "players": players, "status_counts": session_stats, "capture_status_counts": dict(statuses)}
+    selected_sessions = {cp["id"] for cp in daily}
+    archived_sessions = [{**cp, "day_key": assignment[cp["id"]], "used_as_daily": cp["id"] in selected_sessions} for cp in sessions]
+    payload = {"version": 3, "timezone": "America/Chicago", "threshold": "8000000000",
+               "checkpoints": daily, "observations": daily_observations,
+               "sessions": archived_sessions, "session_observations": session_observations,
+               "captures": sorted_cps, "capture_observations": observations,
+               "evidence": list(evidence.values()), "players": players,
+               "status_counts": daily_stats, "session_status_counts": session_stats,
+               "capture_status_counts": dict(statuses), "session_day_assignment": assignment}
     site.mkdir(exist_ok=True)
     (site / "data.json").write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     if copy_images and source != (ROOT / "data/source").resolve():
@@ -205,12 +212,13 @@ def build(source, copy_images=True):
         baseline.mkdir(parents=True, exist_ok=True)
         for name in ("checkpoints.csv", "evidence_manifest.csv"):
             shutil.copyfile(source / "data" / name, baseline / name)
-    print(json.dumps({"captures": len(sorted_cps), "sessions": len(sessions), "images": len(evidence),
+    print(json.dumps({"captures": len(sorted_cps), "sessions": len(sessions), "daily_snapshots": len(daily), "images": len(evidence),
                       "capture_rank_slots": len(observations), "session_rank_slots": len(session_observations),
-                      "capture_verified": statuses["verified"], "session_verified": session_stats.get('verified',0),
-                      "session_pending": session_stats.get('captured_pending_transcription',0),
+                      "daily_rank_slots": len(daily_observations), "capture_verified": statuses["verified"],
+                      "session_verified": session_stats.get('verified',0), "daily_verified": daily_stats.get('verified',0),
+                      "daily_pending": daily_stats.get('captured_pending_transcription',0),
                       "fully_verified_captures": sum(cp["complete"] for cp in sorted_cps),
-                      "complete_sessions": sum(cp["complete"] for cp in sessions),
+                      "complete_sessions": sum(cp["complete"] for cp in sessions), "complete_daily_snapshots": sum(cp["complete"] for cp in daily),
                       "evidence_mb": round(sum(safe_path(site, 'evidence/' + row['relative_path']).stat().st_size for row in ev_rows) / 1_000_000, 1) if copy_images else None}, indent=2))
 
 

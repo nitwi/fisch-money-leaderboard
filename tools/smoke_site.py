@@ -24,7 +24,7 @@ try:
         page = browser.new_page(viewport={"width": 1300, "height": 930})
         page.on("pageerror", lambda error: errors.append(str(error)))
         page.goto(f"http://127.0.0.1:{server.server_address[1]}/", wait_until="domcontentloaded")
-        page.locator("#capture-index").get_by_text("SNAPSHOT 33 / 33").wait_for(timeout=20000)
+        page.locator("#capture-index").get_by_text("DAY 31 / 31",exact=False).wait_for(timeout=20000)
         assert page.locator("#stat-coverage").inner_text() == "50 / 50"
         assert page.locator(".proof").count() == 4
         assert page.locator(".movement-item").count() == 50
@@ -35,10 +35,15 @@ try:
         assert page.locator(".rainbow-static").first.evaluate("el => getComputedStyle(el).animationName") == "none"
         page.locator("#chart.js-plotly-plot").wait_for(timeout=20000)
         assert page.locator("#chart").evaluate("el => el.data.some(t => t.meta && t.meta.key)")
+        assert page.locator("#chart").evaluate("el => el.layout.xaxis.type") == "category"
+        assert page.locator("#chart").evaluate("el => el.layout.xaxis.tickvals.includes('2026-10-18')")
+        cerulean=next(p for p in data['players'] if p['name']=='Ceruleanflare2')
+        assert "↑13" in page.locator(f'.movement-item[data-player="{cerulean["key"]}"] .rank-move.up').inner_text()
+        assert page.locator(f'.movement-item[data-player="{cerulean["key"]}"] .rank-move.up').evaluate('el => getComputedStyle(el).color') != 'rgb(255, 152, 165)'
         page.screenshot(path=str(ROOT / "preview-desktop.png"), full_page=True)
         page.locator("#search").fill("LowTierNova")
         page.locator("#profile-title").get_by_text("LowTierNova").wait_for()
-        assert page.locator(".profile-history a").count() == 33
+        assert page.locator(".profile-history a").count() == 31
         page.locator(".movement-item[data-player='id:1316700350']").click()
         page.wait_for_timeout(200)
         assert not errors, errors
@@ -46,7 +51,7 @@ try:
         assert page.locator("#profile-content .rainbow-static").count() > 0
         assert "player=id%3A1316700350" in page.url
         page.locator("#prev").click()
-        assert page.locator("#capture-index").inner_text() == "SNAPSHOT 32 / 33"
+        assert "DAY 30 / 31" in page.locator("#capture-index").inner_text()
         page.locator(".proof").first.click()
         assert page.locator("#lightbox").evaluate("el => el.open")
         page.wait_for_function("document.querySelector('#lightbox-image').naturalWidth > 0")
@@ -54,16 +59,18 @@ try:
         morning_index=next(i for i,cp in enumerate(data['checkpoints']) if cp['id']=='2026-11-04_0142')
         evening_index=next(i for i,cp in enumerate(data['checkpoints']) if cp['id']=='2026-11-04_2100')
         page.locator("#capture-slider").evaluate("(el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}))}",str(morning_index))
-        assert "2 batches · 10min span" in page.locator("#capture-index").inner_text()
+        assert "2 batches (10min)" in page.locator("#capture-index").inner_text()
+        assert page.locator("#capture-date").inner_text() == "Nov 3, 2026"
         assert page.locator("#stat-coverage").inner_text() == "50 / 50"
         assert page.locator("#stat-floor").inner_text() != "UNKNOWN"
         assert page.locator(".proof").count() == 6
         assert page.locator(".proof[data-proof='EV0133']").count() == 1
-        assert "Nov 4, 2026" in page.locator("#evidence-subtitle").inner_text()
+        assert "Leaderboard day Nov 3, 2026" in page.locator("#evidence-subtitle").inner_text()
         assert page.evaluate("state.data.checkpoints[state.index-1].id") == "2026-11-02_2128"
         page.screenshot(path=str(ROOT / "preview-merged-desktop.png"), full_page=True)
         page.locator("#capture-slider").evaluate("(el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}))}",str(evening_index))
-        assert "2 batches · 1min span" in page.locator("#capture-index").inner_text()
+        assert "2 batches (1min)" in page.locator("#capture-index").inner_text()
+        assert page.locator("#capture-date").inner_text() == "Nov 4, 2026"
         assert page.locator("#stat-floor").inner_text() != "UNKNOWN"
         assert page.locator(".proof").count() == 6
         page.locator(".proof[data-proof='EV0134']").click()
@@ -71,6 +78,23 @@ try:
         page.locator("#lightbox button").click()
         page.locator("#next").click()
         assert page.evaluate("state.data.checkpoints[state.index].id") == "2026-11-05_1930"
+        october17=next(i for i,cp in enumerate(data['checkpoints']) if cp['day_key']=='2026-10-17')
+        page.locator("#capture-slider").evaluate("(el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}))}",str(october17))
+        assert page.locator(".proof.earlier-proof").count() == 2
+        assert page.locator("#stat-floor").inner_text() != "UNKNOWN"
+        november7=next(i for i,cp in enumerate(data['checkpoints']) if cp['day_key']=='2026-11-07')
+        page.locator("#capture-slider").evaluate("(el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}))}",str(november7))
+        assert page.locator("#capture-date").inner_text() == "Nov 7, 2026"
+        assert "photo Nov 8, 2026, 1:16 AM" in page.locator("#capture-index").inner_text()
+        assert page.locator(".proof").count() == 9
+        assert page.locator(".proof.earlier-proof").count() == 1
+        page.locator("#search").fill("LowTierNova")
+        assert "photo Nov 8, 2026, 1:16 AM" in page.locator(".profile-history a").filter(has_text="Nov 7, 2026").first.inner_text()
+        oct24=next(i for i,cp in enumerate(data['checkpoints']) if cp['day_key']=='2026-10-24')
+        page.locator("#capture-slider").evaluate("(el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}))}",str(oct24))
+        metbepol=next(p for p in data['players'] if p['name']=='metbepol')
+        assert "↓1" in page.locator(f'.movement-item[data-player="{metbepol["key"]}"] .rank-move.down').inner_text()
+        assert page.locator(f'.movement-item[data-player="{metbepol["key"]}"] .rank-move.down').evaluate('el => getComputedStyle(el).color') != 'rgb(114, 233, 183)'
         capture_index=next(i for i,cp in enumerate(data['checkpoints']) if cp['id']=='2026-10-20_1837')
         page.locator("#capture-slider").evaluate("(el, value) => { el.value = value; el.dispatchEvent(new Event('input', {bubbles:true})); }",str(capture_index))
         assert page.locator(".movement-item").count() > 25
@@ -78,11 +102,14 @@ try:
         assert "OCR draft" not in page.locator("#movement-list").inner_text()
         page.locator("#capture-slider").evaluate("el => { el.value = '1'; el.dispatchEvent(new Event('input', {bubbles:true})); }")
         assert "LEFT PICTURED TOP 50" in page.locator("#movement-list").inner_text()
-        page.locator("#capture-slider").evaluate("el => { el.value = '32'; el.dispatchEvent(new Event('input', {bubbles:true})); }")
+        page.locator("#capture-slider").evaluate("el => { el.value = '30'; el.dispatchEvent(new Event('input', {bubbles:true})); }")
         page.set_viewport_size({"width": 390, "height": 840})
         page.wait_for_timeout(500)
-        assert page.locator("#capture-index").inner_text() == "SNAPSHOT 33 / 33"
+        assert "DAY 31 / 31" in page.locator("#capture-index").inner_text()
         assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 4"), "Mobile page overflows horizontally"
+        assert page.locator("#chart").evaluate("el => el.layout.xaxis.tickvals.length > el.layout.xaxis.ticktext.filter(Boolean).length")
+        page.locator(".evidence-section").scroll_into_view_if_needed()
+        page.wait_for_function("document.querySelector('.proof img').naturalWidth > 0")
         page.screenshot(path=str(ROOT / "preview-mobile.png"), full_page=True)
         page.locator("#capture-slider").evaluate("(el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}))}",str(morning_index))
         assert page.locator(".proof").count() == 6

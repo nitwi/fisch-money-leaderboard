@@ -20,3 +20,11 @@
 .profile-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
 .profile-stats b{overflow-wrap:anywhere}
 @media(max-width:700px){.profile-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.rank-move{display:inline-block;margin-left:4px;padding:2px 6px;border-radius:6px;font-size:11px;font-weight:900;white-space:nowrap}
+.rank-move.up{color:#72e9b7;background:rgba(97,229,179,.13)}
+.rank-move.down{color:#ff98a5;background:rgba(255,132,149,.14)}
+.rank-move.steady{color:#bed6e0;background:rgba(154,219,231,.09)}
+.rank-move.new{color:#ffe08b;background:rgba(255,209,102,.15)}
+.profile-history .rank-move{font-size:10px;padding:1px 4px}
+.proof.earlier-proof{border-color:rgba(255,209,102,.25)}
+.proof.earlier-proof small{color:#ffdd99}
