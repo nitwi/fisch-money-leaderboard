@@ -51,7 +51,7 @@ class LedgerTests(unittest.TestCase):
         self.assertEqual(sum(row['status']=='verified' for row in data['observations']),sum(cp['verified'] for cp in data['checkpoints']))
         for row_id in ('2026-10-17_1014_R15','2026-11-04_0152_R16','2026-11-04_2101_R16'):
             self.assertEqual(next(row['status'] for row in data['capture_observations'] if row['id']==row_id),'captured_pending_transcription')
-        self.assertGreaterEqual(sum(cp['complete'] for cp in data['checkpoints']),30)
+        self.assertGreaterEqual(sum(cp['complete'] for cp in data['checkpoints']),29)
         self.assertFalse(any(row['status'].startswith('ocr_') for row in data['observations']))
 
     def test_observed_rate_and_roblox_identity(self):
@@ -94,7 +94,7 @@ class LedgerTests(unittest.TestCase):
         self.assertEqual(len(october),2,"12h-spaced photos with changed balances must remain distinct")
         self.assertEqual([cp['verified'] for cp in october],[14,50])
 
-    def test_daily_ticks_roll_early_am_only_without_prior_afternoon(self):
+    def test_daily_ticks_keep_latest_cycle_photo(self):
         data=self.data
         dates={cp['day_key']:cp for cp in data['checkpoints']}
         self.assertEqual(dates['2026-10-13']['id'],'2026-10-14_0045')
@@ -108,17 +108,26 @@ class LedgerTests(unittest.TestCase):
         self.assertEqual(dates['2026-10-17']['earlier_session_ids'],['2026-10-17_1014'])
         self.assertEqual(len(dates['2026-10-17']['evidence']),6)
         self.assertNotIn('2026-10-18',dates)
+        self.assertEqual(dates['2026-11-11']['id'],'2026-11-12_0036')
+        self.assertEqual(dates['2026-11-11']['earlier_session_ids'],['2026-11-11_2233'])
+        self.assertNotIn('2026-11-12',dates)
         self.assertEqual(sum(row['status']=='verified' for row in data['observations'] if row['day_key']=='2026-11-03'),50)
         self.assertGreaterEqual(len([row for row in data['observations'] if row['key']==next(r['key'] for r in data['observations'] if r['day_key']=='2026-10-10' and r['rank']==1)]),31)
 
-    def test_two_new_full_captures_preserve_distinct_days_and_roblox_renames(self):
+    def test_overnight_update_uses_latest_photo_and_preserves_both_full_captures(self):
         data=self.data
         captures={cp['id']:cp for cp in data['captures']}
         first=captures['2026-11-11_2233'];updated=captures['2026-11-12_0036']
         self.assertEqual((first['coverage'],first['verified'],len(first['evidence'])),(50,50,4))
         self.assertEqual((updated['coverage'],updated['verified'],len(updated['evidence'])),(50,50,4))
-        self.assertEqual(data['session_day_assignment'][updated['id']],'2026-11-12',"Nov 11 evening capture prevents prior-day rollover")
+        self.assertEqual(data['session_day_assignment'][updated['id']],'2026-11-11',"Close overnight updates belong to the prior daily cycle")
         self.assertEqual(updated['at'],'2026-11-12T06:36:00Z')
+        selected=next(cp for cp in data['checkpoints'] if cp['day_key']=='2026-11-11')
+        self.assertEqual((selected['id'],selected['at']), (updated['id'],updated['at']))
+        self.assertEqual((selected['verified'],len(selected['evidence'])),(50,8))
+        self.assertEqual(selected['daily_source_sessions'],[first['id'],updated['id']])
+        self.assertEqual(selected['primary_evidence'],updated['evidence'])
+        self.assertTrue(selected['early_am_rollover'])
         rows={row['id']:row for row in data['capture_observations']}
         self.assertEqual(rows['2026-11-11_2233_R50']['balance'],'53818853769')
         self.assertEqual(rows['2026-11-12_0036_R50']['balance'],'53829367842')
@@ -129,6 +138,7 @@ class LedgerTests(unittest.TestCase):
         self.assertEqual(new['username'],'ewoofs')
         self.assertEqual(new['key'],old['key'],"Exact Roblox ID must merge renamed player's history")
         self.assertEqual(rows['2026-11-12_0036_R35']['key'],old['key'])
+        self.assertEqual(next(row['balance'] for row in data['observations'] if row['day_key']=='2026-11-11' and row['rank']==2),rows['2026-11-12_0036_R02']['balance'])
         self.assertTrue(next(p for p in data['players'] if p['key']==rows['2026-11-11_2233_R50']['key'])['roblox_id'])
         proofs={proof['id']:proof for proof in data['evidence']}
         self.assertEqual(proofs['EV0161']['captured_at'],first['at'])
@@ -162,6 +172,30 @@ class LedgerTests(unittest.TestCase):
         picked,_,_,_=select_daily([prior,midnight,evening],observation(prior)+observation(midnight)+observation(evening),[prior,midnight,evening])
         self.assertEqual([row['id'] for row in picked],['prior','evening'])
         self.assertEqual(picked[-1]['earlier_session_ids'],['midnight'])
+        late=cp('late','2026-11-12T04:33:00Z')  # Nov 11 at 22:33 CST
+        update=cp('update','2026-11-12T06:36:00Z')  # Nov 12 at 00:36 CST
+        followup=cp('followup','2026-11-12T07:50:00Z')  # Nov 12 at 01:50 CST
+        daytime=cp('daytime','2026-11-13T01:00:00Z')  # Nov 12 at 19:00 CST
+        photos=[late,update,followup,daytime]
+        picked,selected,_,assigned=select_daily(photos,sum((observation(photo) for photo in photos),[]),photos)
+        self.assertEqual([row['day_key'] for row in picked],['2026-11-11','2026-11-12'])
+        self.assertEqual([row['id'] for row in picked],['followup','daytime'])
+        self.assertEqual(picked[0]['earlier_session_ids'],['late','update'])
+        self.assertEqual(assigned['update'],assigned['followup'])
+        self.assertEqual(next(row for row in selected if row['day_key']=='2026-11-11' and row['rank']==1)['id'],'followup_R01')
+        distant=cp('distant','2026-11-12T00:00:00Z')  # Nov 11 at 18:00 CST, over six hours before update
+        picked,_,_,_=select_daily([distant,update],observation(distant)+observation(update),[distant,update])
+        self.assertEqual([row['day_key'] for row in picked],['2026-11-11','2026-11-12'])
+        at_limit=cp('at_limit','2026-11-12T07:59:00Z')  # Nov 12 at 01:59 CST
+        just_within=cp('just_within','2026-11-12T04:59:00Z')  # Exactly three hours earlier
+        just_beyond=cp('just_beyond','2026-11-12T04:58:00Z')  # Three hours and one minute earlier
+        picked,_,_,_=select_daily([just_within,at_limit],observation(just_within)+observation(at_limit),[just_within,at_limit])
+        self.assertEqual([row['id'] for row in picked],['at_limit'])
+        picked,_,_,_=select_daily([just_beyond,at_limit],observation(just_beyond)+observation(at_limit),[just_beyond,at_limit])
+        self.assertEqual([row['day_key'] for row in picked],['2026-11-11','2026-11-12'])
+        after_cutoff=cp('after_cutoff','2026-11-12T08:01:00Z')  # Nov 12 at 02:01 CST
+        picked,_,_,_=select_daily([late,after_cutoff],observation(late)+observation(after_cutoff),[late,after_cutoff])
+        self.assertEqual([row['day_key'] for row in picked],['2026-11-11','2026-11-12'])
         self.assertEqual(local_time('2026-11-01T07:30:00Z').hour,1)  # Fall-back hour stays Chicago-local
         halloween=dates['2026-10-31']['at']
         november_first=dates['2026-11-01']['at']

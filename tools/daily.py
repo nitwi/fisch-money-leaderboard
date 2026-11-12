@@ -1,8 +1,10 @@
 """Select one latest photo-backed leaderboard session per Chicago leaderboard day.
 
-12:00–1:59 AM can close the preceding day when that day lacks an afternoon
-capture. Times on the board and per-player interval math remain actual UTC
-instants; only the daily tick label is reassigned.
+12:00–1:59 AM can update the preceding day's cycle when taken within three
+hours of its latest photo, even if that day had an evening capture. It also
+closes a preceding day with no afternoon capture. Times on the board and
+per-player interval math remain actual UTC instants; only the daily tick label
+is reassigned.
 """
 
 from collections import Counter, defaultdict
@@ -12,6 +14,7 @@ from zoneinfo import ZoneInfo
 from sessions import instant
 
 CHICAGO = ZoneInfo("America/Chicago")
+CLOSE_UPDATE_WINDOW = timedelta(hours=3)
 
 
 def local_time(utc_at):
@@ -35,7 +38,13 @@ def select_daily(sessions, session_observations, raw_captures, early_cutoff_hour
                 and local_time(captures_by_id[raw_id]["at"]).hour >= 12
                 for raw_id in cp["source_checkpoints"]
             )
-            if same_session_prior_afternoon or prior not in afternoon:
+            prior_options = sessions_by_day.get(prior.isoformat(), [])
+            latest_prior = prior_options[-1] if prior_options else None
+            close_update = (
+                latest_prior is not None
+                and timedelta(0) < instant(cp["at"]) - instant(latest_prior["at"]) <= CLOSE_UPDATE_WINDOW
+            )
+            if same_session_prior_afternoon or close_update or prior not in afternoon:
                 day = prior
         key = day.isoformat()
         assignment[cp["id"]] = key

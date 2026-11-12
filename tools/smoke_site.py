@@ -34,23 +34,22 @@ try:
         assert page.locator("#chart").evaluate("el => el.data.some(t => t.meta && t.meta.key)")
         assert page.locator("#chart").evaluate("el => el.layout.xaxis.type") == "category"
         assert page.locator("#chart").evaluate("el => el.layout.xaxis.tickvals.includes('2026-10-18')")
-        nov12=next(i for i,cp in enumerate(data['checkpoints']) if cp['day_key']=='2026-11-12')
-        page.locator('#capture-slider').evaluate("(el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}))}",str(nov12))
-        assert page.locator("#capture-date").inner_text() == "Nov 12, 2026"
-        if data['checkpoints'][nov12]['id']=='2026-11-12_0036':
+        nov11=next(i for i,cp in enumerate(data['checkpoints']) if cp['day_key']=='2026-11-11')
+        page.locator('#capture-slider').evaluate("(el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}))}",str(nov11))
+        assert page.locator("#capture-date").inner_text() == "Nov 11, 2026"
+        assert all(cp['day_key']!='2026-11-12' for cp in data['checkpoints'] if cp['at'] <= '2026-11-12T06:36:00Z')
+        assert '2026-11-12_0036' in data['checkpoints'][nov11]['daily_source_sessions']
+        assert page.locator('.proof').count() >= 8
+        assert page.locator('.proof.earlier-proof').count() >= 4
+        if data['checkpoints'][nov11]['id']=='2026-11-12_0036':
             assert page.locator("#stat-coverage").inner_text() == "50 / 50"
-            assert page.locator(".proof").count() == 4
-            assert page.locator(".movement-item").count() == 50
+            assert page.locator(".proof").count() == 8
+            assert page.locator(".movement-item").count() >= 50  # Confirmed Top-50 exits may add entries.
             assert page.locator('#stat-floor').inner_text() == '53.8B'
-            assert page.locator('#stat-hours').inner_text() == '2h 03m'
+            assert page.locator('#stat-hours').inner_text() == '27.1h'
             ismy=next(p for p in data['players'] if p['name']=='ismyaimbotworking')
             assert 'Rainbow-equivalent' in page.locator(f'.movement-item[data-player="{ismy["key"]}"]').inner_text()
-        else:
-            assert '2026-11-12_0036' in data['checkpoints'][nov12]['daily_source_sessions']
-            assert page.locator('.proof').count() >= 4
-            page.locator('#capture-slider').evaluate("(el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}))}",str(next(i for i,cp in enumerate(data['checkpoints']) if cp['day_key']=='2026-11-11')))
-        page.locator('#capture-slider').evaluate("(el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}))}",str(nov12))
-        for image_id in ('EV0165','EV0168'):
+        for image_id in ('EV0161','EV0165','EV0168'):
             page.locator(f'.proof[data-proof="{image_id}"]').click()
             page.wait_for_function("document.querySelector('#lightbox-image').naturalWidth > 0")
             page.locator('#lightbox button').click()
@@ -64,7 +63,7 @@ try:
         cerulean=next(p for p in data['players'] if p['name']=='Ceruleanflare2')
         assert "↑13" in page.locator(f'.movement-item[data-player="{cerulean["key"]}"] .rank-move.up').inner_text()
         assert page.locator(f'.movement-item[data-player="{cerulean["key"]}"] .rank-move.up').evaluate('el => getComputedStyle(el).color') != 'rgb(255, 152, 165)'
-        page.locator('#capture-slider').evaluate("(el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}))}",str(nov12))
+        page.locator('#capture-slider').evaluate("(el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}))}",str(nov11))
         page.screenshot(path=str(ROOT / "preview-desktop.png"), full_page=True)
         page.locator("#search").fill("LowTierNova")
         page.locator("#profile-title").get_by_text("LowTierNova").wait_for()
@@ -77,8 +76,8 @@ try:
         assert page.locator("#profile-content .rainbow-static").count() > 0
         assert "player=id%3A1316700350" in page.url
         page.locator("#prev").click()
-        assert f"DAY {nov12:02d} / {total_days}" in page.locator("#capture-index").inner_text()
-        assert page.locator("#capture-date").inner_text() == "Nov 11, 2026"
+        assert f"DAY {nov11:02d} / {total_days}" in page.locator("#capture-index").inner_text()
+        assert page.locator("#capture-date").inner_text() == "Nov 10, 2026"
         page.locator(".proof").first.click()
         assert page.locator("#lightbox").evaluate("el => el.open")
         page.wait_for_function("document.querySelector('#lightbox-image').naturalWidth > 0")
