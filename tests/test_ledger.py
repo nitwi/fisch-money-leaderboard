@@ -1,3 +1,4 @@
+import hashlib
 import json
 import sys
 import unittest
@@ -33,8 +34,8 @@ class LedgerTests(unittest.TestCase):
         self.assertEqual(len(data["capture_observations"]), 50*len(data["captures"]))
         self.assertEqual(len(data["session_observations"]), 50*len(data["sessions"]))
         self.assertEqual(len(data["observations"]), 50*len(data["checkpoints"]))
-        self.assertEqual(len(data["evidence"]),sum(len(cp['evidence']) for cp in data['captures']))
-        self.assertGreaterEqual(len(data["evidence"]),172)
+        self.assertEqual(len(data["evidence"]),sum(len(cp['evidence']) for cp in data['captures'])+len(data['profile_updates']))
+        self.assertGreaterEqual(len(data["evidence"]),173)
         self.assertTrue(all(len([o for o in data["observations"] if o["checkpoint"] == cp["id"]]) == 50 for cp in data["checkpoints"]))
         proofs = {e["id"]: e for e in data["evidence"]}
         for row in data["observations"]:
@@ -165,8 +166,37 @@ class LedgerTests(unittest.TestCase):
         self.assertEqual(rows['2026-11-12_2258_R50']['balance'],'53844564474')
         self.assertEqual(by_day[50]['evidence'],['EV0172'])
         proofs={proof['id']:proof for proof in data['evidence']}
-        self.assertEqual([proofs[proof]['captured_at'] for proof in selected['evidence']],[capture['at']]*4)
+        self.assertEqual([proofs[proof]['captured_at'] for proof in selected['primary_evidence']],[capture['at']]*4)
+        self.assertEqual(selected['profile_updates'],['PU0001'])
+        self.assertEqual(selected['evidence'],capture['evidence']+['PU0001'])
         self.assertEqual((proofs['EV0172']['min'],proofs['EV0172']['max']),(48,50))
+
+    def test_apathy_profile_photo_updates_only_the_balance_and_uses_exact_photo_interval(self):
+        data=self.data
+        self.assertEqual(data['version'],4)
+        self.assertEqual(len(data['profile_updates']),1)
+        update=data['profile_updates'][0]
+        old=next(row for row in data['capture_observations'] if row['id']=='2026-11-12_2258_R02')
+        latest=next(row for row in data['observations'] if row['day_key']=='2026-11-12' and row['key']==old['key'])
+        previous=next(row for row in data['observations'] if row['day_key']=='2026-11-11' and row['key']==old['key'])
+        self.assertEqual((update['id'],update['key'],update['source_rank']),('PU0001','id:1316700350',2))
+        self.assertEqual((old['balance'],old['at']),("268545154674","2026-11-13T04:58:00Z"))
+        self.assertEqual((latest['balance'],latest['at']),('269064293664','2026-11-13T05:38:50Z'))
+        self.assertEqual((latest['board_balance'],latest['board_at']),(old['balance'],'2026-11-13T04:56:50Z'))
+        self.assertEqual((latest['rank'],latest['evidence'],latest['balance_evidence']),(2,['EV0169'],['PU0001']))
+        self.assertEqual((update['source_balance'],update['source_evidence']),('268545154674','EV0169'))
+        self.assertEqual(int(latest['balance'])-int(update['source_balance']),519_138_990)
+        self.assertEqual((datetime.fromisoformat(update['at'].replace('Z','+00:00'))-datetime.fromisoformat(update['source_at'].replace('Z','+00:00'))).total_seconds(),42*60)
+        self.assertEqual(round(519_138_990/(42/60)),741_627_129)
+        self.assertEqual(int(latest['balance'])-int(previous['balance']),1_010_878_152)
+        elapsed=(datetime.fromisoformat(latest['at'].replace('Z','+00:00'))-datetime.fromisoformat(previous['at'].replace('Z','+00:00'))).total_seconds()/3600
+        self.assertAlmostEqual(elapsed,23+2/60+50/3600)
+        self.assertEqual(round(1_010_878_152/elapsed),43_861_171)
+        self.assertEqual(next(row['balance'] for row in data['capture_observations'] if row['id']=='2026-11-12_2258_R01'),'307471340304')
+        proof=next(proof for proof in data['evidence'] if proof['id']=='PU0001')
+        self.assertEqual((proof['kind'],proof['min'],proof['max']),("profile",None,None))
+        self.assertEqual(proof['captured_at'],latest['at'])
+        self.assertEqual(hashlib.sha256((ROOT/'site'/proof['url']).read_bytes()).hexdigest(),proof['sha256'])
 
     def test_daily_import_rejects_duplicate_checkpoint_without_changing_originals(self):
         photo=ROOT/'site/evidence/screenshots/2026-11-11_2233/EV0161_Screenshot_2026-11-11_223212.png'

@@ -2,7 +2,7 @@
 const $ = (id) => document.getElementById(id);
 const safe = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]);
 const palette = ["#29f8ff","#ffd166","#c9a7ff","#61e5b3","#f990bd","#74a8ff","#ffad79","#a6e672","#ff7d91","#8cd9e0","#f8d38a","#9f9fff"];
-const state = {data:null, index:0, selected:null, view:"all", filter:"all", highlightPage:0, byCapture:new Map(), byPlayer:new Map(), playerMeta:new Map(), proofs:new Map(), chartBound:false};
+const state = {data:null, index:0, selected:null, view:"all", filter:"all", highlightPage:0, byCapture:new Map(), byPlayer:new Map(), playerMeta:new Map(), proofs:new Map(), profileUpdates:new Map(), chartBound:false};
 const byId = (id) => state.proofs.get(id);
 const compact = (amount) => {
   if (amount === null || amount === undefined) return "—";
@@ -48,11 +48,12 @@ function avatar(meta) { const url = meta.headshot; return url && /^https:\/\/[a-
 function point(cp,key) { return state.byCapture.get(cp.id)?.find((row)=>row.key===key) || null; }
 function atRank(cp,rank) { return state.byCapture.get(cp.id)?.find((row)=>row.rank===rank) || null; }
 function memberHistory(key) { return state.byPlayer.get(key) || []; }
+const boardAmount = (row) => row?.board_balance ?? row?.balance;
 function gapInfo(cp,row) {
   if (!row) return {ahead:null,behind:null};
   const ahead = atRank(cp,row.rank-1), behind = atRank(cp,row.rank+1);
-  return {ahead:ahead ? {name:ahead.username, key:ahead.key, gap:BigInt(ahead.balance)-BigInt(row.balance), tentative:!confirmed(ahead)||!confirmed(row)} : null,
-          behind:behind ? {name:behind.username, key:behind.key, gap:BigInt(row.balance)-BigInt(behind.balance), tentative:!confirmed(behind)||!confirmed(row)} : null};
+  return {ahead:ahead ? {name:ahead.username, key:ahead.key, gap:BigInt(boardAmount(ahead))-BigInt(boardAmount(row)), tentative:!confirmed(ahead)||!confirmed(row)} : null,
+          behind:behind ? {name:behind.username, key:behind.key, gap:BigInt(boardAmount(row))-BigInt(boardAmount(behind)), tentative:!confirmed(behind)||!confirmed(row)} : null};
 }
 function interval(cp,row,previous) {
   const old = previous ? point(previous,row.key) : null;
@@ -121,8 +122,8 @@ function renderChart() {
     const xs=days, ys=rows.map((row)=>row?Number(row.balance):null);
     plot.push({type:"scatter",mode:"lines+markers",name:player(key).name,x:xs,y:ys,connectgaps:false,meta:{key},
       line:{color,width:selected===key?3.5:1.5,shape:"linear"},marker:{size:rows.map(row=>row?(selected===key?8:5):0),symbol:"circle",color},
-      customdata:rows.map((row)=>row?[`#${row.rank}`,exact(row.balance),row.evidence.join(", "),labelDate(row.at)]:["unknown","unknown","","unknown"]),
-      hovertemplate:"<b>%{fullData.name}</b><br>Leaderboard day %{x}<br>Photo %{customdata[3]} (Chicago)<br>%{customdata[0]} · %{customdata[1]}<br>Proof: %{customdata[2]}<extra></extra>",showlegend:false});
+      customdata:rows.map((row)=>row?[`#${row.rank}`,exact(row.balance),(row.balance_evidence||row.evidence).join(", "),labelDate(row.at),row.board_at?`Rank pictured ${labelDate(row.board_at)} · board balance ${exact(row.board_balance)}`:"Rank and balance pictured together"]:["unknown","unknown","","unknown",""]),
+      hovertemplate:"<b>%{fullData.name}</b><br>Leaderboard day %{x}<br>Balance photo %{customdata[3]} (Chicago)<br>%{customdata[0]} · %{customdata[1]}<br>%{customdata[4]}<br>Balance proof: %{customdata[2]}<extra></extra>",showlegend:false});
     // A faint dashed bridge marks an unobserved span rather than inventing intermediate points.
     let previous=-1;
     rows.forEach((row,index)=>{if(!row)return;if(previous>=0 && index-previous>1){plot.push({type:"scatter",mode:"lines",x:[xs[previous],xs[index]],y:[ys[previous],ys[index]],line:{color:selected && selected!==key?"rgba(125,151,164,.11)":color,width:1,dash:"dot"},hoverinfo:"skip",showlegend:false});}previous=index;});
@@ -146,7 +147,7 @@ function renderMovement() {
   let filtered=rows;
   if(state.view==="gains")filtered=rows.filter(({change})=>change.delta!==null && change.delta>0n).sort((a,b)=>a.change.delta>b.change.delta?-1:a.change.delta<b.change.delta?1:0);
   if(state.view==="changes")filtered=rows.filter(({row,change})=>change.old && change.old.rank!==row.rank);
-  $("movement-subtitle").textContent=previous?`Versus ${dayLabel(previous.day_key)} (photo ${labelDate(previous.at)}) · ${cp.verified} readings`:`First recorded day · ${cp.verified} photo-checked readings`;
+  $("movement-subtitle").textContent=(previous?`Versus ${dayLabel(previous.day_key)} (photo ${labelDate(previous.at)}) · ${cp.verified} readings`:`First recorded day · ${cp.verified} photo-checked readings`)+(cp.profile_updates?.length?" · Neighbor gaps use simultaneous board values":"");
   const markup=filtered.map(({row,change})=>{
     const {old,delta,rate,currentGap,oldGap}=change;
     const rank=old?`#${old.rank} ${old.rank===row.rank?"→":old.rank>row.rank?"↗":"↘"} #${row.rank}`:`#${row.rank}`;
@@ -159,7 +160,9 @@ function renderMovement() {
     const deltaText=known?`${tentative?"≈":""}${signed(delta)} observed net C$`:"no adjacent measurement";
     const rateLine=known?(rate>0 ? `<span class="rainbow-rate">${rainbowRateHtml(rate)}</span><span class="muted">Rainbow base-equivalent ≈${signed(rainbowBase(delta))} C$ if all net change were 1.5× sales</span>` : `<span class="muted">Observed no-multiplier rate ${rateText(rate)}</span>`):"";
     const quality="Photo checked";
-    return `<button class="movement-item ${state.selected===row.key?"selected":""}" data-player="${safe(row.key)}" type="button"><div class="top"><strong>${avatar(player(row.key))}${safe(row.username)}</strong><span>${rank} ${positionChange}</span></div><p>${safe(previousText)} → <strong title="${safe(exact(row.balance))}">${tentative?"≈":""}${compact(row.balance)}</strong> · <span class="${known?(delta<0n?"negative":"positive"):"muted"}">${safe(deltaText)}</span></p>${rateLine?`<p class="rate-compare">${rateLine}</p>`:""}<p class="gaps">${nearbyLabel("↑",currentGap.ahead,oldGap.ahead)}<br>${nearbyLabel("↓",currentGap.behind,oldGap.behind)}</p><div class="badges"><span class="badge ${tentative?"gold":""}">${quality}${tentative?" · check proof":""}</span>${large?'<span class="badge gold">NOTABLE +8B</span>':""}${old?"":`<span class="badge">${previous?.complete&&confirmed(row)?"FIRST SEEN IN TOP 50":"PREVIOUS UNKNOWN"}</span>`}${cp.precision.includes("approximate")||previous?.precision?.includes("approximate")?'<span class="badge gold">TIME APPROX.</span>':""}</div></button>`;
+    const update=state.profileUpdates.get(row.profile_update);
+    const profileNote=update?`<p class="profile-update-inline">Player profile at ${safe(labelDate(update.at,{second:"2-digit"}))}: ${signed(BigInt(update.balance)-BigInt(update.source_balance))} observed net C$ since the #${update.source_rank} board photo at ${safe(labelDate(update.source_at,{second:"2-digit"}))} (${elapsedLabel(hours(update.source_at,update.at))}, no multiplier ${rateText(timeRate(BigInt(update.balance)-BigInt(update.source_balance),hours(update.source_at,update.at)))}). Rank and neighboring gaps remain from the board photo; no later rank was photographed.</p>`:"";
+    return `<button class="movement-item ${state.selected===row.key?"selected":""}" data-player="${safe(row.key)}" type="button"><div class="top"><strong>${avatar(player(row.key))}${safe(row.username)}</strong><span>${rank} ${positionChange}</span></div><p>${safe(previousText)} → <strong title="${safe(exact(row.balance))}">${tentative?"≈":""}${compact(row.balance)}</strong> · <span class="${known?(delta<0n?"negative":"positive"):"muted"}">${safe(deltaText)}</span></p>${rateLine?`<p class="rate-compare">${rateLine}</p>`:""}${profileNote}<p class="gaps">${nearbyLabel("↑",currentGap.ahead,oldGap.ahead)}<br>${nearbyLabel("↓",currentGap.behind,oldGap.behind)}</p><div class="badges"><span class="badge ${tentative?"gold":""}">${quality}${tentative?" · check proof":""}</span>${update?'<span class="badge gold">LATER PROFILE BALANCE</span>':""}${large?'<span class="badge gold">NOTABLE +8B</span>':""}${old?"":`<span class="badge">${previous?.complete&&confirmed(row)?"FIRST SEEN IN TOP 50":"PREVIOUS UNKNOWN"}</span>`}${cp.precision.includes("approximate")||previous?.precision?.includes("approximate")?'<span class="badge gold">TIME APPROX.</span>':""}</div></button>`;
   }).join("");
   const prior=previous?.complete && cp.complete && state.view!=="gains" ? (state.byCapture.get(previous.id)||[]).filter(row=>!point(cp,row.key)) : [];
   const departures=prior.map(row=>`<button class="movement-item" type="button" data-player="${safe(row.key)}"><div class="top"><strong>${avatar(player(row.key))}${safe(row.username)}</strong><span>#${row.rank} → outside Top 50</span></div><p>Last observed ${compact(row.balance)}. Current amount unknown; last captured floor ${compact(atRank(cp,50)?.balance||null)}.</p><div class="badges"><span class="badge gold">LEFT PICTURED TOP 50</span></div></button>`).join("");
@@ -181,7 +184,7 @@ function standoutRows() {
   return flags.sort((a,b)=>b.index-a.index || (a.change.delta===b.change.delta?b.climb-a.climb:a.change.delta>b.change.delta?-1:1));
 }
 function standoutProof(row,label) {
-  const proof=byId(row.evidence[0]);
+  const proof=byId((row.balance_evidence||row.evidence)[0]);
   return proof?`<a href="${safe(evidenceUrl(proof))}" target="_blank" rel="noopener noreferrer" title="Original SHA-256 ${safe(proof.sha256)}">${safe(label)} ${safe(proof.id)} ↗</a>`:"";
 }
 function renderHighlights() {
@@ -223,9 +226,13 @@ function renderProfile() {
   const checkedCount=rows.filter(confirmed).length;
   $("profile-hint").textContent=`First day ${dayLabel(first.day_key)} · latest ${dayLabel(last.day_key)} · ${checkedCount} photo-checked daily points`;
   const link=meta.roblox_id?`<a href="https://www.roblox.com/users/${safe(meta.roblox_id)}/profile" rel="noopener noreferrer" target="_blank">View Roblox profile ↗</a>`:"<small>Roblox account not yet independently matched</small>";
+  const update=state.profileUpdates.get(last.profile_update);
+  const boardDelta=update?BigInt(update.balance)-BigInt(update.source_balance):null;
+  const boardHours=update?hours(update.source_at,update.at):null;
+  const profileNote=update?`<div class="profile-update-detail"><strong>Later player-profile balance · ${safe(labelDate(update.at,{second:"2-digit"}))}</strong><p>${safe(exact(update.source_balance))} at board photo ${safe(labelDate(update.source_at,{second:"2-digit"}))} → ${safe(exact(update.balance))} · ${signed(boardDelta)} observed net C$ in ${elapsedLabel(boardHours)} (no multiplier ${rateText(timeRate(boardDelta,boardHours))}). Rank #${last.rank} remains from the earlier board photo.</p><p>${safe(update.note)}. The observed net change is not an independently verified sale amount.</p><a href="${safe(evidenceUrl(byId(update.evidence[0])))}" rel="noopener noreferrer" target="_blank">Open original player-profile proof ${safe(update.id)} ↗</a></div>`:"";
   wrapper.className="";
   const stats=[
-    ["LATEST BALANCE",compact(last.balance),`Rank #${last.rank} · photo checked`],
+    ["LATEST BALANCE",compact(last.balance),update?`Profile photo · rank #${last.rank} from earlier board`:`Rank #${last.rank} · photo checked`],
     ["NET SINCE FIRST",`${confirmed(first)&&confirmed(last)?"":"≈"}${signed(gain)}`,`${rows.length} pictured captures`],
     ["RAINBOW 1.5× BASE",gain>0n?`≈${signed(rainbowBase(gain))}`:"—",gain>0n?`(no multiplier ${signed(gain)} net C$)` : "Only positive net changes can be compared",gain>0n],
     ["RAINBOW-EQUIVALENT NET RATE",timeRate(gain,time)>0?rateText(timeRate(gain,time)/1.5):"—",`(no multiplier ${rateText(timeRate(gain,time))}) · ${time?time.toFixed(0):0}h`,timeRate(gain,time)>0],
@@ -233,6 +240,7 @@ function renderProfile() {
     ["PEAK RAINBOW-EQUIVALENT RATE",fastest?rateText(timeRate(fastest.delta,fastest.elapsed)/1.5):"—",fastest?`(no multiplier ${rateText(timeRate(fastest.delta,fastest.elapsed))}) · ${fastest.elapsed.toFixed(1)}h`:"No positive interval",Boolean(fastest)],
     ["CHANGE SINCE FIRST",BigInt(first.balance)>0n?`${(Number(gain)/Number(first.balance)*100).toFixed(1)}%`:"—","Observed balance only"]
   ];
+  if(update)stats.splice(1,0,["SINCE BOARD PHOTO",signed(boardDelta),`${elapsedLabel(boardHours)} · no multiplier ${rateText(timeRate(boardDelta,boardHours))}`]);
   const historyRows=rows.slice().reverse().map((row)=>{
     const ix=state.data.checkpoints.findIndex(cp=>cp.id===row.checkpoint);
     const old=ix>0?point(state.data.checkpoints[ix-1],key):null;
@@ -241,19 +249,30 @@ function renderProfile() {
     const rate=change===null?null:timeRate(change,elapsed);
     const rankChange=old?old.rank>row.rank?`<b class="rank-move up">↑${old.rank-row.rank}</b>`:old.rank<row.rank?`<b class="rank-move down">↓${row.rank-old.rank}</b>`:`<b class="rank-move steady">→0</b>`:"";
     const photoTime=localDay(row.at)===row.day_key?new Intl.DateTimeFormat("en-US",{timeZone:"America/Chicago",hour:"numeric",minute:"2-digit"}).format(new Date(row.at)):labelDate(row.at);
-    return `<a href="#evidence" data-capture="${ix}" data-proof="${safe(row.evidence[0]||"")}"><span>${safe(dayLabel(row.day_key))} · photo ${safe(photoTime)} · #${row.rank} ${rankChange}</span><strong title="${safe(exact(row.balance))}">${compact(row.balance)}</strong><span>${change!==null?`${signed(change)} · ${rate>0?rainbowRateHtml(rate):rateText(rate)}`:"—"} ↗</span></a>`;
+    return `<a href="#evidence" data-capture="${ix}" data-proof="${safe((row.balance_evidence||row.evidence)[0]||"")}"><span>${safe(dayLabel(row.day_key))} · photo ${safe(photoTime)} · #${row.rank} ${rankChange}${row.board_at?` · rank photo ${safe(labelDate(row.board_at))}`:""}</span><strong title="${safe(exact(row.balance))}">${compact(row.balance)}</strong><span>${change!==null?`${signed(change)} · ${rate>0?rainbowRateHtml(rate):rateText(rate)}`:"—"} ↗</span></a>`;
   }).join("");
-  wrapper.innerHTML=`<div class="profile-head">${avatar(meta)||'<span class="avatar-fallback">@</span>'}<div><strong>${safe(meta.name)}</strong><small>${meta.roblox_name&&meta.roblox_name!==meta.name?`Current Roblox name: ${safe(meta.roblox_name)}`:"Historical screenshot name"}</small>${link}</div></div><div class="profile-stats">${stats.map(([title,value,detail,rainbow])=>`<div><span>${safe(title)}</span><b class="${rainbow?"rainbow-static":""}" title="${safe(value)}">${safe(value)}</b><small>${safe(detail)}</small></div>`).join("")}</div><p class="card-title"><small>Peak pictured ${compact(peak.balance)} · ${BigInt(peak.balance)-BigInt(last.balance)>0n?`${compact(BigInt(peak.balance)-BigInt(last.balance))} below peak`:"at peak"}. Rainbow 1.5× figures are hypothetical base equivalents if all positive net balance change came from boosted sales. Spending, stored fish, and other changes cannot be inferred from the board.</small></p><div class="profile-history">${historyRows}</div>`;
+  wrapper.innerHTML=`<div class="profile-head">${avatar(meta)||'<span class="avatar-fallback">@</span>'}<div><strong>${safe(meta.name)}</strong><small>${meta.roblox_name&&meta.roblox_name!==meta.name?`Current Roblox name: ${safe(meta.roblox_name)}`:"Historical screenshot name"}</small>${link}</div></div>${profileNote}<div class="profile-stats">${stats.map(([title,value,detail,rainbow])=>`<div><span>${safe(title)}</span><b class="${rainbow?"rainbow-static":""}" title="${safe(value)}">${safe(value)}</b><small>${safe(detail)}</small></div>`).join("")}</div><p class="card-title"><small>Peak pictured ${compact(peak.balance)} · ${BigInt(peak.balance)-BigInt(last.balance)>0n?`${compact(BigInt(peak.balance)-BigInt(last.balance))} below peak`:"at peak"}. Rainbow 1.5× figures are hypothetical base equivalents if all positive net balance change came from boosted sales. Spending, stored fish, and other changes cannot be inferred from the board.</small></p><div class="profile-history">${historyRows}</div>`;
   wrapper.querySelectorAll("[data-capture]").forEach((el)=>el.addEventListener("click",(event)=>{event.preventDefault();moveTo(Number(el.dataset.capture));document.querySelector(".evidence-section").scrollIntoView({behavior:"smooth"});spotlight(el.dataset.proof);}));
 }
 function spotlight(id){document.querySelectorAll(".proof").forEach((el)=>el.classList.toggle("spotlit",el.dataset.proof===id));}
 function renderEvidence() {
   const cp=state.data.checkpoints[state.index];
   $("evidence-count").textContent=`${cp.evidence.length} ORIGINAL PNG${cp.evidence.length===1?"":"S"}`;
-  $("evidence-subtitle").textContent=`Leaderboard day ${dayLabel(cp.day_key)} · selected photo ${labelDate(cp.at)}${cp.early_am_rollover?" (early AM, counted for preceding day)":""}${cp.earlier_session_ids.length?` · ${cp.earlier_session_ids.length} earlier capture kept for context`:""}${cp.source_checkpoints.length>1?` · ${cp.source_checkpoints.length} matching photo batches`:""}`;
-  $("evidence-grid").innerHTML=cp.evidence.map((id)=>{const item=byId(id);if(!item)return"";const selected=cp.primary_evidence.includes(id);return `<button type="button" class="proof ${selected?"":"earlier-proof"}" data-proof="${safe(item.id)}"><img src="${safe(evidenceUrl(item))}" loading="lazy" alt="Original evidence ${safe(id)}, leaderboard ranks ${item.min} to ${item.max}"><span>${safe(id)} · rank ${item.min}–${item.max}</span><small>${selected?"Selected daily point":"Earlier context · not used for daily balance"} · ${safe(labelDate(item.captured_at))} · SHA-256 ${safe(item.sha256.slice(0,12))}…</small></button>`;}).join("");
-  $("evidence-grid").querySelectorAll(".proof").forEach((el)=>el.addEventListener("click",()=>{const item=byId(el.dataset.proof);if(!item)return;$("lightbox-image").src=evidenceUrl(item);$("lightbox-caption").textContent=`${cp.primary_evidence.includes(item.id)?"Selected daily point":"Earlier capture (not used for daily balance)"} · ${item.id} · ${labelDate(item.captured_at)} · ranks ${item.min}–${item.max} · original SHA-256 ${item.sha256}`;$("lightbox").showModal();}));
-  if(state.selected){const row=point(cp,state.selected);if(row)spotlight(row.evidence[0]);}
+  $("evidence-subtitle").textContent=`Leaderboard day ${dayLabel(cp.day_key)} · board photo ${labelDate(cp.at)}${cp.early_am_rollover?" (early AM, counted for preceding day)":""}${cp.earlier_session_ids.length?` · ${cp.earlier_session_ids.length} earlier capture kept for context`:""}${cp.source_checkpoints.length>1?` · ${cp.source_checkpoints.length} matching photo batches`:""}${cp.profile_updates?.length?` · ${cp.profile_updates.length} separate player-profile balance reading`:""}`;
+  $("evidence-grid").innerHTML=cp.evidence.map((id)=>{
+    const item=byId(id);if(!item)return"";
+    const profile=item.kind==="profile", selected=cp.primary_evidence.includes(id);
+    const label=profile?`Player profile balance · ${safe(item.username)} (not a new rank)`:`rank ${item.min}–${item.max}`;
+    const context=profile?"Later balance for one player; leaderboard ranks from board photo":selected?"Selected daily board photo":"Earlier context · not used for daily balance";
+    return `<button type="button" class="proof ${profile?"profile-proof":selected?"":"earlier-proof"}" data-proof="${safe(item.id)}"><img src="${safe(evidenceUrl(item))}" loading="lazy" alt="Original ${profile?"player profile":"leaderboard"} evidence ${safe(id)}"><span>${safe(id)} · ${label}</span><small>${context} · ${safe(labelDate(item.captured_at))} · SHA-256 ${safe(item.sha256.slice(0,12))}…</small></button>`;
+  }).join("");
+  $("evidence-grid").querySelectorAll(".proof").forEach((el)=>el.addEventListener("click",()=>{
+    const item=byId(el.dataset.proof);if(!item)return;
+    $("lightbox-image").src=evidenceUrl(item);
+    $("lightbox-caption").textContent=`${item.kind==="profile"?`Player profile balance for ${item.username}; not a new board rank`:cp.primary_evidence.includes(item.id)?"Selected daily board photo":"Earlier capture (not used for daily balance)"} · ${item.id} · ${labelDate(item.captured_at)}${item.kind==="profile"?"":` · ranks ${item.min}–${item.max}`} · original SHA-256 ${item.sha256}`;
+    $("lightbox").showModal();
+  }));
+  if(state.selected){const row=point(cp,state.selected);if(row)spotlight((row.balance_evidence||row.evidence)[0]);}
 }
 function render(){renderControls();renderHighlights();renderChart();renderMovement();renderProfile();renderEvidence();}
 async function init(){
@@ -262,11 +281,12 @@ async function init(){
     const data=await response.json();state.data=data;
     const pictured=data.captures.reduce((sum,cp)=>sum+cp.coverage,0);
     const confirmed=data.captures.reduce((sum,cp)=>sum+cp.verified,0);
-    $("global-review-note").textContent=`${data.checkpoints.length} daily points (latest photo per leaderboard day) from ${data.sessions.length} sessions and ${data.captures.length} original captures. ${confirmed.toLocaleString()} of ${pictured.toLocaleString()} photographed readings were checked directly against original images; ${pictured-confirmed} cropped readings remain unknown, and ${data.capture_status_counts.not_captured} raw rank slots were not pictured. Photo times and SHA-256 proofs are retained. Rainbow 1.5× figures are hypothetical base equivalents, not confirmed sales.`;
+    $("global-review-note").textContent=`${data.checkpoints.length} daily points (latest photo per leaderboard day) from ${data.sessions.length} sessions and ${data.captures.length} original board captures, plus ${data.profile_updates.length} separate player-profile balance update${data.profile_updates.length===1?"":"s"}. ${confirmed.toLocaleString()} of ${pictured.toLocaleString()} board readings were checked directly against original images; ${pictured-confirmed} cropped readings remain unknown, and ${data.capture_status_counts.not_captured} raw rank slots were not pictured. Photo times and SHA-256 proofs are retained. Rainbow 1.5× figures are hypothetical base equivalents, not confirmed sales.`;
     data.checkpoints.forEach(cp=>state.byCapture.set(cp.id,[]));
     data.observations.filter(row=>row.status==="verified").forEach(row=>{state.byCapture.get(row.checkpoint).push(row);if(!state.byPlayer.has(row.key))state.byPlayer.set(row.key,[]);state.byPlayer.get(row.key).push(row);});
     data.players.forEach(meta=>state.playerMeta.set(meta.key,meta));
     data.evidence.forEach(proof=>state.proofs.set(proof.id,proof));
+    data.profile_updates.forEach(update=>state.profileUpdates.set(update.id,update));
     for(const [key,rows] of state.byPlayer)rows.sort((a,b)=>new Date(data.checkpoints.find(cp=>cp.id===a.checkpoint).at)-new Date(data.checkpoints.find(cp=>cp.id===b.checkpoint).at));
     const url=new URL(location.href), requestedDay=url.searchParams.get("day"), requestedIndex=data.checkpoints.findIndex(cp=>cp.day_key===requestedDay);
     state.index=requestedIndex>=0?requestedIndex:data.checkpoints.length-1;

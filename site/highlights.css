@@ -23,4 +23,10 @@
 .highlight-pages[hidden]{display:none}
 .highlight-pages button{padding:8px 12px;border:1px solid var(--border);border-radius:9px;background:var(--panel2);color:var(--text)}
 .highlight-pages button:disabled{opacity:.4;cursor:default}
+.profile-update-inline{padding:9px;border-left:2px solid var(--gold);background:rgba(255,209,102,.07);color:var(--text);font-size:12px;line-height:1.5}
+.profile-update-detail{margin:16px 0;padding:14px;border:1px solid rgba(255,209,102,.35);border-radius:10px;background:rgba(255,209,102,.07);font-size:12px;line-height:1.6}
+.profile-update-detail strong{color:var(--gold)}
+.profile-update-detail p{color:var(--text);margin:6px 0}
+.profile-update-detail a{color:var(--cyan);text-decoration:underline;text-underline-offset:3px}
+.proof.profile-proof{border-color:rgba(255,209,102,.65)}
 @media(max-width:600px){.highlights-section{padding:18px}.highlights-header{align-items:start}.highlights-header .count-pill{white-space:nowrap}.highlight-head{gap:10px}}

@@ -34,13 +34,31 @@ try:
             assert page.locator('#capture-date').inner_text() == 'Nov 12, 2026'
             assert page.locator('#stat-hours').inner_text() == '22.4h'
             assert page.locator('#stat-floor').inner_text() == '53.8B'
-            assert page.locator('.proof').count() == 4
+            assert page.locator('.proof').count() == 5
             assert page.locator('.proof.earlier-proof').count() == 0
+            assert page.locator('.proof.profile-proof[data-proof="PU0001"]').count() == 1
             assert page.locator('.movement-item').count() >= 50
-            for image_id in ('EV0169','EV0172'):
+            for image_id in ('EV0169','EV0172','PU0001'):
                 page.locator(f'.proof[data-proof="{image_id}"]').click()
                 page.wait_for_function("document.querySelector('#lightbox-image').naturalWidth > 0")
+                if image_id=='PU0001':
+                    assert 'not a new board rank' in page.locator('#lightbox-caption').inner_text()
                 page.locator('#lightbox button').click()
+            apathy=page.locator('.movement-item[data-player="id:1316700350"]')
+            assert '269B' in apathy.inner_text()
+            assert '0h 42m' in apathy.inner_text()
+            assert 'no multiplier +43.8M/hr' in apathy.inner_text()
+            assert 'no multiplier +741.6M/hr' in apathy.inner_text()
+            assert 'no later rank was photographed' in apathy.inner_text()
+            assert '73.6B' in apathy.locator('.gaps').inner_text()  # Simultaneous board gap, not the later profile balance.
+            apathy.click()
+            assert '269,064,293,664 C$' in page.locator('.profile-update-detail').inner_text()
+            assert '+519.1M' in page.locator('.profile-update-detail').inner_text()
+            assert '0h 42m' in page.locator('.profile-update-detail').inner_text()
+            assert 'PU0001' in page.locator('.profile-update-detail a').inner_text()
+            assert 'PU0001' in page.locator('.profile-history a').first.get_attribute('data-proof')
+            page.screenshot(path=str(ROOT/'preview-apathy-desktop.png'),full_page=True)
+            page.locator('#profile-clear').click()
             page.locator('#prev').click()
             assert page.locator('#capture-date').inner_text() == 'Nov 11, 2026'
             assert page.locator('.proof').count() == 8
@@ -49,6 +67,7 @@ try:
         assert page.locator("#chart").evaluate("el => el.data.some(t => t.meta && t.meta.key)")
         assert page.locator("#chart").evaluate("el => el.layout.xaxis.type") == "category"
         assert page.locator("#chart").evaluate("el => el.layout.xaxis.tickvals.includes('2026-10-18')")
+        assert page.locator('#chart').evaluate("el => {const line=el.data.find(trace=>trace.meta?.key==='id:1316700350');return line.y[line.x.indexOf('2026-11-12')];}")==269064293664
         standouts=page.evaluate("standoutRows().map(item=>({day:item.cp.day_key,name:item.row.username,gain:item.change.delta.toString(),climb:item.climb}))")
         assert len(standouts)>8, "The archive-wide feed should paginate beyond its first eight flags"
         assert any(item['day']=='2026-11-12' and item['name']=='Ceruleanflare2' and item['gain']=='26027711662' and item['climb']==6 for item in standouts)

@@ -12,9 +12,10 @@ import hashlib
 import json
 import shutil
 from collections import Counter, defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from daily import select_daily
+from import_profile_update import photo_time
 from sessions import group_sessions
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -39,6 +40,72 @@ def checked_amount(value):
     if number < 0 or number > 9_223_372_036_854_775_807:
         raise ValueError("Balance is outside supported integer range")
     return str(number)
+
+
+def add_profile_updates(site, manifest, evidence, raw_captures, capture_rows, sessions, daily, daily_rows, assignment, identities):
+    """Add a later single-player balance without rewriting the full-board source."""
+    path=ROOT/'data/profile_updates.csv'
+    updates=rows(path) if path.exists() else []
+    proofs={item['evidence_id']:item for item in manifest}
+    source_checkpoints={cp['id']:cp for cp in raw_captures}
+    captures={(row['checkpoint'],row['rank']):row for row in capture_rows}
+    days={cp['day_key']:cp for cp in daily}
+    raw_days={source_id:assignment[session['id']] for session in sessions for source_id in session['source_checkpoints']}
+    by_day={(row['day_key'],row['key']):row for row in daily_rows if row['status']=='verified'}
+    seen_ids=set()
+    published=[]
+    for item in updates:
+        key=item['id']
+        if key in seen_ids or key in evidence:raise ValueError(f'Duplicate profile proof {key}')
+        seen_ids.add(key)
+        source=captures.get((item['source_checkpoint'],int(item['source_rank'])))
+        manifest_row=proofs.get(item['source_evidence'])
+        identity=identities.get(item['username'].casefold(),{})
+        account=f"id:{item['roblox_id']}"
+        if (not source or source['status']!='verified' or source['key']!=account
+                or item['source_evidence'] not in source['evidence']
+                or not manifest_row or manifest_row['checkpoint_id']!=source['checkpoint']
+                or identity.get('id')!=int(item['roblox_id'])):
+            raise ValueError(f'Profile update has no matching photo-verified board account: {key}')
+        if item['day_key'] not in days or raw_days.get(source['checkpoint'])!=item['day_key']:
+            raise ValueError(f'Profile update belongs to a different daily cycle: {key}')
+        source_time=photo_time(manifest_row['original_filename'])
+        if source_time!=item['source_at_local']:
+            raise ValueError(f'Profile update source photo time mismatch: {key}')
+        source_at=datetime.fromisoformat(source_time)
+        session_at=datetime.fromisoformat(source_checkpoints[source['checkpoint']]['at'].replace('Z','+00:00'))
+        if not timedelta(0)<=session_at-source_at<=timedelta(minutes=5):
+            raise ValueError(f'Profile update source photo is outside its session: {key}')
+        captured=datetime.fromisoformat(item['captured_at_local'])
+        original_name=Path(item['image_path']).name.removeprefix(key+'_').replace('_',' ')
+        if photo_time(original_name)!=item['captured_at_local']:
+            raise ValueError(f'Profile proof filename and photo time disagree: {key}')
+        if captured<=source_at:raise ValueError(f'Profile balance predates the pictured board amount: {key}')
+        digest=hashlib.sha256(safe_path(site,'evidence/'+item['image_path']).read_bytes()).hexdigest()
+        if digest!=item['sha256']:raise ValueError(f'Profile original SHA-256 mismatch: {key}')
+        amount=checked_amount(item['balance_c'])
+        at=captured.astimezone(timezone.utc).isoformat().replace('+00:00','Z')
+        evidence[key]={'id':key,'checkpoint':source['checkpoint'],'kind':'profile','username':item['username'],
+                       'captured_at':at,'url':'evidence/'+item['image_path'].replace('\\','/'),'sha256':digest,
+                       'min':None,'max':None}
+        update={'id':key,'day_key':item['day_key'],'key':account,'username':item['username'],
+                'balance':amount,'at':at,'evidence':[key],'source_checkpoint':source['checkpoint'],
+                'source_rank':source['rank'],'source_evidence':item['source_evidence'],
+                'source_at':source_at.astimezone(timezone.utc).isoformat().replace('+00:00','Z'),
+                'source_balance':source['balance'],'note':item['note']}
+        published.append(update)
+        cp=days[item['day_key']]
+        cp['evidence'].append(key)
+        cp.setdefault('profile_updates',[]).append(key)
+    for update in sorted(published,key=lambda item:item['at']):
+        current=by_day.get((update['day_key'],update['key']))
+        if current and datetime.fromisoformat(update['at'].replace('Z','+00:00'))>datetime.fromisoformat(current['at'].replace('Z','+00:00')):
+            if 'board_balance' not in current:
+                current['board_balance']=current['balance']
+                current['board_at']=update['source_at'] if current['checkpoint']==update['source_checkpoint'] else current['at']
+            current.update(balance=update['balance'],at=update['at'],balance_evidence=update['evidence'],
+                           profile_update=update['id'],source_at=update['source_at'],source_balance=update['source_balance'])
+    return published
 
 
 def build(source, copy_images=True):
@@ -178,6 +245,8 @@ def build(source, copy_images=True):
         raise ValueError("Capture timestamps must be unique")
     sessions, session_observations, session_stats = group_sessions(sorted_cps, observations)
     daily, daily_observations, daily_stats, assignment = select_daily(sessions, session_observations, sorted_cps)
+    profile_updates=add_profile_updates(site, ev_rows, evidence, sorted_cps, observations, sessions, daily,
+                                        daily_observations, assignment, identities)
 
     people = {}
     people_ident = {}
@@ -198,11 +267,11 @@ def build(source, copy_images=True):
 
     selected_sessions = {cp["id"] for cp in daily}
     archived_sessions = [{**cp, "day_key": assignment[cp["id"]], "used_as_daily": cp["id"] in selected_sessions} for cp in sessions]
-    payload = {"version": 3, "timezone": "America/Chicago", "threshold": "8000000000",
+    payload = {"version": 4, "timezone": "America/Chicago", "threshold": "8000000000",
                "checkpoints": daily, "observations": daily_observations,
                "sessions": archived_sessions, "session_observations": session_observations,
                "captures": sorted_cps, "capture_observations": observations,
-               "evidence": list(evidence.values()), "players": players,
+               "evidence": list(evidence.values()), "players": players, "profile_updates": profile_updates,
                "status_counts": daily_stats, "session_status_counts": session_stats,
                "capture_status_counts": dict(statuses), "session_day_assignment": assignment}
     site.mkdir(exist_ok=True)
@@ -213,6 +282,7 @@ def build(source, copy_images=True):
         for name in ("checkpoints.csv", "evidence_manifest.csv"):
             shutil.copyfile(source / "data" / name, baseline / name)
     print(json.dumps({"captures": len(sorted_cps), "sessions": len(sessions), "daily_snapshots": len(daily), "images": len(evidence),
+                       "profile_updates":len(profile_updates),
                       "capture_rank_slots": len(observations), "session_rank_slots": len(session_observations),
                       "daily_rank_slots": len(daily_observations), "capture_verified": statuses["verified"],
                       "session_verified": session_stats.get('verified',0), "daily_verified": daily_stats.get('verified',0),
