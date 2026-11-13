@@ -30,6 +30,21 @@ try:
         assert page.locator("#capture-date").inner_text() == page.evaluate("dayLabel(state.data.checkpoints.at(-1).day_key)")
         assert page.locator("#stat-coverage").inner_text() == f"{last['verified']} / {last['coverage']}"
         assert page.locator(".proof").count() == len(last['evidence'])
+        if last['id']=='2026-11-12_2258':
+            assert page.locator('#capture-date').inner_text() == 'Nov 12, 2026'
+            assert page.locator('#stat-hours').inner_text() == '22.4h'
+            assert page.locator('#stat-floor').inner_text() == '53.8B'
+            assert page.locator('.proof').count() == 4
+            assert page.locator('.proof.earlier-proof').count() == 0
+            assert page.locator('.movement-item').count() >= 50
+            for image_id in ('EV0169','EV0172'):
+                page.locator(f'.proof[data-proof="{image_id}"]').click()
+                page.wait_for_function("document.querySelector('#lightbox-image').naturalWidth > 0")
+                page.locator('#lightbox button').click()
+            page.locator('#prev').click()
+            assert page.locator('#capture-date').inner_text() == 'Nov 11, 2026'
+            assert page.locator('.proof').count() == 8
+            page.locator('#next').click()
         page.locator("#chart.js-plotly-plot").wait_for(timeout=20000)
         assert page.locator("#chart").evaluate("el => el.data.some(t => t.meta && t.meta.key)")
         assert page.locator("#chart").evaluate("el => el.layout.xaxis.type") == "category"

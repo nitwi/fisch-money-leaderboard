@@ -110,3 +110,7 @@ EV0165,1-16,Read updated November 12 early-AM top-band screenshot from original 
 EV0166,17-32,Read updated November 12 early-AM middle-band screenshot from original at 00:36
 EV0167,33-48,Read updated November 12 early-AM lower-band screenshot from original at 00:36
 EV0168,49-50,Read updated November 12 early-AM bottom-band screenshot from original at 00:36
+EV0169,1-16,Read all sixteen November 12 evening top-board names and exact balances from original 22:56 screenshot
+EV0170,17-32,Read all sixteen November 12 evening middle-board names and exact balances from original 22:57 screenshot
+EV0171,33-48,Read all sixteen November 12 evening lower-board names and exact balances from original 22:58 screenshot
+EV0172,48-50,Read November 12 evening bottom ranks from original 22:58 screenshot; rank 48 also corroborates lower-board image
