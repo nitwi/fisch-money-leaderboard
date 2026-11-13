@@ -68,37 +68,131 @@ try:
         assert page.locator("#chart").evaluate("el => el.layout.xaxis.type") == "category"
         assert page.locator("#chart").evaluate("el => el.layout.xaxis.tickvals.includes('2026-10-18')")
         assert page.locator('#chart').evaluate("el => {const line=el.data.find(trace=>trace.meta?.key==='id:1316700350');return line.y[line.x.indexOf('2026-11-12')];}")==269064293664
+        assert [event['day_key'] for event in data['checkpoints'] if event['day_key'] in ('2026-10-31','2026-11-07')]==['2026-10-31','2026-11-07']
+        assert page.evaluate("patchEvents.map(event=>[event.day,localDay(event.at)])")==[['2026-10-31','2026-10-31'],['2026-11-07','2026-11-07']]
+        assert set(page.locator('#chart').evaluate('el=>el.layout.annotations.map(event=>event.text)'))=={'v2.08','v2.09.1'}
+        assert page.locator('.event-card').count()==2
+        assert 'https://fischipedia.org/wiki/2.08#2.08.0'==page.locator('.event-card[data-event="venue-encore"] a').first.get_attribute('href')
+        assert 'https://fischipedia.org/wiki/2.09#2.09.1'==page.locator('.event-card[data-event="stellarwave-change"] a').first.get_attribute('href')
+        assert 'Oct 31, 2026, 11:00 AM' in page.locator('.event-card[data-event="venue-encore"]').inner_text()
+        assert 'Nov 7, 2026, 8:34 PM' in page.locator('.event-card[data-event="stellarwave-change"]').inner_text()
+        assert page.locator('.event-card[data-event="stellarwave-change"] a').nth(1).get_attribute('href')=='https://fischipedia.org/wiki/File:Stellarwave_Melody.png'
+        page.locator('.event-card[data-event="stellarwave-change"] .event-jump').click()
+        assert page.locator('#capture-date').inner_text()=='Nov 7, 2026'
+        page.locator('.event-card[data-event="venue-encore"] .event-jump').click()
+        assert page.locator('#capture-date').inner_text()=='Oct 31, 2026'
+        assert page.locator('#profile-range').is_hidden()
+        page.locator('#search').fill('ismyaimbotworking')
+        assert page.locator('#profile-range').is_visible()
+        assert page.locator('#range-start').input_value()=='2026-10-10'
+        assert page.locator('#range-end').input_value()=='2026-11-12'
+        full_rate=page.locator('.profile-stats > div').filter(has_text='AVERAGE OBSERVED NET RATE').locator('b').inner_text()
+        page.locator('#range-start').fill('2026-11-07')
+        assert page.locator('#range-start').input_value()=='2026-11-07'
+        assert 'from=2026-11-07' in page.url and 'to=2026-11-12' in page.url
+        assert page.locator('.profile-history a').count()==6
+        assert '6 pictured readings' in page.locator('#range-summary').inner_text()
+        recent_rate=page.locator('.profile-stats > div').filter(has_text='AVERAGE OBSERVED NET RATE').locator('b').inner_text()
+        assert recent_rate!=full_rate
+        selected_rows=[row for row in data['observations'] if row['key']=='id:1316700350' and '2026-11-07'<=row['day_key']<='2026-11-12']
+        from datetime import datetime
+        expected=(int(selected_rows[-1]['balance'])-int(selected_rows[0]['balance']))/((datetime.fromisoformat(selected_rows[-1]['at'].replace('Z','+00:00'))-datetime.fromisoformat(selected_rows[0]['at'].replace('Z','+00:00'))).total_seconds()/3600)
+        actual=page.evaluate("(()=>{const r=rangedHistory('id:1316700350');return timeRate(BigInt(r.at(-1).balance)-BigInt(r[0].balance),hours(r[0].at,r.at(-1).at))})()")
+        assert abs(actual-expected)<1
+        assert page.locator('#chart').evaluate("el=>el.layout.xaxis.tickvals.includes('2026-11-07') && !el.layout.xaxis.tickvals.includes('2026-10-31')")
+        page.locator('#range-start').fill('2026-11-12')
+        assert page.locator('.profile-history a').count()==1
+        assert page.locator('.profile-stats > div').filter(has_text='AVERAGE OBSERVED NET RATE').locator('b').inner_text()=='—'
+        assert 'two are required' in page.locator('#range-summary').inner_text()
+        page.locator('#range-start').fill('2026-10-18')
+        page.locator('#range-end').fill('2026-10-18')
+        assert 'No photo-checked' in page.locator('#profile-content').inner_text()
+        page.locator('#range-all').click()
+        page.locator('#chart.js-plotly-plot').wait_for(timeout=20000)
+        assert page.locator('#profile-range').is_visible() and page.locator('.profile-history a').count()>1
+        page.locator('#range-week').click()
+        assert page.locator('#range-start').input_value()=='2026-11-06'
+        page.reload(wait_until='domcontentloaded')
+        page.locator('#profile-title').get_by_text('ismyaimbotworking').wait_for(timeout=20000)
+        assert page.locator('#range-start').input_value()=='2026-11-06'
+        assert page.locator('#range-end').input_value()=='2026-11-12'
+        page.locator('#clear').click()
+        assert page.locator('#profile-range').is_hidden()
+        assert 'from=' not in page.url and 'to=' not in page.url
+        assert page.locator('.highlight-card').count()==0
+        assert page.locator('.standout-teaser').is_visible()
         standouts=page.evaluate("standoutRows().map(item=>({day:item.cp.day_key,name:item.row.username,gain:item.change.delta.toString(),climb:item.climb}))")
         assert len(standouts)>8, "The archive-wide feed should paginate beyond its first eight flags"
         assert any(item['day']=='2026-11-12' and item['name']=='Ceruleanflare2' and item['gain']=='26027711662' and item['climb']==6 for item in standouts)
         assert any(item['day']=='2026-11-10' and item['name']=='Ceruleanflare2' for item in standouts)
+        repeated=page.evaluate("standoutRows().filter(item=>item.row.username==='Ceruleanflare2' && item.repeatWith).map(item=>[item.cp.day_key,item.severity,item.repeatWith.cp.day_key,Math.round(Math.abs(hours(item.repeatWith.row.at,item.row.at))*10)/10])")
+        assert ['2026-11-12','extreme','2026-11-10',49.5] in repeated
+        assert ['2026-11-10','extreme','2026-11-12',49.5] in repeated
         assert page.evaluate("standoutRows().some(item=>!item.bigGain && item.climb>=5)")
+        assert page.evaluate("standoutRows().some(item=>item.severity==='notable') && standoutRows().some(item=>item.severity==='high')")
         assert page.evaluate("standoutRows().every(item=>item.row.status==='verified' && item.change.old.status==='verified' && item.row.evidence.length && item.change.old.evidence.length && state.data.checkpoints[item.index-1].id===item.change.old.checkpoint)")
-        assert page.locator('#highlight-count').inner_text()==f'{len(standouts)} FLAGS'
-        assert page.locator('.highlight-card').count()==8
-        assert page.locator('#highlight-pages').is_visible()
-        assert page.locator('#highlight-list').evaluate('el=>getComputedStyle(el).display')=='grid'
+        assert f'{len(standouts)} pictured changes' in page.locator('#standout-teaser-summary').inner_text()
+        analysis=browser.new_page(viewport={'width':1300,'height':930})
+        analysis.on('pageerror',lambda error: errors.append(str(error)))
+        analysis.goto(f'http://127.0.0.1:{server.server_address[1]}/standouts.html',wait_until='domcontentloaded')
+        analysis.locator('#highlight-count').get_by_text(f'{len(standouts)} FLAGS').wait_for(timeout=20000)
+        assert analysis.locator('.highlight-card').count()==8 and analysis.locator('#highlight-pages').is_visible()
+        assert analysis.locator('#highlight-list').evaluate('el=>getComputedStyle(el).display')=='grid'
+        assert analysis.locator('.standout-layout').evaluate('el=>{const [left,right]=el.children;const ratio=left.getBoundingClientRect().width/right.getBoundingClientRect().width;return ratio>1.8&&ratio<2.2}')
+        assert 'Ceruleanflare2' in analysis.locator('#overview-content').inner_text()
+        assert '26,027,711,662' in analysis.locator('#overview-content').inner_text()
+        assert 'EV0166' in analysis.locator('#overview-content').inner_text() and 'EV0169' in analysis.locator('#overview-content').inner_text()
+        assert 'two' not in analysis.locator('#overview-rate').inner_text().lower()
+        analysis.locator('#overview-start').fill('2026-11-10')
+        assert 'from=2026-11-10' in analysis.url and 'to=2026-11-12' in analysis.url
+        assert '3 photographed points' in analysis.locator('#overview-rate').inner_text()
+        analysis.locator('#overview-start').fill('2026-11-12')
+        assert 'Two are needed' in analysis.locator('#overview-rate').inner_text()
+        analysis.locator('#overview-all').click()
+        assert 'from=' not in analysis.url
+        analysis.locator('#flag-severity').select_option('extreme')
+        assert 0<analysis.locator('.highlight-card').count()<=8
+        assert analysis.locator('.highlight-card').evaluate_all("els=>els.every(el=>el.dataset.severity==='extreme')")
+        analysis.locator('#flag-severity').select_option('all')
+        analysis.locator('#flag-search').fill('Ceruleanflare2')
+        assert 2<=analysis.locator('.highlight-card').count()<8
+        analysis.locator('#flag-search').fill('')
+        assert analysis.locator('#highlight-count').inner_text()==f'{len(standouts)} FLAGS'
         cerulean=next(p for p in data['players'] if p['name']=='Ceruleanflare2')
         latest_flag=f'.highlight-card[data-highlight-day="2026-11-12"][data-highlight-player="{cerulean["key"]}"]'
         for _ in range((len(standouts)+7)//8):
-            if page.locator(latest_flag).count():break
-            page.locator('#highlight-next').click()
-        assert page.locator(latest_flag).count()==1
-        assert '+26B' in page.locator(latest_flag).inner_text()
-        assert '↑6 ranks' in page.locator(latest_flag).inner_text()
-        assert 'EV0166' in page.locator(f'{latest_flag} .highlight-proof-links').inner_text()
-        assert 'EV0169' in page.locator(f'{latest_flag} .highlight-proof-links').inner_text()
-        assert page.locator(f'{latest_flag} .highlight-proof-links a').evaluate_all("els=>els.length===2 && els.every(el=>el.href.includes('/evidence/screenshots/') && el.title.includes('SHA-256'))")
+            if analysis.locator(latest_flag).count():break
+            analysis.locator('#highlight-next').click()
+        assert analysis.locator(latest_flag).count()==1
+        assert analysis.locator(latest_flag).get_attribute('data-severity')=='extreme'
+        assert '+26B' in analysis.locator(latest_flag).inner_text()
+        assert '↑6 ranks' in analysis.locator(latest_flag).inner_text()
+        assert 'Two ≥20B observed net changes' in analysis.locator(latest_flag).inner_text()
+        assert '49.5h between later photos' in analysis.locator(latest_flag).inner_text()
+        assert '255, 132, 149' in analysis.locator(latest_flag).evaluate('el=>getComputedStyle(el).borderColor')
+        assert 'EV0166' in analysis.locator(f'{latest_flag} .highlight-proof-links').inner_text()
+        assert 'EV0169' in analysis.locator(f'{latest_flag} .highlight-proof-links').inner_text()
+        assert analysis.locator(f'{latest_flag} .highlight-proof-links a').evaluate_all("els=>els.length===2 && els.every(el=>el.href.includes('/evidence/screenshots/') && el.title.includes('SHA-256'))")
+        analysis.screenshot(path=str(ROOT/'preview-standouts-desktop.png'),full_page=True)
         historical_flag=f'.highlight-card[data-highlight-day="2026-11-10"][data-highlight-player="{cerulean["key"]}"]'
         for _ in range((len(standouts)+7)//8):
-            if page.locator(historical_flag).count():break
-            page.locator('#highlight-next').click()
-        assert page.locator(historical_flag).count()==1
-        page.locator(f'{historical_flag} .highlight-open').click()
-        assert page.locator('#capture-date').inner_text()=='Nov 10, 2026'
-        assert page.locator('#profile-title').inner_text()=='Ceruleanflare2'
-        assert 'day=2026-11-10' in page.url and f'player={cerulean["key"].replace(":","%3A")}' in page.url
-        page.reload(wait_until='domcontentloaded')
+            if analysis.locator(historical_flag).count():break
+            analysis.locator('#highlight-next').click()
+        assert analysis.locator(historical_flag).count()==1
+        analysis.locator(f'{historical_flag} .highlight-open').click()
+        assert 'Nov 10, 2026' in analysis.locator('#overview-content').inner_text()
+        assert 'day=2026-11-10' in analysis.url and f'player={cerulean["key"].replace(":","%3A")}' in analysis.url
+        assert 'day=2026-11-10' in analysis.locator('.overview-dashboard-link').get_attribute('href')
+        analysis.reload(wait_until='domcontentloaded')
+        analysis.locator('#highlight-count').get_by_text(f'{len(standouts)} FLAGS').wait_for(timeout=20000)
+        assert 'Nov 10, 2026' in analysis.locator('#overview-content').inner_text()
+        analysis.set_viewport_size({'width':390,'height':840})
+        analysis.wait_for_timeout(400)
+        assert analysis.evaluate('document.documentElement.scrollWidth <= window.innerWidth + 4')
+        assert analysis.locator('.standout-layout').evaluate('el=>el.children[1].getBoundingClientRect().top>el.children[0].getBoundingClientRect().top')
+        analysis.screenshot(path=str(ROOT/'preview-standouts-mobile.png'),full_page=True)
+        analysis.close()
+        page.goto(f'http://127.0.0.1:{server.server_address[1]}/?day=2026-11-10&player={cerulean["key"].replace(":","%3A")}',wait_until='domcontentloaded')
         page.locator('#capture-date').get_by_text('Nov 10, 2026').wait_for(timeout=20000)
         assert page.locator('#profile-title').inner_text()=='Ceruleanflare2'
         assert page.locator('#capture-slider').get_attribute('max')==str(total_days-1)

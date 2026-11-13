@@ -1,0 +1,25 @@
+.range-panel,.event-section{margin:22px 0;padding:21px;border:1px solid var(--border);border-radius:16px;background:var(--panel)}
+.range-panel[hidden]{display:none}
+.range-panel h2,.event-section h2{margin:7px 0;font-size:clamp(20px,2vw,25px)}
+.range-panel{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 22px;align-items:center}
+.range-panel p,.event-section p{margin:7px 0;color:var(--muted);font-size:12px;line-height:1.5}
+.range-panel .eyebrow,.event-section .eyebrow{color:var(--cyan)}
+.range-controls{display:flex;gap:10px;align-items:end;flex-wrap:wrap}
+.range-controls label{display:grid;gap:5px;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.06em}
+.range-controls input,.range-controls button{min-height:36px;border:1px solid var(--border);border-radius:9px;background:var(--panel2);color:var(--text);padding:6px 9px}
+.range-controls input{color-scheme:dark;max-width:160px}
+.range-controls button:hover,.range-controls button:focus-visible{border-color:var(--cyan)}
+.range-explanation{grid-column:1/-1}
+.event-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:12px;margin-top:16px}
+.event-card{display:flex;gap:12px;align-items:start;border:1px solid var(--border);border-left:3px solid var(--event-color);border-radius:10px;background:rgba(4,19,31,.45);padding:13px;min-width:0}
+.event-icon{display:grid;place-items:center;position:relative;flex:0 0 42px;width:42px;height:52px;border:1px solid var(--event-color);border-radius:8px;background:rgba(154,219,231,.08);font-size:21px}
+.event-icon img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.event-copy{min-width:0}
+.event-copy .event-jump{display:block;width:100%;padding:0;border:0;background:none;color:var(--text);font-weight:800;font-size:13px;text-align:left;line-height:1.45;overflow-wrap:anywhere}
+.event-jump:hover,.event-jump:focus-visible{color:var(--event-color);text-decoration:underline}
+.event-copy p{margin:5px 0}
+.event-copy a{font-size:11px;color:var(--cyan);text-decoration:underline;text-underline-offset:3px;margin-right:12px}
+.event-copy a:hover,.event-copy a:focus-visible{color:var(--text)}
+.event-context{color:var(--muted);font-size:11px}
+@media(max-width:780px){.range-panel{grid-template-columns:1fr}.range-controls input{width:min(42vw,160px)}}
+@media(max-width:410px){.range-controls{align-items:stretch}.range-controls label{flex:1 1 42%;min-width:0}.range-controls input{width:100%;max-width:none}.range-controls button{flex:1 1 100%}}

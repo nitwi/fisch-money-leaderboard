@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en"><head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Photo-verified standout Fisch money leaderboard changes, ranked by measurable severity with player and screenshot context.">
+  <title>Standout Analysis · Fisch Money Ledger</title>
+  <link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="rainbow.css"><link rel="stylesheet" href="highlights.css"><link rel="stylesheet" href="rate-events.css"><link rel="stylesheet" href="standouts.css">
+  <script defer src="app.js"></script><script defer src="standouts.js"></script>
+</head><body>
+  <header class="site-head"><a class="brand" href="./"><span class="mark">C$</span><span>FISCH <b>MONEY LEDGER</b><small>TOP C$ · EVIDENCE ARCHIVE</small></span></a><nav class="site-nav" aria-label="Site pages"><a href="./">Dashboard</a><a href="standouts.html" aria-current="page">Standout analysis</a></nav></header>
+  <main class="standout-main">
+    <section class="standout-hero"><p class="eyebrow">PHOTO-VERIFIED <span class="slash">/</span> FULL ARCHIVE</p><h1>Standout <em>analysis.</em></h1><p>Explore unusually large observed net-balance changes, rank climbs and repeated big increases. Each entry links to both original photos; select one to inspect that player and day.</p><a href="./">← Back to the dashboard chart</a></section>
+    <div class="severity-legend" aria-label="Standout severity thresholds"><span class="legend-notable">Notable: ≥8B C$ or ↑5 ranks</span><span class="legend-high">High: ≥20B, ↑10, or both ≥8B and ↑5</span><span class="legend-extreme">Extreme: ≥25B or repeated ≥20B within 72h</span></div>
+    <p class="standout-caveat">A flag is a measured difference between photo-backed held balances. Repeated increases are timed by their later photos; these are not verified sales, earnings rates, or proof of wrongdoing. Gaps without photos remain unknown.</p>
+    <div class="standout-layout">
+      <section class="highlights-section" aria-labelledby="highlights-title"><div class="highlights-header"><div><p class="eyebrow">ALL DATED INTERVALS</p><h2 id="highlights-title">Flagged changes</h2><p>Newest days first; within each day, largest net changes first.</p></div><span id="highlight-count" class="count-pill">—</span></div>
+        <div class="standout-controls"><label>Player <input id="flag-search" type="search" placeholder="Search a player…" autocomplete="off" aria-label="Filter standout changes by player"></label><label>Severity <select id="flag-severity" aria-label="Filter standout changes by severity"><option value="all">All severities</option><option value="extreme">Extreme</option><option value="high">High</option><option value="notable">Notable</option></select></label></div>
+        <div id="highlight-list" class="highlight-grid" aria-live="polite"></div><nav id="highlight-pages" class="highlight-pages" aria-label="Standout changes pages" hidden><button id="highlight-prev" type="button" aria-label="Previous standout page">← Previous</button><span id="highlight-page-label"></span><button id="highlight-next" type="button" aria-label="Next standout page">Next →</button></nav>
+      </section>
+      <aside id="standout-overview" class="standout-overview" aria-labelledby="overview-title"><p class="eyebrow">PLAYER CONTEXT <span class="slash">/</span> SELECTED FLAG</p><h2 id="overview-title">Player overview</h2><div id="overview-content" aria-live="polite"><p>Select a flagged change to examine its exact photos and player history.</p></div></aside>
+    </div>
+    <footer><span>FISCH MONEY LEDGER <span class="slash">/</span> independent screenshot archive</span><span>Wiki rod icons and patch dates credited to the Official Fisch Wiki on the dashboard. All times America/Chicago.</span></footer>
+  </main>
+</body></html>

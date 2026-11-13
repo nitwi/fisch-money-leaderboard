@@ -4,8 +4,11 @@
 .highlights-header p:not(.eyebrow),.highlights-caution{color:var(--muted);font-size:13px;line-height:1.5;margin:6px 0}
 .highlights-caution{margin:12px 0 20px}
 .highlight-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:14px}
-.highlight-card{min-width:0;padding:18px;border:1px solid rgba(255,209,102,.23);border-radius:14px;background:rgba(4,19,31,.56)}
-.highlight-card.active{border-color:rgba(41,248,255,.65)}
+.highlight-card{min-width:0;padding:18px;border:1px solid var(--severity-color);border-radius:14px;background:linear-gradient(125deg,var(--severity-glow),transparent 70%),rgba(4,19,31,.56)}
+.highlight-card[data-severity="notable"]{--severity-color:rgba(41,248,255,.5);--severity-glow:rgba(41,248,255,.08)}
+.highlight-card[data-severity="high"]{--severity-color:rgba(255,178,99,.7);--severity-glow:rgba(255,178,99,.13)}
+.highlight-card[data-severity="extreme"]{--severity-color:rgba(255,132,149,.88);--severity-glow:rgba(255,132,149,.19)}
+.highlight-card.active{outline:1px solid var(--cyan);outline-offset:2px}
 .highlight-head{display:flex;align-items:start;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .highlight-open{width:100%;padding:0;border:0;background:none;color:inherit;text-align:left}
 .highlight-open:hover .highlight-player,.highlight-open:focus-visible .highlight-player{color:var(--cyan);text-decoration:underline}
@@ -13,6 +16,11 @@
 .highlight-player img{width:30px;height:30px;object-fit:cover;border-radius:50%}
 .highlight-badges{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
 .highlight-badges b{color:var(--gold);background:rgba(255,209,102,.1);border:1px solid rgba(255,209,102,.2);padding:5px 7px;border-radius:7px;font-size:12px}
+.highlight-badges .severity-badge{color:var(--severity-color);background:var(--severity-glow);border-color:var(--severity-color)}
+.severity-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;font-size:11px}
+.severity-legend span{padding:5px 8px;border:1px solid currentColor;border-radius:7px}
+.legend-notable{color:var(--cyan)}.legend-high{color:#ffb263}.legend-extreme{color:var(--red)}
+.highlight-card .highlight-repeat{border-top:1px solid var(--severity-color);padding-top:9px;color:var(--text)}
 .highlight-card p{font-size:12px;line-height:1.5;margin:12px 0 0;overflow-wrap:anywhere}
 .highlight-card .highlight-amounts{color:var(--muted)}
 .highlight-proof-links{display:flex;flex-wrap:wrap;gap:10px;margin-top:15px;font-size:12px}
