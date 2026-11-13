@@ -2,7 +2,7 @@
 const $ = (id) => document.getElementById(id);
 const safe = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]);
 const palette = ["#29f8ff","#ffd166","#c9a7ff","#61e5b3","#f990bd","#74a8ff","#ffad79","#a6e672","#ff7d91","#8cd9e0","#f8d38a","#9f9fff"];
-const state = {data:null, index:0, selected:null, view:"all", filter:"all", byCapture:new Map(), byPlayer:new Map(), playerMeta:new Map(), proofs:new Map(), chartBound:false};
+const state = {data:null, index:0, selected:null, view:"all", filter:"all", highlightPage:0, byCapture:new Map(), byPlayer:new Map(), playerMeta:new Map(), proofs:new Map(), chartBound:false};
 const byId = (id) => state.proofs.get(id);
 const compact = (amount) => {
   if (amount === null || amount === undefined) return "—";
@@ -76,7 +76,7 @@ function setSelected(key) {
   window.history.replaceState(null,"",u);
   render();
 }
-function moveTo(index) { state.index=Math.max(0,Math.min(state.data.checkpoints.length-1,index)); $("capture-slider").value=state.index; render(); }
+function moveTo(index) { state.index=Math.max(0,Math.min(state.data.checkpoints.length-1,index)); $("capture-slider").value=state.index; const u=new URL(location.href);if(u.searchParams.has("day")){u.searchParams.set("day",state.data.checkpoints[state.index].day_key);history.replaceState(null,"",u);}render(); }
 function renderControls() {
   const cps=state.data.checkpoints, cp=cps[state.index];
   $("capture-date").textContent=dayLabel(cp.day_key);
@@ -166,6 +166,50 @@ function renderMovement() {
   $("movement-list").innerHTML=markup+departures||`<p class="profile-empty">${cp.visible?"No pictured rows match this filter.":"No readable screenshot rows for this capture yet. Open its original proof images below."}</p>`;
   $("movement-list").querySelectorAll("[data-player]").forEach((el)=>el.addEventListener("click",()=>setSelected(el.dataset.player)));
 }
+function standoutRows() {
+  const cps=state.data.checkpoints, threshold=BigInt(state.data.threshold), flags=[];
+  for(let index=1;index<cps.length;index++){
+    const cp=cps[index], previous=cps[index-1];
+    for(const row of state.byCapture.get(cp.id)||[]){
+      if(!confirmed(row))continue;
+      const change=interval(cp,row,previous);
+      if(!confirmed(change.old)||change.delta===null||!(change.elapsed>0))continue;
+      const climb=change.old.rank-row.rank, bigGain=change.delta>=threshold;
+      if(bigGain||climb>=5)flags.push({index,cp,previous,row,change,climb,bigGain});
+    }
+  }
+  return flags.sort((a,b)=>b.index-a.index || (a.change.delta===b.change.delta?b.climb-a.climb:a.change.delta>b.change.delta?-1:1));
+}
+function standoutProof(row,label) {
+  const proof=byId(row.evidence[0]);
+  return proof?`<a href="${safe(evidenceUrl(proof))}" target="_blank" rel="noopener noreferrer" title="Original SHA-256 ${safe(proof.sha256)}">${safe(label)} ${safe(proof.id)} ↗</a>`:"";
+}
+function renderHighlights() {
+  const flags=standoutRows(), pageSize=8, lastPage=Math.max(0,Math.ceil(flags.length/pageSize)-1);
+  state.highlightPage=Math.max(0,Math.min(state.highlightPage,lastPage));
+  const start=state.highlightPage*pageSize;
+  $("highlight-count").textContent=`${flags.length} FLAG${flags.length===1?"":"S"}`;
+  const cards=flags.slice(start,start+pageSize).map(({index,cp,previous,row,change,climb,bigGain})=>`
+    <article class="highlight-card ${state.index===index?"active":""}" data-highlight-day="${safe(cp.day_key)}" data-highlight-player="${safe(row.key)}">
+      <button class="highlight-open" type="button" data-highlight-open="${index}" data-player="${safe(row.key)}" aria-label="Open ${safe(row.username)} on ${safe(dayLabel(cp.day_key))}">
+        <span class="highlight-head"><span class="highlight-player">${avatar(player(row.key))}${safe(row.username)}</span>
+          <span class="highlight-badges">${bigGain?'<b>+8B NET FLAG</b>':""}${climb>=5?'<b>↑5+ RANK FLAG</b>':""}</span></span>
+        <p><strong>${safe(dayLabel(previous.day_key))} #${change.old.rank} → ${safe(dayLabel(cp.day_key))} #${row.rank}</strong> · ${signed(change.delta)} observed net C$${climb>0?` · ↑${climb} ranks`:""}</p>
+        <p class="highlight-amounts">${safe(exact(change.old.balance))} → ${safe(exact(row.balance))}<br>Photos ${safe(labelDate(change.old.at))} → ${safe(labelDate(row.at))} · ${elapsedLabel(change.elapsed)} elapsed</p>
+      </button>
+      <div class="highlight-proof-links">${standoutProof(change.old,"Before proof")}${standoutProof(row,"After proof")}</div>
+    </article>`).join("");
+  $("highlight-list").innerHTML=cards||'<p class="highlight-empty">No adjacent photo-verified changes meet the +8B C$ or ↑5 rank threshold yet.</p>';
+  $("highlight-pages").hidden=flags.length<=pageSize;
+  $("highlight-prev").disabled=state.highlightPage===0;
+  $("highlight-next").disabled=state.highlightPage===lastPage;
+  $("highlight-page-label").textContent=flags.length?`${start+1}–${Math.min(start+pageSize,flags.length)} of ${flags.length}`:"";
+  $("highlight-list").querySelectorAll("[data-highlight-open]").forEach(el=>el.addEventListener("click",()=>{
+    moveTo(Number(el.dataset.highlightOpen));setSelected(el.dataset.player);
+    const u=new URL(location.href);u.searchParams.set("day",state.data.checkpoints[state.index].day_key);history.replaceState(null,"",u);
+    $("profile-card").scrollIntoView({behavior:"smooth",block:"start"});
+  }));
+}
 function renderProfile() {
   const key=state.selected, wrapper=$("profile-content");
   $("profile-clear").hidden=!key;
@@ -211,7 +255,7 @@ function renderEvidence() {
   $("evidence-grid").querySelectorAll(".proof").forEach((el)=>el.addEventListener("click",()=>{const item=byId(el.dataset.proof);if(!item)return;$("lightbox-image").src=evidenceUrl(item);$("lightbox-caption").textContent=`${cp.primary_evidence.includes(item.id)?"Selected daily point":"Earlier capture (not used for daily balance)"} · ${item.id} · ${labelDate(item.captured_at)} · ranks ${item.min}–${item.max} · original SHA-256 ${item.sha256}`;$("lightbox").showModal();}));
   if(state.selected){const row=point(cp,state.selected);if(row)spotlight(row.evidence[0]);}
 }
-function render(){renderControls();renderChart();renderMovement();renderProfile();renderEvidence();}
+function render(){renderControls();renderHighlights();renderChart();renderMovement();renderProfile();renderEvidence();}
 async function init(){
   try{
     const response=await fetch("data.json",{cache:"no-cache"});if(!response.ok)throw new Error(`HTTP ${response.status}`);
@@ -224,10 +268,13 @@ async function init(){
     data.players.forEach(meta=>state.playerMeta.set(meta.key,meta));
     data.evidence.forEach(proof=>state.proofs.set(proof.id,proof));
     for(const [key,rows] of state.byPlayer)rows.sort((a,b)=>new Date(data.checkpoints.find(cp=>cp.id===a.checkpoint).at)-new Date(data.checkpoints.find(cp=>cp.id===b.checkpoint).at));
-    state.index=data.checkpoints.length-1;
-    const requested=new URL(location.href).searchParams.get("player");if(requested && state.playerMeta.has(requested))state.selected=requested;
-    $("capture-slider").max=String(state.index);$("capture-slider").addEventListener("input",(ev)=>moveTo(Number(ev.target.value)));
+    const url=new URL(location.href), requestedDay=url.searchParams.get("day"), requestedIndex=data.checkpoints.findIndex(cp=>cp.day_key===requestedDay);
+    state.index=requestedIndex>=0?requestedIndex:data.checkpoints.length-1;
+    const requested=url.searchParams.get("player");if(requested && state.playerMeta.has(requested))state.selected=requested;
+    $("capture-slider").max=String(data.checkpoints.length-1);$("capture-slider").addEventListener("input",(ev)=>moveTo(Number(ev.target.value)));
     $("prev").addEventListener("click",()=>moveTo(state.index-1));$("next").addEventListener("click",()=>moveTo(state.index+1));
+    $("highlight-prev").addEventListener("click",()=>{state.highlightPage--;renderHighlights();});
+    $("highlight-next").addEventListener("click",()=>{state.highlightPage++;renderHighlights();});
     $("clear").addEventListener("click",()=>setSelected(null));$("profile-clear").addEventListener("click",()=>setSelected(null));
     $("top-filter").addEventListener("change",(ev)=>{state.filter=ev.target.value;renderChart();});
     let resizeTimer;

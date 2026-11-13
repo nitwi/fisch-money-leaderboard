@@ -49,6 +49,42 @@ try:
         assert page.locator("#chart").evaluate("el => el.data.some(t => t.meta && t.meta.key)")
         assert page.locator("#chart").evaluate("el => el.layout.xaxis.type") == "category"
         assert page.locator("#chart").evaluate("el => el.layout.xaxis.tickvals.includes('2026-10-18')")
+        standouts=page.evaluate("standoutRows().map(item=>({day:item.cp.day_key,name:item.row.username,gain:item.change.delta.toString(),climb:item.climb}))")
+        assert len(standouts)>8, "The archive-wide feed should paginate beyond its first eight flags"
+        assert any(item['day']=='2026-11-12' and item['name']=='Ceruleanflare2' and item['gain']=='26027711662' and item['climb']==6 for item in standouts)
+        assert any(item['day']=='2026-11-10' and item['name']=='Ceruleanflare2' for item in standouts)
+        assert page.evaluate("standoutRows().some(item=>!item.bigGain && item.climb>=5)")
+        assert page.evaluate("standoutRows().every(item=>item.row.status==='verified' && item.change.old.status==='verified' && item.row.evidence.length && item.change.old.evidence.length && state.data.checkpoints[item.index-1].id===item.change.old.checkpoint)")
+        assert page.locator('#highlight-count').inner_text()==f'{len(standouts)} FLAGS'
+        assert page.locator('.highlight-card').count()==8
+        assert page.locator('#highlight-pages').is_visible()
+        assert page.locator('#highlight-list').evaluate('el=>getComputedStyle(el).display')=='grid'
+        cerulean=next(p for p in data['players'] if p['name']=='Ceruleanflare2')
+        latest_flag=f'.highlight-card[data-highlight-day="2026-11-12"][data-highlight-player="{cerulean["key"]}"]'
+        for _ in range((len(standouts)+7)//8):
+            if page.locator(latest_flag).count():break
+            page.locator('#highlight-next').click()
+        assert page.locator(latest_flag).count()==1
+        assert '+26B' in page.locator(latest_flag).inner_text()
+        assert '↑6 ranks' in page.locator(latest_flag).inner_text()
+        assert 'EV0166' in page.locator(f'{latest_flag} .highlight-proof-links').inner_text()
+        assert 'EV0169' in page.locator(f'{latest_flag} .highlight-proof-links').inner_text()
+        assert page.locator(f'{latest_flag} .highlight-proof-links a').evaluate_all("els=>els.length===2 && els.every(el=>el.href.includes('/evidence/screenshots/') && el.title.includes('SHA-256'))")
+        historical_flag=f'.highlight-card[data-highlight-day="2026-11-10"][data-highlight-player="{cerulean["key"]}"]'
+        for _ in range((len(standouts)+7)//8):
+            if page.locator(historical_flag).count():break
+            page.locator('#highlight-next').click()
+        assert page.locator(historical_flag).count()==1
+        page.locator(f'{historical_flag} .highlight-open').click()
+        assert page.locator('#capture-date').inner_text()=='Nov 10, 2026'
+        assert page.locator('#profile-title').inner_text()=='Ceruleanflare2'
+        assert 'day=2026-11-10' in page.url and f'player={cerulean["key"].replace(":","%3A")}' in page.url
+        page.reload(wait_until='domcontentloaded')
+        page.locator('#capture-date').get_by_text('Nov 10, 2026').wait_for(timeout=20000)
+        assert page.locator('#profile-title').inner_text()=='Ceruleanflare2'
+        assert page.locator('#capture-slider').get_attribute('max')==str(total_days-1)
+        page.locator('#next').click()
+        assert 'day=2026-11-11' in page.url
         nov11=next(i for i,cp in enumerate(data['checkpoints']) if cp['day_key']=='2026-11-11')
         page.locator('#capture-slider').evaluate("(el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}))}",str(nov11))
         assert page.locator("#capture-date").inner_text() == "Nov 11, 2026"
@@ -75,7 +111,6 @@ try:
         assert page.locator(".rainbow-static").first.evaluate("el => getComputedStyle(el).animationName") == "none"
         old_nov10=next(i for i,cp in enumerate(data['checkpoints']) if cp['day_key']=='2026-11-10')
         page.locator('#capture-slider').evaluate("(el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}))}",str(old_nov10))
-        cerulean=next(p for p in data['players'] if p['name']=='Ceruleanflare2')
         assert "↑13" in page.locator(f'.movement-item[data-player="{cerulean["key"]}"] .rank-move.up').inner_text()
         assert page.locator(f'.movement-item[data-player="{cerulean["key"]}"] .rank-move.up').evaluate('el => getComputedStyle(el).color') != 'rgb(255, 152, 165)'
         page.locator('#capture-slider').evaluate("(el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}))}",str(nov11))
