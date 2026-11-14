@@ -118,3 +118,6 @@ EV0173,1-16,Read every November 13 evening top-board name and exact balance from
 EV0174,17-32,Read every November 13 evening middle-board name and exact balance from original 21:51:41 PNG
 EV0175,32-47,Read every November 13 evening lower-board name and exact balance from original 21:52:01 PNG; rank 32 corroborates EV0174
 EV0176,47-50,Read November 13 evening bottom four ranks from original 21:52:09 PNG; rank 47 corroborates EV0175
+EV0177,33-46,Read each Oct 23 missing lower-board name and exact amount from owner-saved original; ranks 47-48 match later EV0054
+EV0178,33-45,Read each Oct 30 missing lower-board name and exact amount from owner-saved original; lower photo #47=54021982113 differs from later bottom EV0082 #47=54021982503 and is not selected for that rank
+EV0179,33-47,Read each Nov 2 missing lower-board name and exact amount from owner-saved original; #48 matches EV0094

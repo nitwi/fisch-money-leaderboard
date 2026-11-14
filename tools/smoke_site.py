@@ -292,6 +292,21 @@ try:
         page.locator("#capture-slider").evaluate("(el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}))}",str(october17))
         assert page.locator(".proof.earlier-proof").count() == 2
         assert page.locator("#stat-floor").inner_text() != "UNKNOWN"
+        for day,evidence_id,username in (
+            ('2026-10-23','EV0177','NoRoblox_Support'),
+            ('2026-10-30','EV0178','johncenagaming347v2'),
+            ('2026-11-02','EV0179','kawaiicatsophi67'),
+        ):
+            index=next(i for i,cp in enumerate(data['checkpoints']) if cp['day_key']==day)
+            page.locator('#capture-slider').evaluate("(el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}))}",str(index))
+            assert page.locator('#stat-coverage').inner_text()=='50 / 50'
+            assert page.locator('.proof').count()==len(data['checkpoints'][index]['evidence'])==6
+            assert username in page.locator('#movement-list').inner_text()
+            page.locator(f'.proof[data-proof="{evidence_id}"]').click()
+            page.wait_for_function("document.querySelector('#lightbox-image').naturalWidth > 0")
+            page.locator('#lightbox button').click()
+        oct30=next(row for row in data['observations'] if row['day_key']=='2026-10-30' and row['rank']==47)
+        assert (oct30['balance'],oct30['evidence'])==('54021982503',['EV0082'])
         november7=next(i for i,cp in enumerate(data['checkpoints']) if cp['day_key']=='2026-11-07')
         page.locator("#capture-slider").evaluate("(el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}))}",str(november7))
         assert page.locator("#capture-date").inner_text() == "Nov 7, 2026"

@@ -1,3 +1,4 @@
+import csv
 import hashlib
 import json
 import sys
@@ -35,7 +36,7 @@ class LedgerTests(unittest.TestCase):
         self.assertEqual(len(data["session_observations"]), 50*len(data["sessions"]))
         self.assertEqual(len(data["observations"]), 50*len(data["checkpoints"]))
         self.assertEqual(len(data["evidence"]),sum(len(cp['evidence']) for cp in data['captures'])+len(data['profile_updates']))
-        self.assertGreaterEqual(len(data["evidence"]),177)
+        self.assertGreaterEqual(len(data["evidence"]),180)
         self.assertTrue(all(len([o for o in data["observations"] if o["checkpoint"] == cp["id"]]) == 50 for cp in data["checkpoints"]))
         proofs = {e["id"]: e for e in data["evidence"]}
         for row in data["observations"]:
@@ -45,14 +46,14 @@ class LedgerTests(unittest.TestCase):
             if row["status"] in ("captured_pending_transcription", "not_captured"):
                 self.assertFalse(row["balance"])
         self.assertFalse((ROOT/"data/source/data/observations.csv").exists(), "Excel-derived observations must not be an input")
-        self.assertGreaterEqual(sum(cp['verified'] for cp in data['captures']),1768)
+        self.assertGreaterEqual(sum(cp['verified'] for cp in data['captures']),1810)
         self.assertEqual(sum(cp['coverage'] for cp in data['captures']),50*len(data['captures'])-sum(row['status']=='not_captured' for row in data['capture_observations']))
         self.assertGreaterEqual(sum(row['status']=='captured_pending_transcription' for row in data['capture_observations']),3)
         self.assertEqual(sum(row['status']=='verified' for row in data['session_observations']),sum(cp['verified'] for cp in data['sessions']))
         self.assertEqual(sum(row['status']=='verified' for row in data['observations']),sum(cp['verified'] for cp in data['checkpoints']))
         for row_id in ('2026-10-17_1014_R15','2026-11-04_0152_R16','2026-11-04_2101_R16'):
             self.assertEqual(next(row['status'] for row in data['capture_observations'] if row['id']==row_id),'captured_pending_transcription')
-        self.assertGreaterEqual(sum(cp['complete'] for cp in data['checkpoints']),31)
+        self.assertGreaterEqual(sum(cp['complete'] for cp in data['checkpoints']),34)
         self.assertFalse(any(row['status'].startswith('ocr_') for row in data['observations']))
 
     def test_observed_rate_and_roblox_identity(self):
@@ -193,6 +194,32 @@ class LedgerTests(unittest.TestCase):
         proofs={proof['id']:proof for proof in data['evidence']}
         self.assertEqual((proofs['EV0175']['min'],proofs['EV0175']['max']),(32,47))
         self.assertEqual((proofs['EV0176']['min'],proofs['EV0176']['max']),(47,50))
+
+    def test_lower_band_backfills_complete_three_existing_days_without_rewriting_oct30_rank_47(self):
+        data=self.data
+        days={cp['day_key']:cp for cp in data['checkpoints']}
+        by_day={(row['day_key'],row['rank']):row for row in data['observations']}
+        proofs={proof['id']:proof for proof in data['evidence']}
+        for day,checkpoint,new_proof,rank,username,balance in (
+            ('2026-10-23','2026-10-23_2200','EV0177',36,'NoRoblox_Support','59651360685'),
+            ('2026-10-30','2026-10-30_2253','EV0178',33,'johncenagaming347v2','66225096182'),
+            ('2026-11-02','2026-11-02_2128','EV0179',33,'kawaiicatsophi67','66832438429'),
+        ):
+            selected=days[day]
+            self.assertEqual(selected['id'],checkpoint)
+            self.assertEqual((selected['verified'],selected['coverage'],selected['complete']),(50,50,True))
+            self.assertIn(new_proof,selected['evidence'])
+            self.assertEqual((by_day[(day,rank)]['username'],by_day[(day,rank)]['balance']), (username,balance))
+            self.assertEqual(by_day[(day,rank)]['evidence'],[new_proof])
+            self.assertEqual(hashlib.sha256((ROOT/'site'/proofs[new_proof]['url']).read_bytes()).hexdigest(),proofs[new_proof]['sha256'])
+        self.assertEqual((by_day[('2026-10-23',46)]['username'],by_day[('2026-10-23',46)]['balance']),('BigBoyyChriss','52529149818'))
+        self.assertEqual((by_day[('2026-10-30',45)]['username'],by_day[('2026-10-30',45)]['balance']),('1234mysterio','55619059997'))
+        later=by_day[('2026-10-30',47)]
+        self.assertEqual((later['username'],later['balance'],later['evidence']),('zackbourbon','54021982503',['EV0082']))
+        with (ROOT/'data/source/data/evidence_manifest.csv').open(encoding='utf-8-sig',newline='') as stream:
+            self.assertIn('54021982113',next(row['notes'] for row in csv.DictReader(stream) if row['evidence_id']=='EV0178'))
+        self.assertEqual((by_day[('2026-11-02',47)]['username'],by_day[('2026-11-02',47)]['balance']),('10ne17','54914164531'))
+        self.assertEqual(by_day[('2026-11-02',33)]['key'],next(row['key'] for row in data['observations'] if row['day_key']=='2026-11-13' and row['username']=='ewoofs'))
 
     def test_apathy_profile_photo_updates_only_the_balance_and_uses_exact_photo_interval(self):
         data=self.data

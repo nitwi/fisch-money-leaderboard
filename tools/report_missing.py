@@ -28,13 +28,16 @@ while day<=end:
     day+=timedelta(days=1)
 print('CALENDAR_DAYS_WITHOUT_SELECTED_PHOTO:', ', '.join(missing_days) or 'none')
 print('INCOMPLETE_SELECTED_DAILY_BOARDS:')
+incomplete=0
 for cp in data['checkpoints']:
     rows=by_day[cp['day_key']]
     if len(rows)!=50:raise ValueError(f'Missing rank slots in generated daily data: {cp["day_key"]}')
     unpictured=spans(row['rank'] for row in rows if row['status']=='not_captured')
     unreadable=spans(row['rank'] for row in rows if row['status']=='captured_pending_transcription')
     if unpictured!='none' or unreadable!='none':
+        incomplete+=1
         print(f'  {cp["day_key"]}: {cp["verified"]}/50 verified; not pictured {unpictured}; photographed but unreadable {unreadable}; chosen photo {cp["id"]}')
+if not incomplete:print('  none; every selected daily point has all 50 photographed and verified ranks')
 print('ORIGINAL_PHOTOGRAPHED_RANKS_STILL_UNREADABLE:')
 proofs={item['id']:item for item in data['evidence']}
 unreadable=[row for row in data['capture_observations'] if row['status']=='captured_pending_transcription']
