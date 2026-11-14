@@ -288,13 +288,17 @@ function renderProfile() {
   const fastest=pairs.filter(x=>x.delta>0n && x.elapsed>0).sort((a,b)=>Number(b.delta)/b.elapsed-Number(a.delta)/a.elapsed)[0];
   const peak=rows.reduce((best,row)=>BigInt(row.balance)>BigInt(best.balance)?row:best,first);
   const link=meta.roblox_id?`<a href="https://www.roblox.com/users/${safe(meta.roblox_id)}/profile" rel="noopener noreferrer" target="_blank">View Roblox profile ↗</a>`:"<small>Roblox account not yet independently matched</small>";
-  const update=state.profileUpdates.get(last.profile_update);
+  const selectedRow=point(state.data.checkpoints[state.index],key);
+  const selectedUpdate=selectedRow&&selectedRow.day_key>=state.rangeStart&&selectedRow.day_key<=state.rangeEnd?state.profileUpdates.get(selectedRow.profile_update):null;
+  const latestUpdate=state.profileUpdates.get(last.profile_update);
+  const update=selectedUpdate||latestUpdate;
+  const rankAtUpdate=selectedUpdate?selectedRow.rank:last.rank;
   const boardDelta=update?BigInt(update.balance)-BigInt(update.source_balance):null;
   const boardHours=update?hours(update.source_at,update.at):null;
-  const profileNote=update?`<div class="profile-update-detail"><strong>Later player-profile balance · ${safe(labelDate(update.at,{second:"2-digit"}))}</strong><p>${safe(exact(update.source_balance))} at board photo ${safe(labelDate(update.source_at,{second:"2-digit"}))} → ${safe(exact(update.balance))} · ${signed(boardDelta)} observed net C$ in ${elapsedLabel(boardHours)} (no multiplier ${rateText(timeRate(boardDelta,boardHours))}). Rank #${last.rank} remains from the earlier board photo.</p><p>${safe(update.note)}. The observed net change is not an independently verified sale amount.</p><a href="${safe(evidenceUrl(byId(update.evidence[0])))}" rel="noopener noreferrer" target="_blank">Open original player-profile proof ${safe(update.id)} ↗</a></div>`:"";
+  const profileNote=update?`<div class="profile-update-detail"><strong>Later player-profile balance · ${safe(labelDate(update.at,{second:"2-digit"}))}</strong><p>${safe(exact(update.source_balance))} at board photo ${safe(labelDate(update.source_at,{second:"2-digit"}))} → ${safe(exact(update.balance))} · ${signed(boardDelta)} observed net C$ in ${elapsedLabel(boardHours)} (no multiplier ${rateText(timeRate(boardDelta,boardHours))}). Rank #${rankAtUpdate} remains from the earlier board photo.</p><p>${safe(update.note)}. The observed net change is not an independently verified sale amount.</p><a href="${safe(evidenceUrl(byId(update.evidence[0])))}" rel="noopener noreferrer" target="_blank">Open original player-profile proof ${safe(update.id)} ↗</a></div>`:"";
   wrapper.className="";
   const stats=[
-    ["LAST BALANCE IN RANGE",compact(last.balance),update?`Profile photo · rank #${last.rank} from earlier board`:`Rank #${last.rank} · photo checked`],
+    ["LAST BALANCE IN RANGE",compact(last.balance),latestUpdate?`Profile photo · rank #${last.rank} from earlier board`:`Rank #${last.rank} · photo checked`],
     ["AVERAGE OBSERVED NET RATE",rateText(average),comparable?`${elapsedLabel(time)} first-to-last photos · gaps included`:"At least two photo readings required"],
     ["NET IN RANGE",comparable?signed(gain):"—",comparable?`${rows.length} pictured daily points · held C$ change`:"Only one pictured balance"],
     ["RAINBOW 1.5× BASE",comparable&&gain>0n?`≈${signed(rainbowBase(gain))}`:"—",comparable&&gain>0n?`(no multiplier ${signed(gain)} net C$)` : "Only comparable positive net changes",comparable&&gain>0n],
@@ -303,7 +307,7 @@ function renderProfile() {
     ["PEAK RAINBOW-EQUIVALENT RATE",fastest?rateText(timeRate(fastest.delta,fastest.elapsed)/1.5):"—",fastest?`(no multiplier ${rateText(timeRate(fastest.delta,fastest.elapsed))}) · ${fastest.elapsed.toFixed(1)}h`:"No positive interval",Boolean(fastest)],
     ["CHANGE IN RANGE",comparable&&BigInt(first.balance)>0n?`${(Number(gain)/Number(first.balance)*100).toFixed(1)}%`:"—","Observed balance only"]
   ];
-  if(update)stats.splice(1,0,["SINCE BOARD PHOTO",signed(boardDelta),`${elapsedLabel(boardHours)} · no multiplier ${rateText(timeRate(boardDelta,boardHours))}`]);
+  if(latestUpdate){const delta=BigInt(latestUpdate.balance)-BigInt(latestUpdate.source_balance), elapsed=hours(latestUpdate.source_at,latestUpdate.at);stats.splice(1,0,["SINCE BOARD PHOTO",signed(delta),`${elapsedLabel(elapsed)} · no multiplier ${rateText(timeRate(delta,elapsed))}`]);}
   const historyRows=rows.slice().reverse().map((row)=>{
     const ix=state.data.checkpoints.findIndex(cp=>cp.id===row.checkpoint);
     const previous=state.data.checkpoints[ix-1];

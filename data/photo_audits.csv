@@ -114,3 +114,7 @@ EV0169,1-16,Read all sixteen November 12 evening top-board names and exact balan
 EV0170,17-32,Read all sixteen November 12 evening middle-board names and exact balances from original 22:57 screenshot
 EV0171,33-48,Read all sixteen November 12 evening lower-board names and exact balances from original 22:58 screenshot
 EV0172,48-50,Read November 12 evening bottom ranks from original 22:58 screenshot; rank 48 also corroborates lower-board image
+EV0173,1-16,Read every November 13 evening top-board name and exact balance from original 21:50:24 PNG
+EV0174,17-32,Read every November 13 evening middle-board name and exact balance from original 21:51:41 PNG
+EV0175,32-47,Read every November 13 evening lower-board name and exact balance from original 21:52:01 PNG; rank 32 corroborates EV0174
+EV0176,47-50,Read November 13 evening bottom four ranks from original 21:52:09 PNG; rank 47 corroborates EV0175

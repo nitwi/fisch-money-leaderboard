@@ -30,12 +30,12 @@ class LedgerTests(unittest.TestCase):
 
     def test_proof_and_missing_are_distinct(self):
         data = self.data
-        self.assertGreaterEqual(len(data["captures"]), 38)
+        self.assertGreaterEqual(len(data["captures"]), 39)
         self.assertEqual(len(data["capture_observations"]), 50*len(data["captures"]))
         self.assertEqual(len(data["session_observations"]), 50*len(data["sessions"]))
         self.assertEqual(len(data["observations"]), 50*len(data["checkpoints"]))
         self.assertEqual(len(data["evidence"]),sum(len(cp['evidence']) for cp in data['captures'])+len(data['profile_updates']))
-        self.assertGreaterEqual(len(data["evidence"]),173)
+        self.assertGreaterEqual(len(data["evidence"]),177)
         self.assertTrue(all(len([o for o in data["observations"] if o["checkpoint"] == cp["id"]]) == 50 for cp in data["checkpoints"]))
         proofs = {e["id"]: e for e in data["evidence"]}
         for row in data["observations"]:
@@ -45,14 +45,14 @@ class LedgerTests(unittest.TestCase):
             if row["status"] in ("captured_pending_transcription", "not_captured"):
                 self.assertFalse(row["balance"])
         self.assertFalse((ROOT/"data/source/data/observations.csv").exists(), "Excel-derived observations must not be an input")
-        self.assertGreaterEqual(sum(cp['verified'] for cp in data['captures']),1718)
+        self.assertGreaterEqual(sum(cp['verified'] for cp in data['captures']),1768)
         self.assertEqual(sum(cp['coverage'] for cp in data['captures']),50*len(data['captures'])-sum(row['status']=='not_captured' for row in data['capture_observations']))
         self.assertGreaterEqual(sum(row['status']=='captured_pending_transcription' for row in data['capture_observations']),3)
         self.assertEqual(sum(row['status']=='verified' for row in data['session_observations']),sum(cp['verified'] for cp in data['sessions']))
         self.assertEqual(sum(row['status']=='verified' for row in data['observations']),sum(cp['verified'] for cp in data['checkpoints']))
         for row_id in ('2026-10-17_1014_R15','2026-11-04_0152_R16','2026-11-04_2101_R16'):
             self.assertEqual(next(row['status'] for row in data['capture_observations'] if row['id']==row_id),'captured_pending_transcription')
-        self.assertGreaterEqual(sum(cp['complete'] for cp in data['checkpoints']),30)
+        self.assertGreaterEqual(sum(cp['complete'] for cp in data['checkpoints']),31)
         self.assertFalse(any(row['status'].startswith('ocr_') for row in data['observations']))
 
     def test_observed_rate_and_roblox_identity(self):
@@ -170,6 +170,29 @@ class LedgerTests(unittest.TestCase):
         self.assertEqual(selected['profile_updates'],['PU0001'])
         self.assertEqual(selected['evidence'],capture['evidence']+['PU0001'])
         self.assertEqual((proofs['EV0172']['min'],proofs['EV0172']['max']),(48,50))
+
+    def test_november_13_complete_capture_preserves_previous_profile_time(self):
+        data=self.data
+        chosen=next(cp for cp in data['checkpoints'] if cp['day_key']=='2026-11-13')
+        raw=next(cp for cp in data['captures'] if cp['id']=='2026-11-13_2152')
+        self.assertEqual((chosen['id'],chosen['at']),('2026-11-13_2152','2026-11-14T03:52:00Z'))
+        self.assertEqual((chosen['coverage'],chosen['verified'],chosen['complete']),(50,50,True))
+        self.assertEqual(chosen['evidence'],['EV0173','EV0174','EV0175','EV0176'])
+        self.assertEqual(raw['evidence'],chosen['evidence'])
+        self.assertEqual(chosen['daily_source_sessions'],['2026-11-13_2152'])
+        rows={row['rank']:row for row in data['observations'] if row['day_key']=='2026-11-13'}
+        self.assertEqual((len(rows),rows[1]['balance'],rows[50]['balance']),(50,'309378891620','53905288849'))
+        self.assertEqual((rows[13]['username'],rows[13]['balance']),('Ceruleanflare2','118861548522'))
+        self.assertEqual((rows[24]['username'],rows[25]['username']),('LasTnIghT2011','JPaltaa'))
+        self.assertEqual((rows[40]['username'],rows[45]['username']),('AliceSekai','zNaN_Rot'))
+        self.assertEqual((rows[2]['balance'],rows[2]['evidence']),('270130469438',['EV0173']))
+        previous=next(row for row in data['observations'] if row['day_key']=='2026-11-12' and row['key']==rows[2]['key'])
+        self.assertEqual((previous['balance'],previous['at'],previous['balance_evidence']),('269064293664','2026-11-13T05:38:50Z',['PU0001']))
+        self.assertEqual(int(rows[2]['balance'])-int(previous['balance']),1_066_175_774)
+        self.assertEqual((datetime.fromisoformat(rows[2]['at'].replace('Z','+00:00'))-datetime.fromisoformat(previous['at'].replace('Z','+00:00'))).total_seconds(),22*3600+13*60+10)
+        proofs={proof['id']:proof for proof in data['evidence']}
+        self.assertEqual((proofs['EV0175']['min'],proofs['EV0175']['max']),(32,47))
+        self.assertEqual((proofs['EV0176']['min'],proofs['EV0176']['max']),(47,50))
 
     def test_apathy_profile_photo_updates_only_the_balance_and_uses_exact_photo_interval(self):
         data=self.data

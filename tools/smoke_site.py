@@ -3,6 +3,7 @@ from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from threading import Thread
+from datetime import datetime, timedelta
 import json
 from playwright.sync_api import sync_playwright
 
@@ -27,10 +28,28 @@ try:
         total_days=len(data['checkpoints'])
         page.locator("#capture-index").get_by_text(f"DAY {total_days:02d} / {total_days}",exact=False).wait_for(timeout=20000)
         last=data['checkpoints'][-1]
+        last_day=last['day_key']
         assert page.locator("#capture-date").inner_text() == page.evaluate("dayLabel(state.data.checkpoints.at(-1).day_key)")
         assert page.locator("#stat-coverage").inner_text() == f"{last['verified']} / {last['coverage']}"
         assert page.locator(".proof").count() == len(last['evidence'])
-        if last['id']=='2026-11-12_2258':
+        if last['id']=='2026-11-13_2152':
+            assert page.locator('#capture-date').inner_text()=='Nov 13, 2026'
+            assert page.locator('#stat-hours').inner_text()=='22.9h'
+            assert page.locator('#stat-floor').inner_text()=='53.9B'
+            assert page.locator('.proof').count()==4
+            assert page.locator('.proof.profile-proof').count()==0
+            assert page.locator('.movement-item').count()>=50
+            assert '+1B' in page.locator('.movement-item[data-player="id:1316700350"]').inner_text()
+            for image_id in ('EV0173','EV0176'):
+                page.locator(f'.proof[data-proof="{image_id}"]').click()
+                page.wait_for_function("document.querySelector('#lightbox-image').naturalWidth > 0")
+                page.locator('#lightbox button').click()
+            page.locator('#prev').click()
+            assert page.locator('#capture-date').inner_text()=='Nov 12, 2026'
+            assert page.locator('.proof.profile-proof').count()==1
+        nov12=next(i for i,cp in enumerate(data['checkpoints']) if cp['day_key']=='2026-11-12')
+        page.locator('#capture-slider').evaluate("(el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}))}",str(nov12))
+        if data['checkpoints'][nov12]['id']=='2026-11-12_2258':
             assert page.locator('#capture-date').inner_text() == 'Nov 12, 2026'
             assert page.locator('#stat-hours').inner_text() == '22.4h'
             assert page.locator('#stat-floor').inner_text() == '53.8B'
@@ -56,13 +75,14 @@ try:
             assert '+519.1M' in page.locator('.profile-update-detail').inner_text()
             assert '0h 42m' in page.locator('.profile-update-detail').inner_text()
             assert 'PU0001' in page.locator('.profile-update-detail a').inner_text()
-            assert 'PU0001' in page.locator('.profile-history a').first.get_attribute('data-proof')
+            assert page.locator('.profile-history a').filter(has_text='Nov 12, 2026').first.get_attribute('data-proof')=='PU0001'
             page.screenshot(path=str(ROOT/'preview-apathy-desktop.png'),full_page=True)
             page.locator('#profile-clear').click()
             page.locator('#prev').click()
             assert page.locator('#capture-date').inner_text() == 'Nov 11, 2026'
             assert page.locator('.proof').count() == 8
             page.locator('#next').click()
+        page.locator('#capture-slider').evaluate("(el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}))}",str(total_days-1))
         page.locator("#chart.js-plotly-plot").wait_for(timeout=20000)
         assert page.locator("#chart").evaluate("el => el.data.some(t => t.meta && t.meta.key)")
         assert page.locator("#chart").evaluate("el => el.layout.xaxis.type") == "category"
@@ -85,22 +105,21 @@ try:
         page.locator('#search').fill('ismyaimbotworking')
         assert page.locator('#profile-range').is_visible()
         assert page.locator('#range-start').input_value()=='2026-10-10'
-        assert page.locator('#range-end').input_value()=='2026-11-12'
+        assert page.locator('#range-end').input_value()==last_day
         full_rate=page.locator('.profile-stats > div').filter(has_text='AVERAGE OBSERVED NET RATE').locator('b').inner_text()
         page.locator('#range-start').fill('2026-11-07')
         assert page.locator('#range-start').input_value()=='2026-11-07'
-        assert 'from=2026-11-07' in page.url and 'to=2026-11-12' in page.url
-        assert page.locator('.profile-history a').count()==6
-        assert '6 pictured readings' in page.locator('#range-summary').inner_text()
+        assert 'from=2026-11-07' in page.url and f'to={last_day}' in page.url
+        selected_rows=[row for row in data['observations'] if row['key']=='id:1316700350' and '2026-11-07'<=row['day_key']<=last_day]
+        assert page.locator('.profile-history a').count()==len(selected_rows)
+        assert f'{len(selected_rows)} pictured readings' in page.locator('#range-summary').inner_text()
         recent_rate=page.locator('.profile-stats > div').filter(has_text='AVERAGE OBSERVED NET RATE').locator('b').inner_text()
         assert recent_rate!=full_rate
-        selected_rows=[row for row in data['observations'] if row['key']=='id:1316700350' and '2026-11-07'<=row['day_key']<='2026-11-12']
-        from datetime import datetime
         expected=(int(selected_rows[-1]['balance'])-int(selected_rows[0]['balance']))/((datetime.fromisoformat(selected_rows[-1]['at'].replace('Z','+00:00'))-datetime.fromisoformat(selected_rows[0]['at'].replace('Z','+00:00'))).total_seconds()/3600)
         actual=page.evaluate("(()=>{const r=rangedHistory('id:1316700350');return timeRate(BigInt(r.at(-1).balance)-BigInt(r[0].balance),hours(r[0].at,r.at(-1).at))})()")
         assert abs(actual-expected)<1
         assert page.locator('#chart').evaluate("el=>el.layout.xaxis.tickvals.includes('2026-11-07') && !el.layout.xaxis.tickvals.includes('2026-10-31')")
-        page.locator('#range-start').fill('2026-11-12')
+        page.locator('#range-start').fill(last_day)
         assert page.locator('.profile-history a').count()==1
         assert page.locator('.profile-stats > div').filter(has_text='AVERAGE OBSERVED NET RATE').locator('b').inner_text()=='—'
         assert 'two are required' in page.locator('#range-summary').inner_text()
@@ -111,11 +130,12 @@ try:
         page.locator('#chart.js-plotly-plot').wait_for(timeout=20000)
         assert page.locator('#profile-range').is_visible() and page.locator('.profile-history a').count()>1
         page.locator('#range-week').click()
-        assert page.locator('#range-start').input_value()=='2026-11-06'
+        week_start=(datetime.fromisoformat(last_day)-timedelta(days=6)).date().isoformat()
+        assert page.locator('#range-start').input_value()==week_start
         page.reload(wait_until='domcontentloaded')
         page.locator('#profile-title').get_by_text('ismyaimbotworking').wait_for(timeout=20000)
-        assert page.locator('#range-start').input_value()=='2026-11-06'
-        assert page.locator('#range-end').input_value()=='2026-11-12'
+        assert page.locator('#range-start').input_value()==week_start
+        assert page.locator('#range-end').input_value()==last_day
         page.locator('#clear').click()
         assert page.locator('#profile-range').is_hidden()
         assert 'from=' not in page.url and 'to=' not in page.url
@@ -144,9 +164,10 @@ try:
         assert 'EV0166' in analysis.locator('#overview-content').inner_text() and 'EV0169' in analysis.locator('#overview-content').inner_text()
         assert 'two' not in analysis.locator('#overview-rate').inner_text().lower()
         analysis.locator('#overview-start').fill('2026-11-10')
-        assert 'from=2026-11-10' in analysis.url and 'to=2026-11-12' in analysis.url
-        assert '3 photographed points' in analysis.locator('#overview-rate').inner_text()
-        analysis.locator('#overview-start').fill('2026-11-12')
+        assert 'from=2026-11-10' in analysis.url and f'to={last_day}' in analysis.url
+        cerulean_window=sum(row['key']==next(p['key'] for p in data['players'] if p['name']=='Ceruleanflare2') and '2026-11-10'<=row['day_key']<=last_day for row in data['observations'])
+        assert f'{cerulean_window} photographed points' in analysis.locator('#overview-rate').inner_text()
+        analysis.locator('#overview-start').fill(last_day)
         assert 'Two are needed' in analysis.locator('#overview-rate').inner_text()
         analysis.locator('#overview-all').click()
         assert 'from=' not in analysis.url
