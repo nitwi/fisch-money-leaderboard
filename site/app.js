@@ -43,7 +43,7 @@ function chartSlots(checkpoints,from,to){
     return photos.length?photos.map((cp,index)=>({id:index?`${day}#${index+1}`:day,day,cp,index,count:photos.length})):[{id:day,day,cp:null,index:0,count:0}];
   });
 }
-const weekendSellCheckpoint = (cp) => cp?.id==="2026-11-14_1128" && cp.complete && cp.day_snapshot_count>1;
+const weekendSettlement = (cp) => Boolean(cp?.weekend_settlement);
 const hours = (a,b) => (new Date(b).getTime() - new Date(a).getTime()) / 3600000;
 const elapsedLabel = (value) => {
   if (value===null) return "BASELINE";
@@ -53,6 +53,7 @@ const elapsedLabel = (value) => {
 const timeRate = (delta, intervalHours) => Number.isFinite(intervalHours) && intervalHours > 0 && BigInt(delta) <= BigInt(Number.MAX_SAFE_INTEGER) && BigInt(delta) >= -BigInt(Number.MAX_SAFE_INTEGER) ? Number(BigInt(delta)) / intervalHours : null;
 const rateText = (amount) => amount === null ? "—" : `${amount >= 0 ? "+" : "−"}${compact(BigInt(Math.round(Math.abs(amount))))}/hr`;
 const confirmed = (row) => row?.status === "verified";
+const crossesSettlement = (first,last) => state.data.checkpoints.some(cp=>weekendSettlement(cp) && new Date(cp.at)>new Date(first) && new Date(cp.at)<=new Date(last));
 const rainbowBase = (delta) => delta > 0n ? BigInt(Math.round(Number(delta) / 1.5)) : null;
 const rainbowRateHtml = (rate) => rate === null || rate <= 0 ? "" : `<span class="rainbow-static">Rainbow-equivalent ${rateText(rate / 1.5)}</span> <span class="muted">(no multiplier ${rateText(rate)})</span>`;
 const evidenceUrl = (proof) => proof ? encodeURI(proof.url).replaceAll("#", "%23") : "#";
@@ -74,7 +75,7 @@ function interval(cp,row,previous) {
   const delta = old ? BigInt(row.balance)-BigInt(old.balance) : null;
   const elapsed = old ? hours(old.at,row.at) : null;
   const currentGap = gapInfo(cp,row), oldGap = old ? gapInfo(previous,old) : {ahead:null,behind:null};
-  return {old,delta,elapsed,currentGap,oldGap,rate:delta===null?null:timeRate(delta,elapsed)};
+  return {old,delta,elapsed,currentGap,oldGap,rate:delta===null||weekendSettlement(cp)?null:timeRate(delta,elapsed)};
 }
 function nearbyLabel(position,current,previous) {
   if (!current) return `<span class="muted">${position}: unknown</span>`;
@@ -107,10 +108,10 @@ function setRateRange(start,end) {
 }
 function renderEvents() {
   $("event-list").innerHTML=patchEvents.map(event=>`<article class="event-card" style="--event-color:${safe(event.color)}" data-event="${safe(event.id)}"><span class="event-icon"><span aria-hidden="true">${safe(event.glyph)}</span><img src="${safe(event.icon)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()"></span><div class="event-copy"><button type="button" class="event-jump" data-event-day="${safe(event.day)}" aria-label="View ${safe(event.title)} on the ledger">${safe(event.version)} · ${safe(event.title)} ↗</button><p>${safe(labelDate(event.at))} · ${safe(event.description)}</p><a href="${safe(event.source)}" target="_blank" rel="noopener noreferrer">Wiki patch notes ↗</a><a href="${safe(event.credit)}" target="_blank" rel="noopener noreferrer">Rod image credit ↗</a></div></article>`).join("");
-  const weekend=state.data.checkpoints.find(weekendSellCheckpoint);
+  const weekend=state.data.checkpoints.find(cp=>cp.day_key==='2026-11-14'&&weekendSettlement(cp));
   if(weekend){
     const proof=byId(weekend.primary_evidence[0]);
-    $("event-list").insertAdjacentHTML("beforeend",`<article class="event-card" style="--event-color:#ff8495" data-event="weekend-sell"><span class="event-icon" aria-hidden="true">↗</span><div class="event-copy"><button type="button" class="event-jump" data-event-capture="${safe(weekend.id)}">Major weekend sell point · ${safe(labelDate(weekend.at))} ↗</button><p>Owner-marked post-update photo. Compare with the separate before-update point on the same Saturday; observed held-balance changes are not verified sale proceeds.</p>${proof?`<a href="${safe(evidenceUrl(proof))}" target="_blank" rel="noopener noreferrer">Original photo proof ${safe(proof.id)} ↗</a>`:""}</div></article>`);
+    $("event-list").insertAdjacentHTML("beforeend",`<article class="event-card" style="--event-color:#61e5b3" data-event="weekend-settlement"><span class="event-icon" aria-hidden="true">↗</span><div class="event-copy"><button type="button" class="event-jump" data-event-capture="${safe(weekend.id)}">Saturday settlement baseline · ${safe(labelDate(weekend.at))} ↗</button><p>Owner-supplied before/after and later Saturday photos describe one end-of-week held-balance level. Earlier images remain context; the balance step is not an hourly earning rate.</p>${proof?`<a href="${safe(evidenceUrl(proof))}" target="_blank" rel="noopener noreferrer">Selected board proof ${safe(proof.id)} ↗</a>`:""}</div></article>`);
     $("event-list").querySelector("[data-event-capture]").addEventListener("click",()=>{
       moveTo(state.data.checkpoints.findIndex(cp=>cp.id===weekend.id));
       const u=new URL(location.href);u.searchParams.set("day",weekend.day_key);u.searchParams.set("snapshot",weekend.id);history.replaceState(null,"",u);
@@ -133,8 +134,7 @@ function renderControls() {
   const lastPhoto=state.data.captures.find(row=>row.id===cp.source_checkpoints.at(-1));
   const extra=cp.source_checkpoints.length>1?` · ${cp.source_checkpoints.length} batches (${Math.round(hours(firstPhoto.at,lastPhoto.at)*60)}min)` : "";
   const earlier=cp.earlier_session_ids.length?` · ${cp.earlier_session_ids.length} earlier capture${cp.earlier_session_ids.length===1?"":"s"}`:"";
-  const saturday=cp.day_key>="2026-11-14"&&new Date(`${cp.day_key}T12:00:00Z`).getUTCDay()===6;
-  $("capture-index").textContent=`DAY ${String(calendar.indexOf(cp.day_key)+1).padStart(2,"0")} / ${calendar.length}${saturday?` · SATURDAY PHOTO ${cp.day_snapshot_number}/${cp.day_snapshot_count}`:""}${weekendSellCheckpoint(cp)?" · MAJOR WEEKEND SELL POINT":""} · photo ${labelDate(cp.at)}${extra}${earlier}`;
+  $("capture-index").textContent=`DAY ${String(calendar.indexOf(cp.day_key)+1).padStart(2,"0")} / ${calendar.length}${weekendSettlement(cp)?" · WEEKEND SETTLEMENT BASELINE":""} · photo ${labelDate(cp.at)}${extra}${earlier}`;
   $("prev").disabled=state.index===0; $("next").disabled=state.index===cps.length-1;
   $("capture-slider").value=String(state.index);
   $("first-date").textContent=dayLabel(cps[0].day_key);
@@ -143,10 +143,10 @@ function renderControls() {
   $("stat-coverage-note").textContent=`${cp.verified} read directly from PNG${cp.coverage<50?` · ${50-cp.coverage} not pictured`:""}`;
   const previous=cps[state.index-1], deltaHours=previous?hours(previous.at,cp.at):null;
   $("stat-hours").textContent=elapsedLabel(deltaHours);
-  $("stat-hours-note").textContent=cp.precision.includes("approximate")||previous?.precision?.includes("approximate")?"Capture time approximate; rate is indicative":"Between daily snapshot photos · UTC";
+  $("stat-hours-note").textContent=weekendSettlement(cp)?"Time between photos; no hourly rate across Saturday settlement":cp.precision.includes("approximate")||previous?.precision?.includes("approximate")?"Capture time approximate; rate is indicative":"Between daily snapshot photos · UTC";
   const gains=(state.byCapture.get(cp.id)||[]).map((row)=>({row,change:interval(cp,row,previous)})).filter(({row,change})=>confirmed(row)&&confirmed(change.old)&&change.delta>0n).sort((a,b)=>a.change.delta>b.change.delta?-1:1);
   $("stat-largest").textContent=gains.length?signed(gains[0].change.delta):"—";
-  $("stat-largest-name").textContent=gains.length?gains[0].row.username:"No photo-checked adjacent comparison";
+  $("stat-largest-name").textContent=gains.length?`${gains[0].row.username}${weekendSettlement(cp)?" · weekly settlement step":""}`:"No photo-checked adjacent comparison";
   const floor=atRank(cp,50); $("stat-floor").textContent=floor?compact(floor.balance):"UNKNOWN";
   $("stat-floor-note").textContent=floor?`#50 ${floor.username}`:"Rank #50 not pictured or unreadable";
   const notice=$("notice");
@@ -171,7 +171,7 @@ function renderChart() {
     const xs=days, ys=rows.map((row)=>row?Number(row.balance):null);
     plot.push({type:"scatter",mode:"lines+markers",name:player(key).name,x:xs,y:ys,connectgaps:false,meta:{key},
       line:{color,width:selected===key?3.5:1.5,shape:"linear"},marker:{size:rows.map(row=>row?(selected===key?8:5):0),symbol:"circle",color},
-      customdata:rows.map((row,index)=>row?[`#${row.rank}`,exact(row.balance),(row.balance_evidence||row.evidence).join(", "),labelDate(row.at),row.board_at?`Rank pictured ${labelDate(row.board_at)} · board balance ${exact(row.board_balance)}`:"Rank and balance pictured together",dayLabel(slots[index].day),slots[index].count>1?`Saturday photo ${slots[index].index+1}/${slots[index].count}${weekendSellCheckpoint(slots[index].cp)?" · major weekend sell point":""}`:"Latest daily photo",slots[index].cp.id]:["unknown","unknown","","unknown","",dayLabel(slots[index].day),"No photo",""]),
+      customdata:rows.map((row,index)=>row?[`#${row.rank}`,exact(row.balance),(row.balance_evidence||row.evidence).join(", "),labelDate(row.at),row.board_at?`Rank pictured ${labelDate(row.board_at)} · board balance ${exact(row.board_balance)}`:"Rank and balance pictured together",dayLabel(slots[index].day),weekendSettlement(slots[index].cp)?"Saturday settlement baseline · no hourly earning pace":"Selected daily photo",slots[index].cp.id]:["unknown","unknown","","unknown","",dayLabel(slots[index].day),"No photo",""]),
       hovertemplate:"<b>%{fullData.name}</b><br>Leaderboard day %{customdata[5]}<br>%{customdata[6]}<br>Balance photo %{customdata[3]} (Chicago)<br>%{customdata[0]} · %{customdata[1]}<br>%{customdata[4]}<br>Balance proof: %{customdata[2]}<extra></extra>",showlegend:false});
     // A faint dashed bridge marks an unobserved span rather than inventing intermediate points.
     let previous=-1;
@@ -182,13 +182,12 @@ function renderChart() {
   if(!maxY.length){node.textContent="No screenshot-derived balances yet.";return;}
   const ymax=Math.max(...maxY)*1.08;
   const visibleEvents=patchEvents.filter(event=>days.includes(event.day));
-  const saturdaySlots=slots.filter(slot=>slot.cp && slot.count>1);
-  const sellSlot=slots.find(slot=>weekendSellCheckpoint(slot.cp));
+  const saturdaySlots=slots.filter(slot=>weekendSettlement(slot.cp));
   const layout={height:node.clientHeight||495,autosize:true,paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(4,19,31,.44)",font:{color:"#9cbdcc",family:"Inter, Segoe UI, Arial",size:10},margin:{l:65,r:20,t:38,b:55},hovermode:"closest",hoverlabel:{bgcolor:"#0c2b3f",bordercolor:"#29f8ff",font:{color:"#e8fbff"}},
     xaxis:{type:"category",categoryorder:"array",categoryarray:days,range:[-.5,days.length-.5],tickmode:"array",tickvals:days,ticktext:slots.map((slot,index)=>slot.index?compactTicks?`#${slot.index+1}`:new Intl.DateTimeFormat("en-US",{timeZone:"America/Chicago",hour:"numeric",minute:"2-digit"}).format(new Date(slot.cp.at)):compactTicks&&index%3!==0&&!slot.day.endsWith("-01")&&index!==days.length-1&&slot.count<2?"":index===0||slot.day.endsWith("-01")?dayLabel(slot.day).replace(/,\s*\d{4}$/,""):slot.day.slice(-2)),tickangle:compactTicks?-30:-45,tickfont:{size:9},gridcolor:"rgba(154,219,231,.1)"},
     yaxis:{title:"HELD C$",range:[0,ymax],tickformat:"~s",gridcolor:"rgba(154,219,231,.1)",zeroline:false},
-    shapes:[...visibleEvents.map(event=>({type:"line",x0:event.day,x1:event.day,y0:0,y1:1,yref:"paper",line:{color:event.color,width:2,dash:"dash"}})),...(sellSlot?[{type:"line",x0:sellSlot.id,x1:sellSlot.id,y0:0,y1:1,yref:"paper",line:{color:"#ff8495",width:2,dash:"dash"}}]:[]),...(selectedSlot?[{type:"line",x0:selectedSlot.id,x1:selectedSlot.id,y0:0,y1:1,yref:"paper",line:{color:"#ffd166",width:1.4,dash:"dot"}}]:[])],
-    annotations:[...visibleEvents.map(event=>({x:event.day,xref:"x",y:1,yref:"paper",yanchor:"bottom",showarrow:false,text:event.version,font:{color:event.color,size:10},bgcolor:"#071927",bordercolor:event.color,borderwidth:1,borderpad:3})),...saturdaySlots.map(slot=>({x:slot.id,xref:"x",y:.97,yref:"paper",yanchor:"bottom",showarrow:false,captureevents:true,text:weekendSellCheckpoint(slot.cp)?"SELL":`SAT ${slot.index+1}`,font:{color:weekendSellCheckpoint(slot.cp)?"#ff8495":"#c9a7ff",size:9},bgcolor:"#071927",bordercolor:weekendSellCheckpoint(slot.cp)?"#ff8495":"#c9a7ff",borderwidth:1,borderpad:2}))],uirevision:"money-ledger"};
+    shapes:[...visibleEvents.map(event=>({type:"line",x0:event.day,x1:event.day,y0:0,y1:1,yref:"paper",line:{color:event.color,width:2,dash:"dash"}})),...saturdaySlots.map(slot=>({type:"line",x0:slot.id,x1:slot.id,y0:0,y1:1,yref:"paper",line:{color:"#61e5b3",width:1.6,dash:"dash"}})),...(selectedSlot?[{type:"line",x0:selectedSlot.id,x1:selectedSlot.id,y0:0,y1:1,yref:"paper",line:{color:"#ffd166",width:1.4,dash:"dot"}}]:[])],
+    annotations:[...visibleEvents.map(event=>({x:event.day,xref:"x",y:1,yref:"paper",yanchor:"bottom",showarrow:false,text:event.version,font:{color:event.color,size:10},bgcolor:"#071927",bordercolor:event.color,borderwidth:1,borderpad:3})),...saturdaySlots.map(slot=>({x:slot.id,xref:"x",y:.90,yref:"paper",yanchor:"bottom",showarrow:false,captureevents:true,text:"WEEKEND",font:{color:"#61e5b3",size:9},bgcolor:"#071927",bordercolor:"#61e5b3",borderwidth:1,borderpad:2}))],uirevision:"money-ledger"};
   Plotly.react(node,plot,layout,{displayModeBar:false,responsive:true,scrollZoom:false});
   if (!state.chartBound) {
     node.on("plotly_click",(event)=>{const marker=event.points?.[0],key=marker?.data?.meta?.key,id=marker?.customdata?.[7];const index=state.data.checkpoints.findIndex(cp=>cp.id===id);if(index>=0)moveTo(index);if(key)setSelected(key);if(index>=0){const u=new URL(location.href);u.searchParams.set("day",state.data.checkpoints[index].day_key);u.searchParams.set("snapshot",id);history.replaceState(null,"",u);}});
@@ -217,14 +216,14 @@ function renderMovement() {
     const positionChange=old?positionDelta>0?`<b class="rank-move up" title="Up ${positionDelta} places">↑${positionDelta}</b>`:positionDelta<0?`<b class="rank-move down" title="Down ${-positionDelta} places">↓${-positionDelta}</b>`:`<b class="rank-move steady" title="Rank unchanged">→0</b>`:previous?.complete?`<b class="rank-move new">NEW</b>`:"";
     const known=delta!==null;
     const tentative=!confirmed(row)||(old&&!confirmed(old));
-    const large=known && !tentative && delta>=BigInt(state.data.threshold);
+    const large=known && !tentative && !weekendSettlement(cp) && delta>=BigInt(state.data.threshold);
     const previousText=old?exact(old.balance):"previous amount unknown";
     const deltaText=known?`${tentative?"≈":""}${signed(delta)} observed net C$`:"no adjacent measurement";
-    const rateLine=known?(rate>0 ? `<span class="rainbow-rate">${rainbowRateHtml(rate)}</span><span class="muted">Rainbow base-equivalent ≈${signed(rainbowBase(delta))} C$ if all net change were 1.5× sales</span>` : `<span class="muted">Observed no-multiplier rate ${rateText(rate)}</span>`):"";
+    const rateLine=known?(weekendSettlement(cp)?'<span class="muted">Saturday end-of-week balance settlement · new baseline for following photos · no hourly rate inferred</span>':rate>0 ? `<span class="rainbow-rate">${rainbowRateHtml(rate)}</span><span class="muted">Rainbow base-equivalent ≈${signed(rainbowBase(delta))} C$ if all net change were 1.5× sales</span>` : `<span class="muted">Observed no-multiplier rate ${rateText(rate)}</span>`):"";
     const quality="Photo checked";
     const update=state.profileUpdates.get(row.profile_update);
     const profileNote=update?`<p class="profile-update-inline">Player profile at ${safe(labelDate(update.at,{second:"2-digit"}))}: ${signed(BigInt(update.balance)-BigInt(update.source_balance))} observed net C$ since the #${update.source_rank} board photo at ${safe(labelDate(update.source_at,{second:"2-digit"}))} (${elapsedLabel(hours(update.source_at,update.at))}, no multiplier ${rateText(timeRate(BigInt(update.balance)-BigInt(update.source_balance),hours(update.source_at,update.at)))}). Rank and neighboring gaps remain from the board photo; no later rank was photographed.</p>`:"";
-    return `<button class="movement-item ${state.selected===row.key?"selected":""}" data-player="${safe(row.key)}" type="button"><div class="top"><strong>${avatar(player(row.key))}${safe(row.username)}</strong><span>${rank} ${positionChange}</span></div><p>${safe(previousText)} → <strong title="${safe(exact(row.balance))}">${tentative?"≈":""}${compact(row.balance)}</strong> · <span class="${known?(delta<0n?"negative":"positive"):"muted"}">${safe(deltaText)}</span></p>${rateLine?`<p class="rate-compare">${rateLine}</p>`:""}${profileNote}<p class="gaps">${nearbyLabel("↑",currentGap.ahead,oldGap.ahead)}<br>${nearbyLabel("↓",currentGap.behind,oldGap.behind)}</p><div class="badges"><span class="badge ${tentative?"gold":""}">${quality}${tentative?" · check proof":""}</span>${update?'<span class="badge gold">LATER PROFILE BALANCE</span>':""}${large?'<span class="badge gold">NOTABLE +8B</span>':""}${old?"":`<span class="badge">${previous?.complete&&confirmed(row)?"FIRST SEEN IN TOP 50":"PREVIOUS UNKNOWN"}</span>`}${cp.precision.includes("approximate")||previous?.precision?.includes("approximate")?'<span class="badge gold">TIME APPROX.</span>':""}</div></button>`;
+    return `<button class="movement-item ${state.selected===row.key?"selected":""}" data-player="${safe(row.key)}" type="button"><div class="top"><strong>${avatar(player(row.key))}${safe(row.username)}</strong><span>${rank} ${positionChange}</span></div><p>${safe(previousText)} → <strong title="${safe(exact(row.balance))}">${tentative?"≈":""}${compact(row.balance)}</strong> · <span class="${known?(delta<0n?"negative":"positive"):"muted"}">${safe(deltaText)}</span></p>${rateLine?`<p class="rate-compare">${rateLine}</p>`:""}${profileNote}<p class="gaps">${nearbyLabel("↑",currentGap.ahead,oldGap.ahead)}<br>${nearbyLabel("↓",currentGap.behind,oldGap.behind)}</p><div class="badges"><span class="badge ${tentative?"gold":""}">${quality}${tentative?" · check proof":""}</span>${weekendSettlement(cp)?'<span class="badge gold">WEEKEND SETTLEMENT BASELINE</span>':""}${update?'<span class="badge gold">LATER PROFILE BALANCE</span>':""}${large?'<span class="badge gold">NOTABLE +8B</span>':""}${old?"":`<span class="badge">${previous?.complete&&confirmed(row)?"FIRST SEEN IN TOP 50":"PREVIOUS UNKNOWN"}</span>`}${cp.precision.includes("approximate")||previous?.precision?.includes("approximate")?'<span class="badge gold">TIME APPROX.</span>':""}</div></button>`;
   }).join("");
   const prior=previous?.complete && cp.complete && state.view!=="gains" ? (state.byCapture.get(previous.id)||[]).filter(row=>!point(cp,row.key)) : [];
   const departures=prior.map(row=>`<button class="movement-item" type="button" data-player="${safe(row.key)}"><div class="top"><strong>${avatar(player(row.key))}${safe(row.username)}</strong><span>#${row.rank} → outside Top 50</span></div><p>Last observed ${compact(row.balance)}. Current amount unknown; last captured floor ${compact(atRank(cp,50)?.balance||null)}.</p><div class="badges"><span class="badge gold">LEFT PICTURED TOP 50</span></div></button>`).join("");
@@ -235,6 +234,7 @@ function standoutRows() {
   const cps=state.data.checkpoints, threshold=BigInt(state.data.threshold), flags=[], recentLarge=new Map();
   for(let index=1;index<cps.length;index++){
     const cp=cps[index], previous=cps[index-1];
+    if(weekendSettlement(cp)){recentLarge.clear();continue;}
     for(const row of state.byCapture.get(cp.id)||[]){
       if(!confirmed(row))continue;
       const change=interval(cp,row,previous);
@@ -311,13 +311,14 @@ function renderProfile() {
   const rows=rangedHistory(key), first=rows[0], last=rows.at(-1), meta=player(key);
   $("profile-title").textContent=meta.name;
   $("profile-hint").textContent=`${dayLabel(state.rangeStart)} – ${dayLabel(state.rangeEnd)} · ${rows.length} photo-checked point${rows.length===1?"":"s"} in range`;
-  $("range-summary").textContent=rows.length>=2?`${meta.name}: ${rows.length} pictured readings · first ${labelDate(first.at)} → last ${labelDate(last.at)} · ${elapsedLabel(hours(first.at,last.at))} elapsed`:`${meta.name}: ${rows.length} pictured reading${rows.length===1?"":"s"} in this window · two are required for an average`;
+  const settlementBetween=rows.length>=2&&crossesSettlement(first.at,last.at);
+  $("range-summary").textContent=rows.length>=2?`${meta.name}: ${rows.length} pictured readings · first ${labelDate(first.at)} → last ${labelDate(last.at)} · ${elapsedLabel(hours(first.at,last.at))} elapsed${settlementBetween?" · crosses Saturday settlement; no average pace calculated":""}`:`${meta.name}: ${rows.length} pictured reading${rows.length===1?"":"s"} in this window · two are required for an average`;
   if(!rows.length){wrapper.className="profile-empty";wrapper.textContent=`No photo-checked ${meta.name} balance appears between ${dayLabel(state.rangeStart)} and ${dayLabel(state.rangeEnd)}. Widen the range to compare two photographed amounts.`;return;}
-  const gain=BigInt(last.balance)-BigInt(first.balance), time=hours(first.at,last.at), comparable=rows.length>=2 && time>0;
+  const gain=BigInt(last.balance)-BigInt(first.balance), time=hours(first.at,last.at), hasEndpoints=rows.length>=2&&time>0, comparable=hasEndpoints&&!settlementBetween;
   const average=comparable?timeRate(gain,time):null;
-  const pairs=rows.slice(1).map((row,i)=>({start:rows[i],end:row,delta:BigInt(row.balance)-BigInt(rows[i].balance),elapsed:hours(rows[i].at,row.at)}));
-  const maximum=pairs.filter(x=>x.delta>0n).sort((a,b)=>a.delta>b.delta?-1:1)[0];
-  const fastest=pairs.filter(x=>x.delta>0n && x.elapsed>0).sort((a,b)=>Number(b.delta)/b.elapsed-Number(a.delta)/a.elapsed)[0];
+  const pairs=rows.slice(1).map((row,i)=>({start:rows[i],end:row,delta:BigInt(row.balance)-BigInt(rows[i].balance),elapsed:hours(rows[i].at,row.at),settlement:crossesSettlement(rows[i].at,row.at)}));
+  const maximum=pairs.filter(x=>!x.settlement&&x.delta>0n).sort((a,b)=>a.delta>b.delta?-1:1)[0];
+  const fastest=pairs.filter(x=>!x.settlement&&x.delta>0n && x.elapsed>0).sort((a,b)=>Number(b.delta)/b.elapsed-Number(a.delta)/a.elapsed)[0];
   const peak=rows.reduce((best,row)=>BigInt(row.balance)>BigInt(best.balance)?row:best,first);
   const link=meta.roblox_id?`<a href="https://www.roblox.com/users/${safe(meta.roblox_id)}/profile" rel="noopener noreferrer" target="_blank">View Roblox profile ↗</a>`:"<small>Roblox account not yet independently matched</small>";
   const selectedRow=point(state.data.checkpoints[state.index],key);
@@ -331,13 +332,13 @@ function renderProfile() {
   wrapper.className="";
   const stats=[
     ["LAST BALANCE IN RANGE",compact(last.balance),latestUpdate?`Profile photo · rank #${last.rank} from earlier board`:`Rank #${last.rank} · photo checked`],
-    ["AVERAGE OBSERVED NET RATE",rateText(average),comparable?`${elapsedLabel(time)} first-to-last photos · gaps included`:"At least two photo readings required"],
-    ["NET IN RANGE",comparable?signed(gain):"—",comparable?`${rows.length} pictured photo points · held C$ change`:"Only one pictured balance"],
+    ["AVERAGE OBSERVED NET RATE",rateText(average),settlementBetween?"Window crosses weekend settlement; start on or after Saturday baseline":comparable?`${elapsedLabel(time)} first-to-last photos · gaps included`:"At least two photo readings required"],
+    ["NET IN RANGE",hasEndpoints?signed(gain):"—",hasEndpoints?`${rows.length} pictured photo points · ${settlementBetween?"includes weekly balance step":"held C$ change"}`:"Only one pictured balance"],
     ["RAINBOW 1.5× BASE",comparable&&gain>0n?`≈${signed(rainbowBase(gain))}`:"—",comparable&&gain>0n?`(no multiplier ${signed(gain)} net C$)` : "Only comparable positive net changes",comparable&&gain>0n],
     ["RAINBOW-EQUIVALENT NET RATE",average>0?rateText(average/1.5):"—",`(no multiplier ${rateText(average)}) · ${comparable?elapsedLabel(time):"unknown interval"}`,average>0],
-    ["LARGEST INTERVAL",maximum?signed(maximum.delta):"—",maximum?`${maximum.elapsed.toFixed(1)}h between pictured readings`:"No increase measured"],
+    ["LARGEST NON-SETTLEMENT INTERVAL",maximum?signed(maximum.delta):"—",maximum?`${maximum.elapsed.toFixed(1)}h between pictured readings`:"No non-settlement increase measured"],
     ["PEAK RAINBOW-EQUIVALENT RATE",fastest?rateText(timeRate(fastest.delta,fastest.elapsed)/1.5):"—",fastest?`(no multiplier ${rateText(timeRate(fastest.delta,fastest.elapsed))}) · ${fastest.elapsed.toFixed(1)}h`:"No positive interval",Boolean(fastest)],
-    ["CHANGE IN RANGE",comparable&&BigInt(first.balance)>0n?`${(Number(gain)/Number(first.balance)*100).toFixed(1)}%`:"—","Observed balance only"]
+    ["CHANGE IN RANGE",hasEndpoints&&BigInt(first.balance)>0n?`${(Number(gain)/Number(first.balance)*100).toFixed(1)}%`:"—","Observed held balance only"]
   ];
   if(latestUpdate){const delta=BigInt(latestUpdate.balance)-BigInt(latestUpdate.source_balance), elapsed=hours(latestUpdate.source_at,latestUpdate.at);stats.splice(1,0,["SINCE BOARD PHOTO",signed(delta),`${elapsedLabel(elapsed)} · no multiplier ${rateText(timeRate(delta,elapsed))}`]);}
   const historyRows=rows.slice().reverse().map((row)=>{
@@ -349,7 +350,8 @@ function renderProfile() {
     const rate=change===null?null:timeRate(change,elapsed);
     const rankChange=old?old.rank>row.rank?`<b class="rank-move up">↑${old.rank-row.rank}</b>`:old.rank<row.rank?`<b class="rank-move down">↓${row.rank-old.rank}</b>`:`<b class="rank-move steady">→0</b>`:"";
     const photoTime=localDay(row.at)===row.day_key?new Intl.DateTimeFormat("en-US",{timeZone:"America/Chicago",hour:"numeric",minute:"2-digit"}).format(new Date(row.at)):labelDate(row.at);
-    return `<a href="#evidence" data-capture="${ix}" data-proof="${safe((row.balance_evidence||row.evidence)[0]||"")}"><span>${safe(dayLabel(row.day_key))} · photo ${safe(photoTime)} · #${row.rank} ${rankChange}${row.board_at?` · rank photo ${safe(labelDate(row.board_at))}`:""}</span><strong title="${safe(exact(row.balance))}">${compact(row.balance)}</strong><span>${change!==null?`${signed(change)} · ${rate>0?rainbowRateHtml(rate):rateText(rate)}`:"—"} ↗</span></a>`;
+    const settlement=weekendSettlement(state.data.checkpoints[ix]);
+    return `<a href="#evidence" data-capture="${ix}" data-proof="${safe((row.balance_evidence||row.evidence)[0]||"")}"><span>${safe(dayLabel(row.day_key))} · photo ${safe(photoTime)} · #${row.rank} ${rankChange}${row.board_at?` · rank photo ${safe(labelDate(row.board_at))}`:""}</span><strong title="${safe(exact(row.balance))}">${compact(row.balance)}</strong><span>${change!==null?`${signed(change)} · ${settlement?"WEEKEND SETTLEMENT · no hourly rate":rate>0?rainbowRateHtml(rate):rateText(rate)}`:settlement?"WEEKEND BASELINE":"—"} ↗</span></a>`;
   }).join("");
   wrapper.innerHTML=`<div class="profile-head">${avatar(meta)||'<span class="avatar-fallback">@</span>'}<div><strong>${safe(meta.name)}</strong><small>${meta.roblox_name&&meta.roblox_name!==meta.name?`Current Roblox name: ${safe(meta.roblox_name)}`:"Historical screenshot name"}</small>${link}</div></div>${profileNote}<div class="profile-stats">${stats.map(([title,value,detail,rainbow])=>`<div><span>${safe(title)}</span><b class="${rainbow?"rainbow-static":""}" title="${safe(value)}">${safe(value)}</b><small>${safe(detail)}</small></div>`).join("")}</div><p class="card-title"><small>Peak pictured ${compact(peak.balance)} · ${BigInt(peak.balance)-BigInt(last.balance)>0n?`${compact(BigInt(peak.balance)-BigInt(last.balance))} below peak`:"at peak"}. Rainbow 1.5× figures are hypothetical base equivalents if all positive net balance change came from boosted sales. Spending, stored fish, and other changes cannot be inferred from the board.</small></p><div class="profile-history">${historyRows}</div>`;
   wrapper.querySelectorAll("[data-capture]").forEach((el)=>el.addEventListener("click",(event)=>{event.preventDefault();moveTo(Number(el.dataset.capture));document.querySelector(".evidence-section").scrollIntoView({behavior:"smooth"});spotlight(el.dataset.proof);}));

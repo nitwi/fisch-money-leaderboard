@@ -267,7 +267,7 @@ def build(source, copy_images=True):
 
     selected_sessions = {cp["id"] for cp in daily}
     archived_sessions = [{**cp, "day_key": assignment[cp["id"]], "used_as_daily": cp["id"] in selected_sessions} for cp in sessions]
-    payload = {"version": 5, "timezone": "America/Chicago", "threshold": "8000000000",
+    payload = {"version": 6, "timezone": "America/Chicago", "threshold": "8000000000",
                "checkpoints": daily, "observations": daily_observations,
                "sessions": archived_sessions, "session_observations": session_observations,
                "captures": sorted_cps, "capture_observations": observations,

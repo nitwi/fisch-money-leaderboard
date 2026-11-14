@@ -10,8 +10,9 @@ function overviewRate() {
     return;
   }
   const first=rows[0], last=rows.at(-1), elapsed=hours(first.at,last.at);
-  const delta=BigInt(last.balance)-BigInt(first.balance), rate=timeRate(delta,elapsed);
-  node.innerHTML=`<p>${rows.length} photographed points · ${safe(labelDate(first.at))} → ${safe(labelDate(last.at))} · ${elapsedLabel(elapsed)} between actual photos (gaps included).</p><div class="overview-metrics"><div><span>OBSERVED NET RATE</span><b>${rateText(rate)}</b></div><div><span>NET HELD C$ CHANGE</span><b>${signed(delta)}</b></div>${rate>0?`<div><span>HYPOTHETICAL 1.5× BASE RATE</span><b class="rainbow-static">${rateText(rate/1.5)}</b></div>`:""}</div>`;
+  const delta=BigInt(last.balance)-BigInt(first.balance), settlement=crossesSettlement(first.at,last.at);
+  const rate=settlement?null:timeRate(delta,elapsed);
+  node.innerHTML=`<p>${rows.length} photographed points · ${safe(labelDate(first.at))} → ${safe(labelDate(last.at))} · ${elapsedLabel(elapsed)} between actual photos (gaps included).${settlement?" Window crosses a Saturday settlement; start on or after its baseline to inspect a rate.":""}</p><div class="overview-metrics"><div><span>OBSERVED NET RATE</span><b>${rateText(rate)}</b></div><div><span>NET HELD C$ CHANGE</span><b>${signed(delta)}</b></div>${rate>0?`<div><span>HYPOTHETICAL 1.5× BASE RATE</span><b class="rainbow-static">${rateText(rate/1.5)}</b></div>`:""}</div>`;
 }
 
 function overviewRange(start,end) {

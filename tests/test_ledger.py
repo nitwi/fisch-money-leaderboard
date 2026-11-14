@@ -53,7 +53,7 @@ class LedgerTests(unittest.TestCase):
         self.assertEqual(sum(row['status']=='verified' for row in data['observations']),sum(cp['verified'] for cp in data['checkpoints']))
         for row_id in ('2026-10-17_1014_R15','2026-11-04_0152_R16','2026-11-04_2101_R16'):
             self.assertEqual(next(row['status'] for row in data['capture_observations'] if row['id']==row_id),'captured_pending_transcription')
-        self.assertGreaterEqual(sum(cp['complete'] for cp in data['checkpoints']),36)
+        self.assertGreaterEqual(sum(cp['complete'] for cp in data['checkpoints']),35)
         self.assertFalse(any(row['status'].startswith('ocr_') for row in data['observations']))
 
     def test_observed_rate_and_roblox_identity(self):
@@ -195,22 +195,22 @@ class LedgerTests(unittest.TestCase):
         self.assertEqual((proofs['EV0175']['min'],proofs['EV0175']['max']),(32,47))
         self.assertEqual((proofs['EV0176']['min'],proofs['EV0176']['max']),(47,50))
 
-    def test_november_14_before_and_weekend_sell_are_distinct_photo_points_on_one_day(self):
+    def test_november_14_saturday_settlement_uses_latest_full_photo_and_keeps_both_originals(self):
         data=self.data
         saturday=[cp for cp in data['checkpoints'] if cp['day_key']=='2026-11-14']
-        morning=next(cp for cp in saturday if cp['id']=='2026-11-14_1124')
-        sell=next(cp for cp in saturday if cp['id']=='2026-11-14_1128')
+        self.assertEqual(len(saturday),1)
+        selected=saturday[0]
+        self.assertTrue(selected['weekend_settlement'])
+        self.assertEqual((selected['day_snapshot_number'],selected['day_snapshot_count']),(1,1))
+        self.assertEqual((selected['verified'],selected['coverage']),(50,50))
+        self.assertIn('2026-11-14_1124',selected['earlier_session_ids'])
+        self.assertIn('2026-11-14_1128',selected['daily_source_sessions'])
+        self.assertTrue(set(['EV0180','EV0181','EV0182','EV0183','EV0184','EV0185','EV0186','EV0187']).issubset(selected['evidence']))
+        captures={cp['id']:cp for cp in data['captures']}
+        morning=captures['2026-11-14_1124'];sell=captures['2026-11-14_1128']
         self.assertEqual((morning['at'],sell['at']),('2026-11-14T17:24:00Z','2026-11-14T17:28:00Z'))
-        self.assertEqual((morning['day_snapshot_number'],sell['day_snapshot_number']),(1,2))
-        self.assertGreaterEqual(morning['day_snapshot_count'],2)
-        self.assertEqual(morning['day_snapshot_count'],sell['day_snapshot_count'])
         self.assertEqual((morning['verified'],sell['verified']),(50,50))
-        self.assertEqual((morning['coverage'],sell['coverage']),(50,50))
-        self.assertEqual(morning['primary_evidence'],['EV0180','EV0181','EV0182','EV0183'])
-        self.assertEqual(sell['primary_evidence'],['EV0184','EV0185','EV0186','EV0187'])
-        self.assertEqual(sell['earlier_session_ids'],['2026-11-14_1124'])
-        self.assertEqual(sell['evidence'],morning['primary_evidence']+sell['primary_evidence'])
-        rows={(row['checkpoint'],row['rank']):row for row in data['observations']}
+        rows={(row['checkpoint'],row['rank']):row for row in data['capture_observations']}
         before=rows[(morning['id'],2)];after=rows[(sell['id'],2)]
         self.assertEqual((before['key'],after['key']),('id:1316700350','id:1316700350'))
         self.assertEqual((before['balance'],after['balance']),('270468412868','295783485068'))
@@ -218,6 +218,11 @@ class LedgerTests(unittest.TestCase):
         self.assertEqual((datetime.fromisoformat(after['at'].replace('Z','+00:00'))-datetime.fromisoformat(before['at'].replace('Z','+00:00'))).total_seconds(),240)
         self.assertEqual((rows[(morning['id'],50)]['balance'],rows[(sell['id'],50)]['balance']),('53947555782','53947556832'))
         self.assertEqual(rows[(sell['id'],50)]['evidence'],['EV0187'])
+        if selected['id']==sell['id']:
+            self.assertEqual(selected['at'],sell['at'])
+            self.assertEqual(selected['primary_evidence'],sell['evidence'])
+            self.assertEqual(selected['evidence'],morning['evidence']+sell['evidence'])
+            self.assertEqual(next(row['balance'] for row in data['observations'] if row['checkpoint']==selected['id'] and row['rank']==2),after['balance'])
         proofs={item['id']:item for item in data['evidence']}
         self.assertEqual(proofs['EV0180']['sha256'],'1dcce2d5b1168dc520b06de4019f86ec54102d95acdf5674e5dbfb228753fbfe')
         self.assertEqual(proofs['EV0184']['sha256'],'4d7eaed39ae3d62fb8e94436360bb9d862e6fa390644cb3ad3799e833d10d59f')
@@ -251,7 +256,7 @@ class LedgerTests(unittest.TestCase):
 
     def test_apathy_profile_photo_updates_only_the_balance_and_uses_exact_photo_interval(self):
         data=self.data
-        self.assertEqual(data['version'],5)
+        self.assertEqual(data['version'],6)
         self.assertEqual(len(data['profile_updates']),1)
         update=data['profile_updates'][0]
         old=next(row for row in data['capture_observations'] if row['id']=='2026-11-12_2258_R02')
@@ -335,7 +340,7 @@ class LedgerTests(unittest.TestCase):
                           datetime.fromisoformat(halloween.replace('Z','+00:00'))).total_seconds()/3600,
                           19+47/60, "DST crossing uses actual UTC elapsed hours, not wall-clock subtraction")
 
-    def test_future_saturday_keeps_before_sell_and_evening_points_on_one_day(self):
+    def test_saturday_selects_one_latest_full_settlement_and_keeps_earlier_proofs(self):
         def photo(name,at,complete=True):
             return {'id':name,'at':at,'captured_from':at,'captured_to':at,
                     'source_checkpoints':[name],'evidence':[name],
@@ -358,21 +363,25 @@ class LedgerTests(unittest.TestCase):
         sources=[friday,before,partial,sell,evening,sunday]
         chosen,rows,_,assignment=select_daily(sources,sum((readings(cp) for cp in sources),[]),sources)
         self.assertEqual([(cp['day_key'],cp['id']) for cp in chosen],[
-            ('2026-11-13','friday'),('2026-11-14','before'),('2026-11-14','sell'),
-            ('2026-11-14','evening'),('2026-11-15','sunday')])
-        self.assertEqual([cp['day_snapshot_number'] for cp in chosen if cp['day_key']=='2026-11-14'],[1,2,3])
-        self.assertTrue(all(cp['day_snapshot_count']==3 for cp in chosen if cp['day_key']=='2026-11-14'))
-        self.assertEqual(chosen[2]['earlier_session_ids'],['before','partial'])
-        self.assertEqual(chosen[2]['daily_source_sessions'],['before','partial','sell'])
-        self.assertEqual(chosen[3]['earlier_session_ids'],['before','partial','sell'])
+            ('2026-11-13','friday'),('2026-11-14','evening'),('2026-11-15','sunday')])
+        self.assertEqual((chosen[1]['day_snapshot_number'],chosen[1]['day_snapshot_count']),(1,1))
+        self.assertTrue(chosen[1]['weekend_settlement'])
+        self.assertFalse(chosen[0]['weekend_settlement'])
+        self.assertEqual(chosen[1]['earlier_session_ids'],['before','partial','sell'])
+        self.assertEqual(chosen[1]['daily_source_sessions'],['before','partial','sell','evening'])
+        self.assertEqual(chosen[1]['evidence'],['before','partial','sell','evening'])
         self.assertEqual(assignment['partial'],'2026-11-14')
-        self.assertEqual([row['checkpoint'] for row in rows if row['day_key']=='2026-11-14' and row['rank']==2],['before','sell','evening'])
-        self.assertEqual((datetime.fromisoformat(chosen[2]['at'].replace('Z','+00:00'))-datetime.fromisoformat(chosen[1]['at'].replace('Z','+00:00'))).total_seconds(),240)
+        self.assertEqual([row['checkpoint'] for row in rows if row['day_key']=='2026-11-14' and row['rank']==2],['evening'])
+        now=[friday,before,partial,sell]
+        current,_,_,_=select_daily(now,sum((readings(cp) for cp in now),[]),now)
+        self.assertEqual(current[-1]['id'],'sell')
+        self.assertEqual(current[-1]['evidence'],['before','partial','sell'])
         old_morning=photo('old_morning','2026-10-31T15:00:00Z')
         old_evening=photo('old_evening','2026-11-01T04:40:00Z')
         old=[old_morning,old_evening]
         older,_,_,_=select_daily(old,sum((readings(cp) for cp in old),[]),old)
-        self.assertEqual([cp['id'] for cp in older],['old_evening'],"Historical Saturdays retain one selected photo")
+        self.assertEqual([cp['id'] for cp in older],['old_evening'])
+        self.assertTrue(older[0]['weekend_settlement'])
         next_morning=photo('next_morning','2026-11-16T16:00:00Z')
         next_noon=photo('next_noon','2026-11-16T18:00:00Z')
         weekday=[next_morning,next_noon]
