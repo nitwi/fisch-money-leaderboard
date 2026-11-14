@@ -20,6 +20,7 @@
 .event-copy p{margin:5px 0}
 .event-copy a{font-size:11px;color:var(--cyan);text-decoration:underline;text-underline-offset:3px;margin-right:12px}
 .event-copy a:hover,.event-copy a:focus-visible{color:var(--text)}
+.chart-card #chart g.annotation{cursor:pointer}
 .event-context{color:var(--muted);font-size:11px}
 @media(max-width:780px){.range-panel{grid-template-columns:1fr}.range-controls input{width:min(42vw,160px)}}
 @media(max-width:410px){.range-controls{align-items:stretch}.range-controls label{flex:1 1 42%;min-width:0}.range-controls input{width:100%;max-width:none}.range-controls button{flex:1 1 100%}}

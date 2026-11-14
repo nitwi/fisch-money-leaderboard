@@ -34,7 +34,7 @@ function renderOverview(){
   const {row,change,cp,previous,climb,severity,repeatWith}=item;
   const meta=player(row.key), first=state.data.checkpoints[0].day_key, last=state.data.checkpoints.at(-1).day_key;
   const url=new URL("./",location.href);
-  url.searchParams.set("day",cp.day_key);url.searchParams.set("player",row.key);
+  url.searchParams.set("day",cp.day_key);url.searchParams.set("snapshot",cp.id);url.searchParams.set("player",row.key);
   if(state.rangeStart!==first||state.rangeEnd!==last){url.searchParams.set("from",state.rangeStart);url.searchParams.set("to",state.rangeEnd);}
   const context=patchEvents.filter(event=>new Date(event.at)>new Date(change.old.at)&&new Date(event.at)<=new Date(row.at));
   $("overview-content").innerHTML=`<div class="overview-person">${avatar(meta)}<span>${safe(meta.name)}<small> · ${safe(dayLabel(cp.day_key))}</small></span></div><p><span class="overview-emphasis">${safe(severity.toUpperCase())} photographed change</span> · ${safe(dayLabel(previous.day_key))} #${change.old.rank} → ${safe(dayLabel(cp.day_key))} #${row.rank}${climb>0?` · ↑${climb} ranks`:""}</p><div class="overview-metrics"><div><span>OBSERVED NET HELD C$</span><b>${signed(change.delta)}</b></div><div><span>PHOTO INTERVAL</span><b>${elapsedLabel(change.elapsed)}</b></div><div><span>BEFORE</span><b>${safe(exact(change.old.balance))}</b></div><div><span>AFTER</span><b>${safe(exact(row.balance))}</b></div><div><span>NET RATE (NO MULTIPLIER)</span><b>${rateText(change.rate)}</b></div></div><p>Before photo ${safe(labelDate(change.old.at))}; after photo ${safe(labelDate(row.at))}. Neither photo establishes gross sales or activity throughout the interval.</p>${repeatWith?`${repeatedGainNote(item)}<button class="overview-other" type="button" data-other-day="${repeatWith.index}" data-other-player="${safe(row.key)}">Inspect the other large change ↗</button>`:""}${context.length?`<p class="event-context">Patch during this photo interval: ${context.map(event=>`<a href="${safe(event.source)}" target="_blank" rel="noopener noreferrer">${safe(event.version)} · ${safe(event.title)} ↗</a>`).join(" · ")}. Timing alone does not establish cause.</p>`:""}<div class="overview-links">${standoutProof(change.old,"Before original")}${standoutProof(row,"After original")}</div><a class="overview-dashboard-link" href="${safe(url.href)}">Open day and player on dashboard ↗</a><div class="overview-range"><h3>Average over your date range</h3><div class="overview-range-fields"><label>From <input id="overview-start" type="date" min="${first}" max="${last}" value="${state.rangeStart}" aria-label="First date for selected player's average"></label><label>Through <input id="overview-end" type="date" min="${first}" max="${last}" value="${state.rangeEnd}" aria-label="Last date for selected player's average"></label></div><div class="overview-range-actions"><button id="overview-week" type="button">Recent 7 days</button><button id="overview-all" type="button">All history</button></div><div id="overview-rate"></div><p>First-to-last net balance ÷ actual elapsed time. Dormant gaps count unless excluded by the dates.</p></div>`;
@@ -51,7 +51,7 @@ window.focusStandout=(index,key)=>{
   const flag=standoutRows().find(item=>item.index===index && item.row.key===key);
   if(!flag)return;
   focusedFlag=flag;state.index=index;state.selected=key;
-  const u=new URL(location.href);u.searchParams.set("day",flag.cp.day_key);u.searchParams.set("player",key);history.replaceState(null,"",u);
+  const u=new URL(location.href);u.searchParams.set("day",flag.cp.day_key);u.searchParams.set("snapshot",flag.cp.id);u.searchParams.set("player",key);history.replaceState(null,"",u);
   renderOverview();renderHighlights();
   if(window.innerWidth<901)$("standout-overview").scrollIntoView({behavior:"smooth",block:"start"});
 };
@@ -74,7 +74,7 @@ async function initStandouts(){
     state.rangeEnd=valid(u.searchParams.get("to"))?u.searchParams.get("to"):last;
     if(state.rangeStart>state.rangeEnd){state.rangeStart=first;state.rangeEnd=last;}
     const flags=standoutRows();
-    const chosen=flags.find(item=>item.cp.day_key===u.searchParams.get("day")&&item.row.key===u.searchParams.get("player"))||flags[0];
+    const chosen=flags.find(item=>item.cp.id===u.searchParams.get("snapshot")&&item.row.key===u.searchParams.get("player"))||flags.find(item=>item.cp.day_key===u.searchParams.get("day")&&item.row.key===u.searchParams.get("player"))||flags[0];
     state.index=chosen?.index??data.checkpoints.length-1;
     state.selected=chosen?.row.key??null;
     if(chosen){focusedFlag=chosen;state.highlightPage=Math.floor(flags.indexOf(chosen)/8);renderOverview();}

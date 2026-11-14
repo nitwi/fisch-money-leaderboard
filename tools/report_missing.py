@@ -6,9 +6,9 @@ from pathlib import Path
 
 root=Path(__file__).resolve().parents[1]
 data=json.loads((root/'site/data.json').read_text(encoding='utf-8'))
-by_day=defaultdict(list)
+by_checkpoint=defaultdict(list)
 for row in data['observations']:
-    by_day[row['day_key']].append(row)
+    by_checkpoint[row['checkpoint']].append(row)
 
 
 def spans(ranks):
@@ -21,22 +21,23 @@ def spans(ranks):
 
 start=date.fromisoformat(data['checkpoints'][0]['day_key'])
 end=date.fromisoformat(data['checkpoints'][-1]['day_key'])
+pictured_days={cp['day_key'] for cp in data['checkpoints']}
 missing_days=[]
 day=start
 while day<=end:
-    if day.isoformat() not in by_day:missing_days.append(day.isoformat())
+    if day.isoformat() not in pictured_days:missing_days.append(day.isoformat())
     day+=timedelta(days=1)
 print('CALENDAR_DAYS_WITHOUT_SELECTED_PHOTO:', ', '.join(missing_days) or 'none')
 print('INCOMPLETE_SELECTED_DAILY_BOARDS:')
 incomplete=0
 for cp in data['checkpoints']:
-    rows=by_day[cp['day_key']]
+    rows=by_checkpoint[cp['id']]
     if len(rows)!=50:raise ValueError(f'Missing rank slots in generated daily data: {cp["day_key"]}')
     unpictured=spans(row['rank'] for row in rows if row['status']=='not_captured')
     unreadable=spans(row['rank'] for row in rows if row['status']=='captured_pending_transcription')
     if unpictured!='none' or unreadable!='none':
         incomplete+=1
-        print(f'  {cp["day_key"]}: {cp["verified"]}/50 verified; not pictured {unpictured}; photographed but unreadable {unreadable}; chosen photo {cp["id"]}')
+        print(f'  {cp["day_key"]} photo {cp["day_snapshot_number"]}/{cp["day_snapshot_count"]}: {cp["verified"]}/50 verified; not pictured {unpictured}; photographed but unreadable {unreadable}; chosen capture {cp["id"]}')
 if not incomplete:print('  none; every selected daily point has all 50 photographed and verified ranks')
 print('ORIGINAL_PHOTOGRAPHED_RANKS_STILL_UNREADABLE:')
 proofs={item['id']:item for item in data['evidence']}

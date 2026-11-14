@@ -121,3 +121,11 @@ EV0176,47-50,Read November 13 evening bottom four ranks from original 21:52:09 P
 EV0177,33-46,Read each Oct 23 missing lower-board name and exact amount from owner-saved original; ranks 47-48 match later EV0054
 EV0178,33-45,Read each Oct 30 missing lower-board name and exact amount from owner-saved original; lower photo #47=54021982113 differs from later bottom EV0082 #47=54021982503 and is not selected for that rank
 EV0179,33-47,Read each Nov 2 missing lower-board name and exact amount from owner-saved original; #48 matches EV0094
+EV0180,1-16,Read every Nov 14 11:24 AM pre-update top-board name and exact amount from owner-pasted original PNG bytes
+EV0181,17-32,Read every Nov 14 11:24 AM pre-update middle-board name and exact amount from owner-pasted original PNG bytes
+EV0182,33-48,Read every Nov 14 11:24 AM pre-update lower-board name and exact amount from owner-pasted original PNG bytes
+EV0183,47-50,Read Nov 14 11:24 AM pre-update bottom ranks from original PNG; #47-48 corroborate EV0182
+EV0184,1-16,Read every Nov 14 11:28 AM post-update top-board name and exact amount from owner-pasted original PNG bytes
+EV0185,17-32,Read every Nov 14 11:28 AM post-update middle-board name and exact amount from owner-pasted original PNG bytes
+EV0186,33-48,Read every Nov 14 11:28 AM post-update lower-board name and exact amount from owner-pasted original PNG bytes
+EV0187,48-50,Read Nov 14 11:28 AM post-update bottom ranks from original PNG; #48 corroborates EV0186

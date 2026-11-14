@@ -35,6 +35,15 @@ function calendarDays(first,last) {
   while (cursor<=end) {result.push(cursor.toISOString().slice(0,10));cursor.setUTCDate(cursor.getUTCDate()+1);}
   return result;
 }
+function chartSlots(checkpoints,from,to){
+  const byDay=new Map();
+  for(const cp of checkpoints){if(!byDay.has(cp.day_key))byDay.set(cp.day_key,[]);byDay.get(cp.day_key).push(cp);}
+  return calendarDays(from,to).flatMap(day=>{
+    const photos=byDay.get(day)||[];
+    return photos.length?photos.map((cp,index)=>({id:index?`${day}#${index+1}`:day,day,cp,index,count:photos.length})):[{id:day,day,cp:null,index:0,count:0}];
+  });
+}
+const weekendSellCheckpoint = (cp) => cp?.id==="2026-11-14_1128" && cp.complete && cp.day_snapshot_count>1;
 const hours = (a,b) => (new Date(b).getTime() - new Date(a).getTime()) / 3600000;
 const elapsedLabel = (value) => {
   if (value===null) return "BASELINE";
@@ -82,7 +91,7 @@ function setSelected(key) {
   window.history.replaceState(null,"",u);
   render();
 }
-function moveTo(index) { state.index=Math.max(0,Math.min(state.data.checkpoints.length-1,index)); $("capture-slider").value=state.index; const u=new URL(location.href);if(u.searchParams.has("day")){u.searchParams.set("day",state.data.checkpoints[state.index].day_key);history.replaceState(null,"",u);}render(); }
+function moveTo(index) { state.index=Math.max(0,Math.min(state.data.checkpoints.length-1,index)); $("capture-slider").value=state.index; const u=new URL(location.href),cp=state.data.checkpoints[state.index];if(u.searchParams.has("day"))u.searchParams.set("day",cp.day_key);if(u.searchParams.has("snapshot")||cp.day_snapshot_count>1)u.searchParams.set("snapshot",cp.id);if(u.searchParams.has("day")||u.searchParams.has("snapshot"))history.replaceState(null,"",u);render(); }
 function setRateRange(start,end) {
   const first=state.data.checkpoints[0].day_key, last=state.data.checkpoints.at(-1).day_key;
   const bound=(day)=>day<first?first:day>last?last:day;
@@ -98,6 +107,16 @@ function setRateRange(start,end) {
 }
 function renderEvents() {
   $("event-list").innerHTML=patchEvents.map(event=>`<article class="event-card" style="--event-color:${safe(event.color)}" data-event="${safe(event.id)}"><span class="event-icon"><span aria-hidden="true">${safe(event.glyph)}</span><img src="${safe(event.icon)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()"></span><div class="event-copy"><button type="button" class="event-jump" data-event-day="${safe(event.day)}" aria-label="View ${safe(event.title)} on the ledger">${safe(event.version)} · ${safe(event.title)} ↗</button><p>${safe(labelDate(event.at))} · ${safe(event.description)}</p><a href="${safe(event.source)}" target="_blank" rel="noopener noreferrer">Wiki patch notes ↗</a><a href="${safe(event.credit)}" target="_blank" rel="noopener noreferrer">Rod image credit ↗</a></div></article>`).join("");
+  const weekend=state.data.checkpoints.find(weekendSellCheckpoint);
+  if(weekend){
+    const proof=byId(weekend.primary_evidence[0]);
+    $("event-list").insertAdjacentHTML("beforeend",`<article class="event-card" style="--event-color:#ff8495" data-event="weekend-sell"><span class="event-icon" aria-hidden="true">↗</span><div class="event-copy"><button type="button" class="event-jump" data-event-capture="${safe(weekend.id)}">Major weekend sell point · ${safe(labelDate(weekend.at))} ↗</button><p>Owner-marked post-update photo. Compare with the separate before-update point on the same Saturday; observed held-balance changes are not verified sale proceeds.</p>${proof?`<a href="${safe(evidenceUrl(proof))}" target="_blank" rel="noopener noreferrer">Original photo proof ${safe(proof.id)} ↗</a>`:""}</div></article>`);
+    $("event-list").querySelector("[data-event-capture]").addEventListener("click",()=>{
+      moveTo(state.data.checkpoints.findIndex(cp=>cp.id===weekend.id));
+      const u=new URL(location.href);u.searchParams.set("day",weekend.day_key);u.searchParams.set("snapshot",weekend.id);history.replaceState(null,"",u);
+      $("chart").scrollIntoView({behavior:"smooth",block:"start"});
+    });
+  }
   $("event-list").querySelectorAll("[data-event-day]").forEach(el=>el.addEventListener("click",()=>{
     const index=state.data.checkpoints.findIndex(cp=>cp.day_key===el.dataset.eventDay);
     if(index>=0){
@@ -109,11 +128,13 @@ function renderEvents() {
 function renderControls() {
   const cps=state.data.checkpoints, cp=cps[state.index];
   $("capture-date").textContent=dayLabel(cp.day_key);
+  const calendar=[...new Set(cps.map(item=>item.day_key))];
   const firstPhoto=state.data.captures.find(row=>row.id===cp.source_checkpoints[0]);
   const lastPhoto=state.data.captures.find(row=>row.id===cp.source_checkpoints.at(-1));
   const extra=cp.source_checkpoints.length>1?` · ${cp.source_checkpoints.length} batches (${Math.round(hours(firstPhoto.at,lastPhoto.at)*60)}min)` : "";
   const earlier=cp.earlier_session_ids.length?` · ${cp.earlier_session_ids.length} earlier capture${cp.earlier_session_ids.length===1?"":"s"}`:"";
-  $("capture-index").textContent=`DAY ${String(state.index+1).padStart(2,"0")} / ${cps.length} · photo ${labelDate(cp.at)}${extra}${earlier}`;
+  const saturday=cp.day_key>="2026-11-14"&&new Date(`${cp.day_key}T12:00:00Z`).getUTCDay()===6;
+  $("capture-index").textContent=`DAY ${String(calendar.indexOf(cp.day_key)+1).padStart(2,"0")} / ${calendar.length}${saturday?` · SATURDAY PHOTO ${cp.day_snapshot_number}/${cp.day_snapshot_count}`:""}${weekendSellCheckpoint(cp)?" · MAJOR WEEKEND SELL POINT":""} · photo ${labelDate(cp.at)}${extra}${earlier}`;
   $("prev").disabled=state.index===0; $("next").disabled=state.index===cps.length-1;
   $("capture-slider").value=String(state.index);
   $("first-date").textContent=dayLabel(cps[0].day_key);
@@ -134,9 +155,9 @@ function renderControls() {
 }
 function renderChart() {
   const node=$("chart"), cps=state.data.checkpoints;
-  const days=calendarDays(cps[0].day_key,cps.at(-1).day_key).filter(day=>!state.selected || day>=state.rangeStart && day<=state.rangeEnd);
+  const slots=chartSlots(cps,cps[0].day_key,cps.at(-1).day_key).filter(slot=>!state.selected || slot.day>=state.rangeStart && slot.day<=state.rangeEnd);
+  const days=slots.map(slot=>slot.id);
   const compactTicks=node.clientWidth<500;
-  const checkpointByDay=new Map(cps.map(cp=>[cp.day_key,cp]));
   const selected=state.selected, limit=state.filter==="all"?50:Number(state.filter);
   const allowed=new Set(cps.flatMap((cp)=>(state.byCapture.get(cp.id)||[]).filter((row)=>row.rank<=limit).map((row)=>row.key)));
   if(selected)allowed.add(selected);
@@ -144,30 +165,41 @@ function renderChart() {
   if (!keys.length) {node.textContent="No screenshot readings yet for this range.";return;}
   const plot=[];
   keys.forEach((key,i)=>{
-    const rows=days.map(day=>checkpointByDay.has(day)?point(checkpointByDay.get(day),key):null);
+    const rows=slots.map(slot=>slot.cp?point(slot.cp,key):null);
     if (!rows.some(Boolean))return;
     const color=selected && selected!==key?"rgba(125,151,164,.22)":palette[i%palette.length];
     const xs=days, ys=rows.map((row)=>row?Number(row.balance):null);
     plot.push({type:"scatter",mode:"lines+markers",name:player(key).name,x:xs,y:ys,connectgaps:false,meta:{key},
       line:{color,width:selected===key?3.5:1.5,shape:"linear"},marker:{size:rows.map(row=>row?(selected===key?8:5):0),symbol:"circle",color},
-      customdata:rows.map((row)=>row?[`#${row.rank}`,exact(row.balance),(row.balance_evidence||row.evidence).join(", "),labelDate(row.at),row.board_at?`Rank pictured ${labelDate(row.board_at)} · board balance ${exact(row.board_balance)}`:"Rank and balance pictured together"]:["unknown","unknown","","unknown",""]),
-      hovertemplate:"<b>%{fullData.name}</b><br>Leaderboard day %{x}<br>Balance photo %{customdata[3]} (Chicago)<br>%{customdata[0]} · %{customdata[1]}<br>%{customdata[4]}<br>Balance proof: %{customdata[2]}<extra></extra>",showlegend:false});
+      customdata:rows.map((row,index)=>row?[`#${row.rank}`,exact(row.balance),(row.balance_evidence||row.evidence).join(", "),labelDate(row.at),row.board_at?`Rank pictured ${labelDate(row.board_at)} · board balance ${exact(row.board_balance)}`:"Rank and balance pictured together",dayLabel(slots[index].day),slots[index].count>1?`Saturday photo ${slots[index].index+1}/${slots[index].count}${weekendSellCheckpoint(slots[index].cp)?" · major weekend sell point":""}`:"Latest daily photo",slots[index].cp.id]:["unknown","unknown","","unknown","",dayLabel(slots[index].day),"No photo",""]),
+      hovertemplate:"<b>%{fullData.name}</b><br>Leaderboard day %{customdata[5]}<br>%{customdata[6]}<br>Balance photo %{customdata[3]} (Chicago)<br>%{customdata[0]} · %{customdata[1]}<br>%{customdata[4]}<br>Balance proof: %{customdata[2]}<extra></extra>",showlegend:false});
     // A faint dashed bridge marks an unobserved span rather than inventing intermediate points.
     let previous=-1;
     rows.forEach((row,index)=>{if(!row)return;if(previous>=0 && index-previous>1){plot.push({type:"scatter",mode:"lines",x:[xs[previous],xs[index]],y:[ys[previous],ys[index]],line:{color:selected && selected!==key?"rgba(125,151,164,.11)":color,width:1,dash:"dot"},hoverinfo:"skip",showlegend:false});}previous=index;});
   });
-  const selectedAt=cps[state.index].day_key;
+  const selectedSlot=slots.find(slot=>slot.cp?.id===cps[state.index].id);
   const maxY=plot.flatMap((item)=>item.y||[]).filter((x)=>Number.isFinite(x));
   if(!maxY.length){node.textContent="No screenshot-derived balances yet.";return;}
   const ymax=Math.max(...maxY)*1.08;
   const visibleEvents=patchEvents.filter(event=>days.includes(event.day));
+  const saturdaySlots=slots.filter(slot=>slot.cp && slot.count>1);
+  const sellSlot=slots.find(slot=>weekendSellCheckpoint(slot.cp));
   const layout={height:node.clientHeight||495,autosize:true,paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(4,19,31,.44)",font:{color:"#9cbdcc",family:"Inter, Segoe UI, Arial",size:10},margin:{l:65,r:20,t:38,b:55},hovermode:"closest",hoverlabel:{bgcolor:"#0c2b3f",bordercolor:"#29f8ff",font:{color:"#e8fbff"}},
-    xaxis:{type:"category",categoryorder:"array",categoryarray:days,range:[-.5,days.length-.5],tickmode:"array",tickvals:days,ticktext:days.map((day,index)=>compactTicks&&index%3!==0&&!day.endsWith("-01")&&index!==days.length-1?"":index===0||day.endsWith("-01")?dayLabel(day).replace(/,\s*\d{4}$/,""):day.slice(-2)),tickangle:compactTicks?-30:-45,tickfont:{size:9},gridcolor:"rgba(154,219,231,.1)"},
+    xaxis:{type:"category",categoryorder:"array",categoryarray:days,range:[-.5,days.length-.5],tickmode:"array",tickvals:days,ticktext:slots.map((slot,index)=>slot.index?compactTicks?`#${slot.index+1}`:new Intl.DateTimeFormat("en-US",{timeZone:"America/Chicago",hour:"numeric",minute:"2-digit"}).format(new Date(slot.cp.at)):compactTicks&&index%3!==0&&!slot.day.endsWith("-01")&&index!==days.length-1&&slot.count<2?"":index===0||slot.day.endsWith("-01")?dayLabel(slot.day).replace(/,\s*\d{4}$/,""):slot.day.slice(-2)),tickangle:compactTicks?-30:-45,tickfont:{size:9},gridcolor:"rgba(154,219,231,.1)"},
     yaxis:{title:"HELD C$",range:[0,ymax],tickformat:"~s",gridcolor:"rgba(154,219,231,.1)",zeroline:false},
-    shapes:[...visibleEvents.map(event=>({type:"line",x0:event.day,x1:event.day,y0:0,y1:1,yref:"paper",line:{color:event.color,width:2,dash:"dash"}})),{type:"line",x0:selectedAt,x1:selectedAt,y0:0,y1:1,yref:"paper",line:{color:"#ffd166",width:1.4,dash:"dot"}}],
-    annotations:visibleEvents.map(event=>({x:event.day,xref:"x",y:1,yref:"paper",yanchor:"bottom",showarrow:false,text:event.version,font:{color:event.color,size:10},bgcolor:"#071927",bordercolor:event.color,borderwidth:1,borderpad:3})),uirevision:"money-ledger"};
+    shapes:[...visibleEvents.map(event=>({type:"line",x0:event.day,x1:event.day,y0:0,y1:1,yref:"paper",line:{color:event.color,width:2,dash:"dash"}})),...(sellSlot?[{type:"line",x0:sellSlot.id,x1:sellSlot.id,y0:0,y1:1,yref:"paper",line:{color:"#ff8495",width:2,dash:"dash"}}]:[]),...(selectedSlot?[{type:"line",x0:selectedSlot.id,x1:selectedSlot.id,y0:0,y1:1,yref:"paper",line:{color:"#ffd166",width:1.4,dash:"dot"}}]:[])],
+    annotations:[...visibleEvents.map(event=>({x:event.day,xref:"x",y:1,yref:"paper",yanchor:"bottom",showarrow:false,text:event.version,font:{color:event.color,size:10},bgcolor:"#071927",bordercolor:event.color,borderwidth:1,borderpad:3})),...saturdaySlots.map(slot=>({x:slot.id,xref:"x",y:.97,yref:"paper",yanchor:"bottom",showarrow:false,captureevents:true,text:weekendSellCheckpoint(slot.cp)?"SELL":`SAT ${slot.index+1}`,font:{color:weekendSellCheckpoint(slot.cp)?"#ff8495":"#c9a7ff",size:9},bgcolor:"#071927",bordercolor:weekendSellCheckpoint(slot.cp)?"#ff8495":"#c9a7ff",borderwidth:1,borderpad:2}))],uirevision:"money-ledger"};
   Plotly.react(node,plot,layout,{displayModeBar:false,responsive:true,scrollZoom:false});
-  if (!state.chartBound) {node.on("plotly_click",(event)=>{const key=event.points?.[0]?.data?.meta?.key;if(key)setSelected(key);});state.chartBound=true;}
+  if (!state.chartBound) {
+    node.on("plotly_click",(event)=>{const marker=event.points?.[0],key=marker?.data?.meta?.key,id=marker?.customdata?.[7];const index=state.data.checkpoints.findIndex(cp=>cp.id===id);if(index>=0)moveTo(index);if(key)setSelected(key);if(index>=0){const u=new URL(location.href);u.searchParams.set("day",state.data.checkpoints[index].day_key);u.searchParams.set("snapshot",id);history.replaceState(null,"",u);}});
+    node.on("plotly_clickannotation",(event)=>{
+      const slot=chartSlots(state.data.checkpoints,state.data.checkpoints[0].day_key,state.data.checkpoints.at(-1).day_key).find(item=>item.id===event.annotation?.x&&item.cp);
+      if(!slot)return;
+      moveTo(state.data.checkpoints.findIndex(cp=>cp.id===slot.cp.id));
+      const u=new URL(location.href);u.searchParams.set("day",slot.day);u.searchParams.set("snapshot",slot.cp.id);history.replaceState(null,"",u);
+    });
+    state.chartBound=true;
+  }
   $("chart-title").textContent=selected?`${player(selected).name} · balance history`:"Leaderboard trajectories";
 }
 function renderMovement() {
@@ -278,7 +310,7 @@ function renderProfile() {
   if(!key){$("profile-title").textContent="Select a player";$("profile-hint").textContent="Search, click a chart line, or choose a movement row.";wrapper.className="profile-empty";wrapper.textContent="Historical balances, rates and position changes appear here.";return;}
   const rows=rangedHistory(key), first=rows[0], last=rows.at(-1), meta=player(key);
   $("profile-title").textContent=meta.name;
-  $("profile-hint").textContent=`${dayLabel(state.rangeStart)} – ${dayLabel(state.rangeEnd)} · ${rows.length} photo-checked daily point${rows.length===1?"":"s"} in range`;
+  $("profile-hint").textContent=`${dayLabel(state.rangeStart)} – ${dayLabel(state.rangeEnd)} · ${rows.length} photo-checked point${rows.length===1?"":"s"} in range`;
   $("range-summary").textContent=rows.length>=2?`${meta.name}: ${rows.length} pictured readings · first ${labelDate(first.at)} → last ${labelDate(last.at)} · ${elapsedLabel(hours(first.at,last.at))} elapsed`:`${meta.name}: ${rows.length} pictured reading${rows.length===1?"":"s"} in this window · two are required for an average`;
   if(!rows.length){wrapper.className="profile-empty";wrapper.textContent=`No photo-checked ${meta.name} balance appears between ${dayLabel(state.rangeStart)} and ${dayLabel(state.rangeEnd)}. Widen the range to compare two photographed amounts.`;return;}
   const gain=BigInt(last.balance)-BigInt(first.balance), time=hours(first.at,last.at), comparable=rows.length>=2 && time>0;
@@ -300,7 +332,7 @@ function renderProfile() {
   const stats=[
     ["LAST BALANCE IN RANGE",compact(last.balance),latestUpdate?`Profile photo · rank #${last.rank} from earlier board`:`Rank #${last.rank} · photo checked`],
     ["AVERAGE OBSERVED NET RATE",rateText(average),comparable?`${elapsedLabel(time)} first-to-last photos · gaps included`:"At least two photo readings required"],
-    ["NET IN RANGE",comparable?signed(gain):"—",comparable?`${rows.length} pictured daily points · held C$ change`:"Only one pictured balance"],
+    ["NET IN RANGE",comparable?signed(gain):"—",comparable?`${rows.length} pictured photo points · held C$ change`:"Only one pictured balance"],
     ["RAINBOW 1.5× BASE",comparable&&gain>0n?`≈${signed(rainbowBase(gain))}`:"—",comparable&&gain>0n?`(no multiplier ${signed(gain)} net C$)` : "Only comparable positive net changes",comparable&&gain>0n],
     ["RAINBOW-EQUIVALENT NET RATE",average>0?rateText(average/1.5):"—",`(no multiplier ${rateText(average)}) · ${comparable?elapsedLabel(time):"unknown interval"}`,average>0],
     ["LARGEST INTERVAL",maximum?signed(maximum.delta):"—",maximum?`${maximum.elapsed.toFixed(1)}h between pictured readings`:"No increase measured"],
@@ -349,14 +381,15 @@ async function init(){
     const data=await response.json();state.data=data;
     const pictured=data.captures.reduce((sum,cp)=>sum+cp.coverage,0);
     const confirmed=data.captures.reduce((sum,cp)=>sum+cp.verified,0);
-    $("global-review-note").textContent=`${data.checkpoints.length} daily points (latest photo per leaderboard day) from ${data.sessions.length} sessions and ${data.captures.length} original board captures, plus ${data.profile_updates.length} separate player-profile balance update${data.profile_updates.length===1?"":"s"}. ${confirmed.toLocaleString()} of ${pictured.toLocaleString()} board readings were checked directly against original images; ${pictured-confirmed} cropped readings remain unknown, and ${data.capture_status_counts.not_captured} raw rank slots were not pictured. Photo times and SHA-256 proofs are retained. Rainbow 1.5× figures are hypothetical base equivalents, not confirmed sales.`;
+    const days=new Set(data.checkpoints.map(cp=>cp.day_key)).size;
+    $("global-review-note").textContent=`${data.checkpoints.length} displayed photo points across ${days} leaderboard days (distinct complete Saturday captures since Nov 14, 2026) from ${data.sessions.length} sessions and ${data.captures.length} original board captures, plus ${data.profile_updates.length} separate player-profile balance update${data.profile_updates.length===1?"":"s"}. ${confirmed.toLocaleString()} of ${pictured.toLocaleString()} board readings were checked directly against original images; ${pictured-confirmed} cropped readings remain unknown, and ${data.capture_status_counts.not_captured} raw rank slots were not pictured. Photo times and SHA-256 proofs are retained. Rainbow 1.5× figures are hypothetical base equivalents, not confirmed sales.`;
     data.checkpoints.forEach(cp=>state.byCapture.set(cp.id,[]));
     data.observations.filter(row=>row.status==="verified").forEach(row=>{state.byCapture.get(row.checkpoint).push(row);if(!state.byPlayer.has(row.key))state.byPlayer.set(row.key,[]);state.byPlayer.get(row.key).push(row);});
     data.players.forEach(meta=>state.playerMeta.set(meta.key,meta));
     data.evidence.forEach(proof=>state.proofs.set(proof.id,proof));
     data.profile_updates.forEach(update=>state.profileUpdates.set(update.id,update));
     for(const [key,rows] of state.byPlayer)rows.sort((a,b)=>new Date(data.checkpoints.find(cp=>cp.id===a.checkpoint).at)-new Date(data.checkpoints.find(cp=>cp.id===b.checkpoint).at));
-    const url=new URL(location.href), requestedDay=url.searchParams.get("day"), requestedIndex=data.checkpoints.findIndex(cp=>cp.day_key===requestedDay);
+    const url=new URL(location.href), requestedDay=url.searchParams.get("day"), requestedSnapshot=url.searchParams.get("snapshot"), requestedById=data.checkpoints.findIndex(cp=>cp.id===requestedSnapshot), requestedIndex=data.checkpoints.findLastIndex(cp=>cp.day_key===requestedDay);
     const firstDay=data.checkpoints[0].day_key, lastDay=data.checkpoints.at(-1).day_key;
     const validDay=(value)=>/^\d{4}-\d{2}-\d{2}$/.test(value||"") && value>=firstDay && value<=lastDay;
     state.rangeStart=validDay(url.searchParams.get("from"))?url.searchParams.get("from"):firstDay;
@@ -370,7 +403,7 @@ async function init(){
     $("range-all").addEventListener("click",()=>setRateRange(firstDay,lastDay));
     for(const event of patchEvents)if(localDay(event.at)!==event.day)throw new Error(`Patch event date mismatch: ${event.id}`);
     renderEvents();
-    state.index=requestedIndex>=0?requestedIndex:data.checkpoints.length-1;
+    state.index=requestedById>=0?requestedById:requestedIndex>=0?requestedIndex:data.checkpoints.length-1;
     const requested=url.searchParams.get("player");if(requested && state.playerMeta.has(requested))state.selected=requested;
     $("capture-slider").max=String(data.checkpoints.length-1);$("capture-slider").addEventListener("input",(ev)=>moveTo(Number(ev.target.value)));
     $("prev").addEventListener("click",()=>moveTo(state.index-1));$("next").addEventListener("click",()=>moveTo(state.index+1));

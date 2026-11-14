@@ -26,12 +26,36 @@ try:
         page.on("pageerror", lambda error: errors.append(str(error)))
         page.goto(f"http://127.0.0.1:{server.server_address[1]}/", wait_until="domcontentloaded")
         total_days=len(data['checkpoints'])
-        page.locator("#capture-index").get_by_text(f"DAY {total_days:02d} / {total_days}",exact=False).wait_for(timeout=20000)
+        calendar_days=len({cp['day_key'] for cp in data['checkpoints']})
+        page.locator("#capture-index").get_by_text(f"DAY {calendar_days:02d} / {calendar_days}",exact=False).wait_for(timeout=20000)
         last=data['checkpoints'][-1]
         last_day=last['day_key']
         assert page.locator("#capture-date").inner_text() == page.evaluate("dayLabel(state.data.checkpoints.at(-1).day_key)")
         assert page.locator("#stat-coverage").inner_text() == f"{last['verified']} / {last['coverage']}"
         assert page.locator(".proof").count() == len(last['evidence'])
+        weekend=next((i for i,cp in enumerate(data['checkpoints']) if cp['id']=='2026-11-14_1128'),None)
+        if weekend is not None:
+            page.locator('#capture-slider').evaluate("(el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}))}",str(weekend))
+            assert page.locator('#capture-date').inner_text()=='Nov 14, 2026'
+            assert 'SATURDAY PHOTO 2/' in page.locator('#capture-index').inner_text()
+            assert 'MAJOR WEEKEND SELL POINT' in page.locator('#capture-index').inner_text()
+            assert page.locator('#stat-coverage').inner_text()=='50 / 50'
+            assert page.locator('#stat-hours').inner_text()=='0h 04m'
+            assert page.locator('.proof').count()==8
+            assert page.locator('.proof.earlier-proof').count()==4
+            assert page.locator('.event-card[data-event="weekend-sell"]').count()==1
+            assert '+25.3B' in page.locator('.movement-item[data-player="id:1316700350"]').inner_text()
+            for image_id in ('EV0180','EV0184','EV0187'):
+                page.locator(f'.proof[data-proof="{image_id}"]').click()
+                page.wait_for_function("document.querySelector('#lightbox-image').naturalWidth > 0")
+                page.locator('#lightbox button').click()
+            page.locator('#prev').click()
+            assert 'SATURDAY PHOTO 1/' in page.locator('#capture-index').inner_text()
+            assert page.locator('.proof').count()==4
+            page.locator('#next').click()
+            page.locator('.event-card[data-event="weekend-sell"] .event-jump').click()
+            assert 'snapshot=2026-11-14_1128' in page.url
+            page.locator('#capture-slider').evaluate("(el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}))}",str(total_days-1))
         if last['id']=='2026-11-13_2152':
             assert page.locator('#capture-date').inner_text()=='Nov 13, 2026'
             assert page.locator('#stat-hours').inner_text()=='22.9h'
@@ -88,10 +112,14 @@ try:
         assert page.locator("#chart").evaluate("el => el.layout.xaxis.type") == "category"
         assert page.locator("#chart").evaluate("el => el.layout.xaxis.tickvals.includes('2026-10-18')")
         assert page.locator('#chart').evaluate("el => {const line=el.data.find(trace=>trace.meta?.key==='id:1316700350');return line.y[line.x.indexOf('2026-11-12')];}")==269064293664
+        if weekend is not None:
+            assert page.locator('#chart').evaluate("el=>['2026-11-14','2026-11-14#2'].every(day=>el.layout.xaxis.tickvals.includes(day))")
+            assert page.locator('#chart').evaluate("el=>{const t=el.data.find(trace=>trace.meta?.key==='id:1316700350');return t.y[t.x.indexOf('2026-11-14#2')]-t.y[t.x.indexOf('2026-11-14')];}")==25315072200
+            assert page.locator('#chart').evaluate("el=>el.layout.annotations.some(mark=>mark.text==='SELL')")
         assert [event['day_key'] for event in data['checkpoints'] if event['day_key'] in ('2026-10-31','2026-11-07')]==['2026-10-31','2026-11-07']
         assert page.evaluate("patchEvents.map(event=>[event.day,localDay(event.at)])")==[['2026-10-31','2026-10-31'],['2026-11-07','2026-11-07']]
-        assert set(page.locator('#chart').evaluate('el=>el.layout.annotations.map(event=>event.text)'))=={'v2.08','v2.09.1'}
-        assert page.locator('.event-card').count()==2
+        assert {'v2.08','v2.09.1'}.issubset(set(page.locator('#chart').evaluate('el=>el.layout.annotations.map(event=>event.text)')))
+        assert page.locator('.event-card').count()==(3 if weekend is not None else 2)
         assert 'https://fischipedia.org/wiki/2.08#2.08.0'==page.locator('.event-card[data-event="venue-encore"] a').first.get_attribute('href')
         assert 'https://fischipedia.org/wiki/2.09#2.09.1'==page.locator('.event-card[data-event="stellarwave-change"] a').first.get_attribute('href')
         assert 'Oct 31, 2026, 11:00 AM' in page.locator('.event-card[data-event="venue-encore"]').inner_text()
@@ -119,7 +147,8 @@ try:
         actual=page.evaluate("(()=>{const r=rangedHistory('id:1316700350');return timeRate(BigInt(r.at(-1).balance)-BigInt(r[0].balance),hours(r[0].at,r.at(-1).at))})()")
         assert abs(actual-expected)<1
         assert page.locator('#chart').evaluate("el=>el.layout.xaxis.tickvals.includes('2026-11-07') && !el.layout.xaxis.tickvals.includes('2026-10-31')")
-        page.locator('#range-start').fill(last_day)
+        page.locator('#range-start').fill('2026-11-13')
+        page.locator('#range-end').fill('2026-11-13')
         assert page.locator('.profile-history a').count()==1
         assert page.locator('.profile-stats > div').filter(has_text='AVERAGE OBSERVED NET RATE').locator('b').inner_text()=='—'
         assert 'two are required' in page.locator('#range-summary').inner_text()
@@ -159,15 +188,16 @@ try:
         assert analysis.locator('.highlight-card').count()==8 and analysis.locator('#highlight-pages').is_visible()
         assert analysis.locator('#highlight-list').evaluate('el=>getComputedStyle(el).display')=='grid'
         assert analysis.locator('.standout-layout').evaluate('el=>{const [left,right]=el.children;const ratio=left.getBoundingClientRect().width/right.getBoundingClientRect().width;return ratio>1.8&&ratio<2.2}')
-        assert 'Ceruleanflare2' in analysis.locator('#overview-content').inner_text()
-        assert '26,027,711,662' in analysis.locator('#overview-content').inner_text()
-        assert 'EV0166' in analysis.locator('#overview-content').inner_text() and 'EV0169' in analysis.locator('#overview-content').inner_text()
+        assert 'ismyaimbotworking' in analysis.locator('#overview-content').inner_text()
+        assert '25,315,072,200' in analysis.locator('#overview-content').inner_text()
+        assert 'EV0180' in analysis.locator('#overview-content').inner_text() and 'EV0184' in analysis.locator('#overview-content').inner_text()
         assert 'two' not in analysis.locator('#overview-rate').inner_text().lower()
         analysis.locator('#overview-start').fill('2026-11-10')
         assert 'from=2026-11-10' in analysis.url and f'to={last_day}' in analysis.url
         cerulean_window=sum(row['key']==next(p['key'] for p in data['players'] if p['name']=='Ceruleanflare2') and '2026-11-10'<=row['day_key']<=last_day for row in data['observations'])
         assert f'{cerulean_window} photographed points' in analysis.locator('#overview-rate').inner_text()
-        analysis.locator('#overview-start').fill(last_day)
+        analysis.locator('#overview-start').fill('2026-11-13')
+        analysis.locator('#overview-end').fill('2026-11-13')
         assert 'Two are needed' in analysis.locator('#overview-rate').inner_text()
         analysis.locator('#overview-all').click()
         assert 'from=' not in analysis.url
@@ -260,7 +290,7 @@ try:
         assert page.locator("#profile-content .rainbow-static").count() > 0
         assert "player=id%3A1316700350" in page.url
         page.locator("#prev").click()
-        assert f"DAY {nov11:02d} / {total_days}" in page.locator("#capture-index").inner_text()
+        assert f"DAY {nov11:02d} / {calendar_days}" in page.locator("#capture-index").inner_text()
         assert page.locator("#capture-date").inner_text() == "Nov 10, 2026"
         page.locator(".proof").first.click()
         assert page.locator("#lightbox").evaluate("el => el.open")
@@ -330,7 +360,7 @@ try:
         page.locator("#capture-slider").evaluate("(el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}))}",str(total_days-1))
         page.set_viewport_size({"width": 390, "height": 840})
         page.wait_for_timeout(500)
-        assert f"DAY {total_days:02d} / {total_days}" in page.locator("#capture-index").inner_text()
+        assert f"DAY {calendar_days:02d} / {calendar_days}" in page.locator("#capture-index").inner_text()
         assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 4"), "Mobile page overflows horizontally"
         assert page.locator("#chart").evaluate("el => el.layout.xaxis.tickvals.length > el.layout.xaxis.ticktext.filter(Boolean).length")
         page.locator(".evidence-section").scroll_into_view_if_needed()
