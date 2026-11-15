@@ -77,6 +77,15 @@ function interval(cp,row,previous) {
   const currentGap = gapInfo(cp,row), oldGap = old ? gapInfo(previous,old) : {ahead:null,behind:null};
   return {old,delta,elapsed,currentGap,oldGap,rate:delta===null||weekendSettlement(cp)?null:timeRate(delta,elapsed)};
 }
+function floorEntry(cp,row,previous){
+  if(!cp?.complete||!previous?.complete||!confirmed(row)||!row.key.startsWith("id:")||point(previous,row.key))return null;
+  // An unresolved prior row with the same photographed name is not evidence of an entry.
+  if((state.byCapture.get(previous.id)||[]).some(prior=>prior.username.toLocaleLowerCase()===row.username.toLocaleLowerCase()))return null;
+  const floor=atRank(previous,50);
+  if(!confirmed(floor))return null;
+  const lowerBound=BigInt(row.balance)-BigInt(boardAmount(floor));
+  return lowerBound>=BigInt(state.data.threshold)?{floor,lowerBound}:null;
+}
 function nearbyLabel(position,current,previous) {
   if (!current) return `<span class="muted">${position}: unknown</span>`;
   const diff=previous ? current.gap-previous.gap : null;
@@ -217,13 +226,14 @@ function renderMovement() {
     const known=delta!==null;
     const tentative=!confirmed(row)||(old&&!confirmed(old));
     const large=known && !tentative && !weekendSettlement(cp) && delta>=BigInt(state.data.threshold);
-    const previousText=old?exact(old.balance):"previous amount unknown";
-    const deltaText=known?`${tentative?"≈":""}${signed(delta)} observed net C$`:"no adjacent measurement";
+    const entry=!old?floorEntry(cp,row,previous):null;
+    const previousText=old?exact(old.balance):entry?`prior #50 floor ${exact(boardAmount(entry.floor))} (upper bound; player's previous amount unknown)`:"previous amount unknown";
+    const deltaText=known?`${tentative?"≈":""}${signed(delta)} observed net C$`:entry?`at least ${signed(entry.lowerBound)} floor-derived net C$; exact prior balance unknown`:"no adjacent measurement";
     const rateLine=known?(weekendSettlement(cp)?'<span class="muted">Saturday end-of-week balance settlement · new baseline for following photos · no hourly rate inferred</span>':rate>0 ? `<span class="rainbow-rate">${rainbowRateHtml(rate)}</span><span class="muted">Rainbow base-equivalent ≈${signed(rainbowBase(delta))} C$ if all net change were 1.5× sales</span>` : `<span class="muted">Observed no-multiplier rate ${rateText(rate)}</span>`):"";
     const quality="Photo checked";
     const update=state.profileUpdates.get(row.profile_update);
     const profileNote=update?`<p class="profile-update-inline">Player profile at ${safe(labelDate(update.at,{second:"2-digit"}))}: ${signed(BigInt(update.balance)-BigInt(update.source_balance))} observed net C$ since the #${update.source_rank} board photo at ${safe(labelDate(update.source_at,{second:"2-digit"}))} (${elapsedLabel(hours(update.source_at,update.at))}, no multiplier ${rateText(timeRate(BigInt(update.balance)-BigInt(update.source_balance),hours(update.source_at,update.at)))}). Rank and neighboring gaps remain from the board photo; no later rank was photographed.</p>`:"";
-    return `<button class="movement-item ${state.selected===row.key?"selected":""}" data-player="${safe(row.key)}" type="button"><div class="top"><strong>${avatar(player(row.key))}${safe(row.username)}</strong><span>${rank} ${positionChange}</span></div><p>${safe(previousText)} → <strong title="${safe(exact(row.balance))}">${tentative?"≈":""}${compact(row.balance)}</strong> · <span class="${known?(delta<0n?"negative":"positive"):"muted"}">${safe(deltaText)}</span></p>${rateLine?`<p class="rate-compare">${rateLine}</p>`:""}${profileNote}<p class="gaps">${nearbyLabel("↑",currentGap.ahead,oldGap.ahead)}<br>${nearbyLabel("↓",currentGap.behind,oldGap.behind)}</p><div class="badges"><span class="badge ${tentative?"gold":""}">${quality}${tentative?" · check proof":""}</span>${weekendSettlement(cp)?'<span class="badge gold">WEEKEND SETTLEMENT BASELINE</span>':""}${update?'<span class="badge gold">LATER PROFILE BALANCE</span>':""}${large?'<span class="badge gold">NOTABLE +8B</span>':""}${old?"":`<span class="badge">${previous?.complete&&confirmed(row)?"FIRST SEEN IN TOP 50":"PREVIOUS UNKNOWN"}</span>`}${cp.precision.includes("approximate")||previous?.precision?.includes("approximate")?'<span class="badge gold">TIME APPROX.</span>':""}</div></button>`;
+    return `<button class="movement-item ${state.selected===row.key?"selected":""}" data-player="${safe(row.key)}" type="button"><div class="top"><strong>${avatar(player(row.key))}${safe(row.username)}</strong><span>${rank} ${positionChange}</span></div><p>${safe(previousText)} → <strong title="${safe(exact(row.balance))}">${tentative?"≈":""}${compact(row.balance)}</strong> · <span class="${known?(delta<0n?"negative":"positive"):entry?"positive":"muted"}">${safe(deltaText)}</span></p>${rateLine?`<p class="rate-compare">${rateLine}</p>`:""}${profileNote}<p class="gaps">${nearbyLabel("↑",currentGap.ahead,oldGap.ahead)}<br>${nearbyLabel("↓",currentGap.behind,oldGap.behind)}</p><div class="badges"><span class="badge ${tentative?"gold":""}">${quality}${tentative?" · check proof":""}</span>${weekendSettlement(cp)?'<span class="badge gold">WEEKEND SETTLEMENT BASELINE</span>':""}${entry?'<span class="badge gold">MAJOR TOP-50 ENTRY · FLOOR-BOUND ≥8B</span>':""}${update?'<span class="badge gold">LATER PROFILE BALANCE</span>':""}${large?'<span class="badge gold">NOTABLE +8B</span>':""}${old?"":`<span class="badge">${previous?.complete&&confirmed(row)?"FIRST SEEN IN TOP 50":"PREVIOUS UNKNOWN"}</span>`}${cp.precision.includes("approximate")||previous?.precision?.includes("approximate")?'<span class="badge gold">TIME APPROX.</span>':""}</div></button>`;
   }).join("");
   const prior=previous?.complete && cp.complete && state.view!=="gains" ? (state.byCapture.get(previous.id)||[]).filter(row=>!point(cp,row.key)) : [];
   const departures=prior.map(row=>`<button class="movement-item" type="button" data-player="${safe(row.key)}"><div class="top"><strong>${avatar(player(row.key))}${safe(row.username)}</strong><span>#${row.rank} → outside Top 50</span></div><p>Last observed ${compact(row.balance)}. Current amount unknown; last captured floor ${compact(atRank(cp,50)?.balance||null)}.</p><div class="badges"><span class="badge gold">LEFT PICTURED TOP 50</span></div></button>`).join("");
@@ -234,14 +244,22 @@ function standoutRows() {
   const cps=state.data.checkpoints, threshold=BigInt(state.data.threshold), flags=[], recentLarge=new Map();
   for(let index=1;index<cps.length;index++){
     const cp=cps[index], previous=cps[index-1];
-    if(weekendSettlement(cp)){recentLarge.clear();continue;}
+    const settlement=weekendSettlement(cp);
+    if(settlement)recentLarge.clear();
     for(const row of state.byCapture.get(cp.id)||[]){
       if(!confirmed(row))continue;
       const change=interval(cp,row,previous);
-      if(!confirmed(change.old)||change.delta===null||!(change.elapsed>0))continue;
+      if(!change.old){
+        const entry=floorEntry(cp,row,previous);
+        if(entry)flags.push({kind:"appearance",index,cp,previous,row,change,
+          lowerBound:entry.lowerBound,previousFloor:entry.floor,climb:null,bigGain:false,repeatWith:null,
+          severity:!settlement&&entry.lowerBound>=25_000_000_000n?"extreme":"high"});
+        continue;
+      }
+      if(settlement||!confirmed(change.old)||change.delta===null||!(change.elapsed>0))continue;
       const climb=change.old.rank-row.rank, bigGain=change.delta>=threshold;
       if(bigGain||climb>=5){
-        const item={index,cp,previous,row,change,climb,bigGain,repeatWith:null,severity:"notable"};
+        const item={kind:"movement",index,cp,previous,row,change,climb,bigGain,repeatWith:null,severity:"notable"};
         flags.push(item);
         if(change.delta>=20_000_000_000n){
           const earlier=recentLarge.get(row.key);
@@ -255,10 +273,11 @@ function standoutRows() {
     }
   }
   for(const item of flags){
+    if(item.kind==="appearance")continue;
     if(item.repeatWith||item.change.delta>=25_000_000_000n)item.severity="extreme";
     else if(item.change.delta>=20_000_000_000n||item.climb>=10||(item.bigGain&&item.climb>=5))item.severity="high";
   }
-  return flags.sort((a,b)=>b.index-a.index || (a.change.delta===b.change.delta?b.climb-a.climb:a.change.delta>b.change.delta?-1:1));
+  return flags.sort((a,b)=>b.index-a.index || (a.kind!==b.kind?(a.kind==="appearance"?-1:1):a.kind==="appearance"?a.row.rank-b.row.rank:a.change.delta===b.change.delta?b.climb-a.climb:a.change.delta>b.change.delta?-1:1));
 }
 function standoutProof(row,label) {
   const proof=byId((row.balance_evidence||row.evidence)[0]);
@@ -269,12 +288,25 @@ function repeatedGainNote(item){
   const [first,last]=[item,item.repeatWith].sort((a,b)=>new Date(a.row.at)-new Date(b.row.at));
   return `<p class="highlight-repeat">Two ≥20B observed net changes: ${signed(first.change.delta)} on ${safe(dayLabel(first.cp.day_key))} and ${signed(last.change.delta)} on ${safe(dayLabel(last.cp.day_key))}, ${elapsedLabel(hours(first.row.at,last.row.at))} between later photos. These are balance changes, not verified sales.</p>`;
 }
+function appearanceBeforeProof(item){
+  const url=new URL("./",location.href);
+  url.searchParams.set("day",item.previous.day_key);url.searchParams.set("snapshot",item.previous.id);
+  return `<a href="${safe(url.href)}" title="Inspect all ${item.previous.primary_evidence.length} original PNGs for the previous complete Top 50">Previous full board (${item.previous.primary_evidence.length} PNGs) ↗</a>`;
+}
+function appearanceCard(item){
+  const {index,cp,previous,row,lowerBound,previousFloor,severity}=item;
+  const firstSeen=!memberHistory(row.key).some(reading=>new Date(reading.at)<new Date(row.at));
+  return `<article class="highlight-card appearance ${state.index===index?"active":""}" data-severity="${severity}" data-flag-kind="appearance" data-highlight-day="${safe(cp.day_key)}" data-highlight-player="${safe(row.key)}"><button class="highlight-open" type="button" data-highlight-open="${index}" data-player="${safe(row.key)}" aria-label="Open ${safe(row.username)} top-50 entry on ${safe(dayLabel(cp.day_key))}"><span class="highlight-head"><span class="highlight-player">${avatar(player(row.key))}${safe(row.username)}</span><span class="highlight-badges"><b class="severity-badge">${severity.toUpperCase()}</b><b>${firstSeen?"FIRST SEEN":"RETURNED"} · TOP 50</b></span></span><p><strong>${safe(dayLabel(previous.day_key))} outside pictured Top 50 → ${safe(dayLabel(cp.day_key))} #${row.rank}</strong></p><p class="highlight-amounts">Previous exact balance unknown · pictured #50 floor ${safe(exact(boardAmount(previousFloor)))}<br>Current ${safe(exact(row.balance))} · <strong>floor-derived minimum net increase ≥${safe(exact(lowerBound))}</strong></p><p>${weekendSettlement(cp)?"Weekend settlement entry · new held-balance baseline.":"Ranked entry from a complete previous board."} Neither the exact prior balance nor an hourly rate is known.</p></button><div class="highlight-proof-links">${appearanceBeforeProof(item)}${standoutProof(row,"Current rank proof")}</div></article>`;
+}
 function renderHighlights() {
   const flags=standoutRows().filter(item=>(state.standoutSeverity==="all"||item.severity===state.standoutSeverity) && item.row.username.toLocaleLowerCase().includes(state.standoutSearch)), pageSize=8, lastPage=Math.max(0,Math.ceil(flags.length/pageSize)-1);
   state.highlightPage=Math.max(0,Math.min(state.highlightPage,lastPage));
   const start=state.highlightPage*pageSize;
   $("highlight-count").textContent=`${flags.length} FLAG${flags.length===1?"":"S"}`;
-  const cards=flags.slice(start,start+pageSize).map(({index,cp,previous,row,change,climb,bigGain,repeatWith,severity})=>`
+  const cards=flags.slice(start,start+pageSize).map(item=>{
+    if(item.kind==="appearance")return appearanceCard(item);
+    const {index,cp,previous,row,change,climb,bigGain,repeatWith,severity}=item;
+    return `
     <article class="highlight-card ${state.index===index?"active":""}" data-severity="${severity}" data-highlight-day="${safe(cp.day_key)}" data-highlight-player="${safe(row.key)}">
       <button class="highlight-open" type="button" data-highlight-open="${index}" data-player="${safe(row.key)}" aria-label="Open ${safe(row.username)} on ${safe(dayLabel(cp.day_key))}">
         <span class="highlight-head"><span class="highlight-player">${avatar(player(row.key))}${safe(row.username)}</span>
@@ -284,7 +316,8 @@ function renderHighlights() {
         ${repeatedGainNote({row,cp,change,repeatWith})}
       </button>
       <div class="highlight-proof-links">${standoutProof(change.old,"Before proof")}${standoutProof(row,"After proof")}</div>
-    </article>`).join("");
+    </article>`;
+  }).join("");
   $("highlight-list").innerHTML=cards||'<p class="highlight-empty">No photo-verified changes match this filter. Try another severity or player name.</p>';
   $("highlight-pages").hidden=flags.length<=pageSize;
   $("highlight-prev").disabled=state.highlightPage===0;
@@ -301,7 +334,7 @@ function renderHighlights() {
 }
 function renderStandoutTeaser(){
   const flags=standoutRows(), repeated=flags.filter(item=>item.repeatWith).length;
-  $("standout-teaser-summary").textContent=`${flags.length} pictured changes across the archive · ${repeated} entries in repeated ≥20B net-gain patterns. Browse severity colors, both proofs and player-by-player context.`;
+  $("standout-teaser-summary").textContent=`${flags.length} photo-backed flags across the archive · ${repeated} entries in repeated ≥20B net-gain patterns. Browse severity colors, original proofs and player-by-player context.`;
 }
 function renderProfile() {
   const key=state.selected, wrapper=$("profile-content");

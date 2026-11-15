@@ -45,6 +45,8 @@ try:
             newcomer=next(p for p in data['players'] if p['name']=='hc2khunowpng43ntk1')
             assert newcomer['roblox_id']=='11482999303'
             assert '#32' in page.locator(f'.movement-item[data-player="{newcomer["key"]}"]').inner_text()
+            assert 'at least +18.7B floor-derived net C$' in page.locator(f'.movement-item[data-player="{newcomer["key"]}"]').inner_text()
+            assert 'MAJOR TOP-50 ENTRY' in page.locator(f'.movement-item[data-player="{newcomer["key"]}"]').inner_text()
             assert 'WEEKEND SETTLEMENT BASELINE' in page.locator(f'.movement-item[data-player="{newcomer["key"]}"]').inner_text()
             assert '/hr' not in page.locator(f'.movement-item[data-player="{newcomer["key"]}"]').inner_text()
             for image_id in ('EV0180','EV0184','EV0188','EV0190','EV0191'):
@@ -146,7 +148,8 @@ try:
             assert page.locator('#chart').evaluate("el=>{const t=el.data.find(trace=>trace.meta?.key==='id:1316700350');return t.y[t.x.indexOf('2026-11-14')];}")==296016651408
             assert page.locator('#chart').evaluate("el=>el.layout.xaxis.tickvals.includes('2026-11-14') && !el.layout.xaxis.tickvals.includes('2026-11-14#2')")
             assert page.locator('#chart').evaluate("el=>el.layout.annotations.some(mark=>mark.text==='WEEKEND')")
-            assert not page.evaluate("standoutRows().some(item=>item.cp.day_key==='2026-11-14')")
+            assert page.evaluate("standoutRows().some(item=>item.cp.day_key==='2026-11-14' && item.kind==='appearance' && item.row.username==='hc2khunowpng43ntk1' && item.lowerBound===18724287019n && item.severity==='high')")
+            assert not page.evaluate("standoutRows().some(item=>item.cp.day_key==='2026-11-14' && item.kind==='movement')")
             page.locator('#search').fill('ismyaimbotworking')
             assert page.locator('.profile-stats > div').filter(has_text='WEEKLY AVG OBSERVED NET CHANGE').locator('b').inner_text().endswith('/week')
             assert 'WEEKEND SETTLEMENT · no hourly rate' in page.locator('.profile-history a').filter(has_text='Nov 14, 2026').first.inner_text()
@@ -216,8 +219,9 @@ try:
         assert 'from=' not in page.url and 'to=' not in page.url
         assert page.locator('.highlight-card').count()==0
         assert page.locator('.standout-teaser').is_visible()
-        standouts=page.evaluate("standoutRows().map(item=>({day:item.cp.day_key,name:item.row.username,gain:item.change.delta.toString(),climb:item.climb}))")
+        standouts=page.evaluate("standoutRows().map(item=>({day:item.cp.day_key,name:item.row.username,kind:item.kind,gain:item.change.delta?.toString()??null,bound:item.lowerBound?.toString()??null,climb:item.climb}))")
         assert len(standouts)>8, "The archive-wide feed should paginate beyond its first eight flags"
+        assert any(item['day']=='2026-11-14' and item['name']=='hc2khunowpng43ntk1' and item['kind']=='appearance' and item['bound']=='18724287019' and item['gain'] is None for item in standouts)
         assert any(item['day']=='2026-11-12' and item['name']=='Ceruleanflare2' and item['gain']=='26027711662' and item['climb']==6 for item in standouts)
         assert any(item['day']=='2026-11-10' and item['name']=='Ceruleanflare2' for item in standouts)
         repeated=page.evaluate("standoutRows().filter(item=>item.row.username==='Ceruleanflare2' && item.repeatWith).map(item=>[item.cp.day_key,item.severity,item.repeatWith.cp.day_key,Math.round(Math.abs(hours(item.repeatWith.row.at,item.row.at))*10)/10])")
@@ -225,8 +229,31 @@ try:
         assert ['2026-11-10','extreme','2026-11-12',49.5] in repeated
         assert page.evaluate("standoutRows().some(item=>!item.bigGain && item.climb>=5)")
         assert page.evaluate("standoutRows().some(item=>item.severity==='notable') && standoutRows().some(item=>item.severity==='high')")
-        assert page.evaluate("standoutRows().every(item=>item.row.status==='verified' && item.change.old.status==='verified' && item.row.evidence.length && item.change.old.evidence.length && state.data.checkpoints[item.index-1].id===item.change.old.checkpoint)")
-        assert f'{len(standouts)} pictured changes' in page.locator('#standout-teaser-summary').inner_text()
+        assert page.evaluate("standoutRows().every(item=>item.row.status==='verified' && item.row.evidence.length && state.data.checkpoints[item.index-1].complete && (item.kind==='appearance'?item.previousFloor.status==='verified' && item.change.old===null:item.change.old?.status==='verified' && item.change.old.evidence.length && state.data.checkpoints[item.index-1].id===item.change.old.checkpoint))")
+        assert f'{len(standouts)} photo-backed flags' in page.locator('#standout-teaser-summary').inner_text()
+        assert page.evaluate("""() => {
+          const cps=state.data.checkpoints, cp=cps.at(-1), previous=cps.at(-2);
+          const row=state.byCapture.get(cp.id).find(item=>item.username==='hc2khunowpng43ntk1');
+          const originals=state.byCapture.get(previous.id), floor=atRank(previous,50);
+          const threshold=BigInt(state.data.threshold), min=BigInt(floor.balance)+threshold;
+          if(floorEntry(cp,{...row,balance:String(min)},previous)?.lowerBound!==threshold || floorEntry(cp,{...row,balance:String(min-1n)},previous)!==null)return false;
+          if(floorEntry({...cp,complete:false},row,previous)!==null || floorEntry(cp,row,{...previous,complete:false})!==null)return false;
+          if(floorEntry(cp,{...row,status:'unverified'},previous)!==null || floorEntry(cp,{...row,key:'name:unresolved'},previous)!==null)return false;
+          if(floorEntry(cp,{...row,key:originals[0].key,username:'different-account'},previous)!==null)return false;
+          try {
+            state.byCapture.set(previous.id,originals.map(item=>item.rank===50?{...item,status:'unverified'}:item));
+            if(floorEntry(cp,row,previous)!==null)return false;
+            state.byCapture.set(previous.id,[...originals,{...row,key:'name:unresolved',rank:51}]);
+            if(floorEntry(cp,row,previous)!==null)return false;
+          } finally {state.byCapture.set(previous.id,originals);}
+          const entry=standoutRows().find(item=>item.cp.id===cp.id&&item.row.key===row.key);
+          if(!entry || !appearanceCard(entry).includes('FIRST SEEN'))return false;
+          const history=state.byPlayer.get(row.key);
+          try {
+            state.byPlayer.set(row.key,[{...row,at:previous.at},...history]);
+            return appearanceCard(entry).includes('RETURNED');
+          } finally {state.byPlayer.set(row.key,history);}
+        }""")
         analysis=browser.new_page(viewport={'width':1300,'height':930})
         analysis.on('pageerror',lambda error: errors.append(str(error)))
         analysis.goto(f'http://127.0.0.1:{server.server_address[1]}/standouts.html',wait_until='domcontentloaded')
@@ -234,12 +261,32 @@ try:
         assert analysis.locator('.highlight-card').count()==8 and analysis.locator('#highlight-pages').is_visible()
         assert analysis.locator('#highlight-list').evaluate('el=>getComputedStyle(el).display')=='grid'
         assert analysis.locator('.standout-layout').evaluate('el=>{const [left,right]=el.children;const ratio=left.getBoundingClientRect().width/right.getBoundingClientRect().width;return ratio>1.8&&ratio<2.2}')
-        assert 'Ceruleanflare2' in analysis.locator('#overview-content').inner_text()
+        assert 'hc2khunowpng43ntk1' in analysis.locator('#overview-content').inner_text()
+        assert '18,724,287,019' in analysis.locator('#overview-content').inner_text()
+        assert '53,905,288,849' in analysis.locator('#overview-content').inner_text()
+        assert 'Unknown · no rate' in analysis.locator('#overview-content').inner_text()
+        assert 'EV0190' in analysis.locator('#overview-content').inner_text()
+        assert 'Two are needed' in analysis.locator('#overview-rate').inner_text()
+        entry=analysis.locator('.highlight-card[data-flag-kind="appearance"][data-highlight-day="2026-11-14"]')
+        assert entry.count()==1 and entry.get_attribute('data-severity')=='high'
+        assert 'floor-derived minimum net increase' in entry.inner_text()
+        assert '18,724,287,019' in entry.inner_text()
+        assert '/hr' not in entry.inner_text()
+        assert 'day=2026-11-13' in entry.locator('.highlight-proof-links a').first.get_attribute('href')
+        assert 'EV0190' in entry.locator('.highlight-proof-links a').nth(1).get_attribute('href')
+        analysis.locator('#flag-search').fill('hc2khunowpng43ntk1')
+        assert analysis.locator('.highlight-card').count()==1
+        analysis.locator('#flag-search').fill('')
+        cerulean=next(p for p in data['players'] if p['name']=='Ceruleanflare2')
+        latest_flag=f'.highlight-card[data-highlight-day="2026-11-12"][data-highlight-player="{cerulean["key"]}"]'
+        for _ in range((len(standouts)+7)//8):
+            if analysis.locator(latest_flag).count():break
+            analysis.locator('#highlight-next').click()
+        assert analysis.locator(latest_flag).count()==1
+        analysis.locator(f'{latest_flag} .highlight-open').click()
         assert '26,027,711,662' in analysis.locator('#overview-content').inner_text()
-        assert 'EV0166' in analysis.locator('#overview-content').inner_text() and 'EV0169' in analysis.locator('#overview-content').inner_text()
         assert 'WEEKLY AVG OBSERVED NET CHANGE' in analysis.locator('#overview-rate').inner_text()
         assert '/week' in analysis.locator('#overview-rate').inner_text()
-        assert analysis.evaluate("!standoutRows().some(item=>item.cp.day_key==='2026-11-14')")
         analysis.locator('#overview-start').fill('2026-11-10')
         assert 'from=2026-11-10' in analysis.url and f'to={last_day}' in analysis.url
         cerulean_window=sum(row['key']==next(p['key'] for p in data['players'] if p['name']=='Ceruleanflare2') and '2026-11-10'<=row['day_key']<=last_day for row in data['observations'])
@@ -258,8 +305,6 @@ try:
         assert 2<=analysis.locator('.highlight-card').count()<8
         analysis.locator('#flag-search').fill('')
         assert analysis.locator('#highlight-count').inner_text()==f'{len(standouts)} FLAGS'
-        cerulean=next(p for p in data['players'] if p['name']=='Ceruleanflare2')
-        latest_flag=f'.highlight-card[data-highlight-day="2026-11-12"][data-highlight-player="{cerulean["key"]}"]'
         for _ in range((len(standouts)+7)//8):
             if analysis.locator(latest_flag).count():break
             analysis.locator('#highlight-next').click()

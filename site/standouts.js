@@ -30,9 +30,29 @@ function overviewRange(start,end) {
   renderOverview();
 }
 
+function bindOverviewRange(first,last){
+  $("overview-start").addEventListener("change",()=>{const start=$("overview-start").value||first,end=$("overview-end").value||last;overviewRange(start,start>end?start:end);});
+  $("overview-end").addEventListener("change",()=>{const start=$("overview-start").value||first,end=$("overview-end").value||last;overviewRange(start>end?end:start,end);});
+  $("overview-week").addEventListener("click",()=>{const date=new Date(`${last}T12:00:00Z`);date.setUTCDate(date.getUTCDate()-6);overviewRange(date.toISOString().slice(0,10),last);});
+  $("overview-all").addEventListener("click",()=>overviewRange(first,last));
+}
+
+function renderAppearanceOverview(item){
+  const {cp,previous,row,lowerBound,previousFloor,severity}=item;
+  const first=state.data.checkpoints[0].day_key,last=state.data.checkpoints.at(-1).day_key;
+  const meta=player(row.key), url=new URL('./',location.href);
+  const firstSeen=!memberHistory(row.key).some(reading=>new Date(reading.at)<new Date(row.at));
+  url.searchParams.set('day',cp.day_key);url.searchParams.set('snapshot',cp.id);url.searchParams.set('player',row.key);
+  if(state.rangeStart!==first||state.rangeEnd!==last){url.searchParams.set('from',state.rangeStart);url.searchParams.set('to',state.rangeEnd);}
+  $("overview-content").innerHTML=`<div class="overview-person">${avatar(meta)}<span>${safe(meta.name)}<small> · ${safe(dayLabel(cp.day_key))}</small></span></div><p><span class="overview-emphasis">HIGH · ${firstSeen?"FIRST PICTURED":"RETURNED"} TOP-50 ENTRY</span> · outside the previous complete board → #${row.rank}${weekendSettlement(cp)?" · Saturday settlement baseline":""}</p><div class="overview-metrics"><div><span>PREVIOUS #50 FLOOR</span><b>${safe(exact(boardAmount(previousFloor)))}</b></div><div><span>CURRENT #${row.rank} BALANCE</span><b>${safe(exact(row.balance))}</b></div><div><span>MINIMUM NET INCREASE</span><b>≥${safe(exact(lowerBound))}</b></div><div><span>EXACT PRIOR BALANCE / RATE</span><b>Unknown · no rate</b></div></div><p>The complete ${safe(dayLabel(previous.day_key))} Top-50 photo (${safe(labelDate(previous.at))}) has no matched account. Its #50 balance supplies a conservative upper bound on that player's prior held balance. ${safe(dayLabel(cp.day_key))} photo ${safe(labelDate(row.at))} confirms the new rank and balance; the bound is not an exact gain, gross sale, or hourly rate.</p><div class="overview-links">${appearanceBeforeProof(item)}${standoutProof(row,"Current rank proof")}</div><a class="overview-dashboard-link" href="${safe(url.href)}">Open day and player on dashboard ↗</a><div class="overview-range"><h3>Average over your date range</h3><div class="overview-range-fields"><label>From <input id="overview-start" type="date" min="${first}" max="${last}" value="${state.rangeStart}" aria-label="First date for selected player's average"></label><label>Through <input id="overview-end" type="date" min="${first}" max="${last}" value="${state.rangeEnd}" aria-label="Last date for selected player's average"></label></div><div class="overview-range-actions"><button id="overview-week" type="button">Recent 7 days</button><button id="overview-all" type="button">All history</button></div><div id="overview-rate"></div><p>Two photo-verified player balances are required for an average; the prior board floor is not one.</p></div>`;
+  $("overview-content").querySelector(".overview-emphasis").textContent=`${severity.toUpperCase()} · ${firstSeen?"FIRST PICTURED":"RETURNED"} TOP-50 ENTRY`;
+  overviewRate();bindOverviewRange(first,last);
+}
+
 function renderOverview(){
   const item=focusedFlag;
   if(!item)return;
+  if(item.kind==='appearance'){renderAppearanceOverview(item);return;}
   const {row,change,cp,previous,climb,severity,repeatWith}=item;
   const meta=player(row.key), first=state.data.checkpoints[0].day_key, last=state.data.checkpoints.at(-1).day_key;
   const url=new URL("./",location.href);
@@ -42,10 +62,7 @@ function renderOverview(){
   $("overview-content").innerHTML=`<div class="overview-person">${avatar(meta)}<span>${safe(meta.name)}<small> · ${safe(dayLabel(cp.day_key))}</small></span></div><p><span class="overview-emphasis">${safe(severity.toUpperCase())} photographed change</span> · ${safe(dayLabel(previous.day_key))} #${change.old.rank} → ${safe(dayLabel(cp.day_key))} #${row.rank}${climb>0?` · ↑${climb} ranks`:""}</p><div class="overview-metrics"><div><span>OBSERVED NET HELD C$</span><b>${signed(change.delta)}</b></div><div><span>PHOTO INTERVAL</span><b>${elapsedLabel(change.elapsed)}</b></div><div><span>BEFORE</span><b>${safe(exact(change.old.balance))}</b></div><div><span>AFTER</span><b>${safe(exact(row.balance))}</b></div><div><span>NET RATE (NO MULTIPLIER)</span><b>${rateText(change.rate)}</b></div></div><p>Before photo ${safe(labelDate(change.old.at))}; after photo ${safe(labelDate(row.at))}. Neither photo establishes gross sales or activity throughout the interval.</p>${repeatWith?`${repeatedGainNote(item)}<button class="overview-other" type="button" data-other-day="${repeatWith.index}" data-other-player="${safe(row.key)}">Inspect the other large change ↗</button>`:""}${context.length?`<p class="event-context">Patch during this photo interval: ${context.map(event=>`<a href="${safe(event.source)}" target="_blank" rel="noopener noreferrer">${safe(event.version)} · ${safe(event.title)} ↗</a>`).join(" · ")}. Timing alone does not establish cause.</p>`:""}<div class="overview-links">${standoutProof(change.old,"Before original")}${standoutProof(row,"After original")}</div><a class="overview-dashboard-link" href="${safe(url.href)}">Open day and player on dashboard ↗</a><div class="overview-range"><h3>Average over your date range</h3><div class="overview-range-fields"><label>From <input id="overview-start" type="date" min="${first}" max="${last}" value="${state.rangeStart}" aria-label="First date for selected player's average"></label><label>Through <input id="overview-end" type="date" min="${first}" max="${last}" value="${state.rangeEnd}" aria-label="Last date for selected player's average"></label></div><div class="overview-range-actions"><button id="overview-week" type="button">Recent 7 days</button><button id="overview-all" type="button">All history</button></div><div id="overview-rate"></div><p>First-to-last net balance ÷ actual elapsed time. Dormant gaps count unless excluded by the dates.</p></div>`;
   $("overview-content").querySelector(".overview-metrics b").insertAdjacentHTML("beforeend",`<small class="overview-exact">${safe(exact(change.delta))} exact</small>`);
   overviewRate();
-  $("overview-start").addEventListener("change",()=>{const start=$("overview-start").value||first,end=$("overview-end").value||last;overviewRange(start,start>end?start:end);});
-  $("overview-end").addEventListener("change",()=>{const start=$("overview-start").value||first,end=$("overview-end").value||last;overviewRange(start>end?end:start,end);});
-  $("overview-week").addEventListener("click",()=>{const date=new Date(`${last}T12:00:00Z`);date.setUTCDate(date.getUTCDate()-6);overviewRange(date.toISOString().slice(0,10),last);});
-  $("overview-all").addEventListener("click",()=>overviewRange(first,last));
+  bindOverviewRange(first,last);
   $("overview-content").querySelector("[data-other-day]")?.addEventListener("click",(event)=>window.focusStandout(Number(event.currentTarget.dataset.otherDay),event.currentTarget.dataset.otherPlayer));
 }
 
