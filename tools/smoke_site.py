@@ -59,8 +59,10 @@ try:
             page.locator('.event-card[data-event="weekend-settlement"] .event-jump').click()
             assert 'snapshot=2026-11-14_1128' in page.url
             page.locator('#search').fill('ismyaimbotworking')
-            assert page.locator('.profile-stats > div').filter(has_text='AVERAGE OBSERVED NET RATE').locator('b').inner_text()=='—'
-            assert 'crosses Saturday settlement' in page.locator('#range-summary').inner_text()
+            assert page.locator('.profile-stats > div').filter(has_text='WEEKLY AVG OBSERVED NET CHANGE').locator('b').inner_text().endswith('/week')
+            assert page.locator('.profile-stats > div').filter(has_text='RAINBOW 1.5× BASE EQUIVALENT').locator('b').inner_text().startswith('≈+')
+            assert page.locator('.profile-stats > div').filter(has_text='RAINBOW 1.5× WEEKLY BASE-EQUIV.').locator('b').inner_text().endswith('/week')
+            assert 'includes Saturday settlement' in page.locator('#range-summary').inner_text()
             assert 'WEEKEND SETTLEMENT · no hourly rate' in page.locator('.profile-history a').filter(has_text='Nov 14, 2026').first.inner_text()
             page.screenshot(path=str(ROOT/'preview-weekend-baseline.png'),full_page=True)
             page.locator('#profile-clear').click()
@@ -142,17 +144,20 @@ try:
         assert page.locator('#profile-range').is_visible()
         assert page.locator('#range-start').input_value()=='2026-10-10'
         assert page.locator('#range-end').input_value()==last_day
-        full_rate=page.locator('.profile-stats > div').filter(has_text='AVERAGE OBSERVED NET RATE').locator('b').inner_text()
-        assert full_rate=='—'
+        full_rate=page.locator('.profile-stats > div').filter(has_text='WEEKLY AVG OBSERVED NET CHANGE').locator('b').inner_text()
+        assert full_rate.endswith('/week')
         page.locator('#range-start').fill('2026-11-07')
         assert page.locator('#range-start').input_value()=='2026-11-07'
         assert 'from=2026-11-07' in page.url and f'to={last_day}' in page.url
         selected_rows=[row for row in data['observations'] if row['key']=='id:1316700350' and '2026-11-07'<=row['day_key']<=last_day]
         assert page.locator('.profile-history a').count()==len(selected_rows)
         assert f'{len(selected_rows)} pictured readings' in page.locator('#range-summary').inner_text()
-        recent_rate=page.locator('.profile-stats > div').filter(has_text='AVERAGE OBSERVED NET RATE').locator('b').inner_text()
-        assert recent_rate=='—'
-        assert 'crosses Saturday settlement' in page.locator('#range-summary').inner_text()
+        recent_rate=page.locator('.profile-stats > div').filter(has_text='WEEKLY AVG OBSERVED NET CHANGE').locator('b').inner_text()
+        assert recent_rate.endswith('/week') and recent_rate!=full_rate
+        assert 'includes Saturday settlement' in page.locator('#range-summary').inner_text()
+        expected_week=(int(selected_rows[-1]['balance'])-int(selected_rows[0]['balance']))/((datetime.fromisoformat(selected_rows[-1]['at'].replace('Z','+00:00'))-datetime.fromisoformat(selected_rows[0]['at'].replace('Z','+00:00'))).total_seconds()/3600)*168
+        actual_week=page.evaluate("(()=>{const r=rangedHistory('id:1316700350');return timeRate(BigInt(r.at(-1).balance)-BigInt(r[0].balance),hours(r[0].at,r.at(-1).at))*168})()")
+        assert abs(actual_week-expected_week)<1
         page.locator('#range-end').fill('2026-11-13')
         assert page.locator('.profile-stats > div').filter(has_text='AVERAGE OBSERVED NET RATE').locator('b').inner_text()!='—'
         active_rows=[row for row in selected_rows if row['day_key']<='2026-11-13']
@@ -204,13 +209,14 @@ try:
         assert 'Ceruleanflare2' in analysis.locator('#overview-content').inner_text()
         assert '26,027,711,662' in analysis.locator('#overview-content').inner_text()
         assert 'EV0166' in analysis.locator('#overview-content').inner_text() and 'EV0169' in analysis.locator('#overview-content').inner_text()
-        assert 'crosses a Saturday settlement' in analysis.locator('#overview-rate').inner_text()
+        assert 'WEEKLY AVG OBSERVED NET CHANGE' in analysis.locator('#overview-rate').inner_text()
+        assert '/week' in analysis.locator('#overview-rate').inner_text()
         assert analysis.evaluate("!standoutRows().some(item=>item.cp.day_key==='2026-11-14')")
         analysis.locator('#overview-start').fill('2026-11-10')
         assert 'from=2026-11-10' in analysis.url and f'to={last_day}' in analysis.url
         cerulean_window=sum(row['key']==next(p['key'] for p in data['players'] if p['name']=='Ceruleanflare2') and '2026-11-10'<=row['day_key']<=last_day for row in data['observations'])
         assert f'{cerulean_window} photographed points' in analysis.locator('#overview-rate').inner_text()
-        assert 'OBSERVED NET RATE\n—' in analysis.locator('#overview-rate').inner_text()
+        assert 'WEEKLY AVG OBSERVED NET CHANGE' in analysis.locator('#overview-rate').inner_text()
         analysis.locator('#overview-start').fill('2026-11-13')
         analysis.locator('#overview-end').fill('2026-11-13')
         assert 'Two are needed' in analysis.locator('#overview-rate').inner_text()

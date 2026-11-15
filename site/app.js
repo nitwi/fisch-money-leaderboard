@@ -51,7 +51,7 @@ const elapsedLabel = (value) => {
   return minutes<720?`${Math.floor(minutes/60)}h ${String(minutes%60).padStart(2,"0")}m`:`${(minutes/60).toFixed(1)}h`;
 };
 const timeRate = (delta, intervalHours) => Number.isFinite(intervalHours) && intervalHours > 0 && BigInt(delta) <= BigInt(Number.MAX_SAFE_INTEGER) && BigInt(delta) >= -BigInt(Number.MAX_SAFE_INTEGER) ? Number(BigInt(delta)) / intervalHours : null;
-const rateText = (amount) => amount === null ? "—" : `${amount >= 0 ? "+" : "−"}${compact(BigInt(Math.round(Math.abs(amount))))}/hr`;
+const rateText = (amount,unit="hr") => amount === null ? "—" : `${amount >= 0 ? "+" : "−"}${compact(BigInt(Math.round(Math.abs(amount))))}/${unit}`;
 const confirmed = (row) => row?.status === "verified";
 const crossesSettlement = (first,last) => state.data.checkpoints.some(cp=>weekendSettlement(cp) && new Date(cp.at)>new Date(first) && new Date(cp.at)<=new Date(last));
 const rainbowBase = (delta) => delta > 0n ? BigInt(Math.round(Number(delta) / 1.5)) : null;
@@ -312,10 +312,12 @@ function renderProfile() {
   $("profile-title").textContent=meta.name;
   $("profile-hint").textContent=`${dayLabel(state.rangeStart)} – ${dayLabel(state.rangeEnd)} · ${rows.length} photo-checked point${rows.length===1?"":"s"} in range`;
   const settlementBetween=rows.length>=2&&crossesSettlement(first.at,last.at);
-  $("range-summary").textContent=rows.length>=2?`${meta.name}: ${rows.length} pictured readings · first ${labelDate(first.at)} → last ${labelDate(last.at)} · ${elapsedLabel(hours(first.at,last.at))} elapsed${settlementBetween?" · crosses Saturday settlement; no average pace calculated":""}`:`${meta.name}: ${rows.length} pictured reading${rows.length===1?"":"s"} in this window · two are required for an average`;
+  $("range-summary").textContent=rows.length>=2?`${meta.name}: ${rows.length} pictured readings · first ${labelDate(first.at)} → last ${labelDate(last.at)} · ${elapsedLabel(hours(first.at,last.at))} elapsed${settlementBetween?" · includes Saturday settlement; average normalized per week rather than per hour":""}`:`${meta.name}: ${rows.length} pictured reading${rows.length===1?"":"s"} in this window · two are required for an average`;
   if(!rows.length){wrapper.className="profile-empty";wrapper.textContent=`No photo-checked ${meta.name} balance appears between ${dayLabel(state.rangeStart)} and ${dayLabel(state.rangeEnd)}. Widen the range to compare two photographed amounts.`;return;}
-  const gain=BigInt(last.balance)-BigInt(first.balance), time=hours(first.at,last.at), hasEndpoints=rows.length>=2&&time>0, comparable=hasEndpoints&&!settlementBetween;
-  const average=comparable?timeRate(gain,time):null;
+  const gain=BigInt(last.balance)-BigInt(first.balance), time=hours(first.at,last.at), hasEndpoints=rows.length>=2&&time>0;
+  const hourly=hasEndpoints?timeRate(gain,time):null;
+  const average=hourly===null?null:settlementBetween?hourly*168:hourly;
+  const rateUnit=settlementBetween?"week":"hr";
   const pairs=rows.slice(1).map((row,i)=>({start:rows[i],end:row,delta:BigInt(row.balance)-BigInt(rows[i].balance),elapsed:hours(rows[i].at,row.at),settlement:crossesSettlement(rows[i].at,row.at)}));
   const maximum=pairs.filter(x=>!x.settlement&&x.delta>0n).sort((a,b)=>a.delta>b.delta?-1:1)[0];
   const fastest=pairs.filter(x=>!x.settlement&&x.delta>0n && x.elapsed>0).sort((a,b)=>Number(b.delta)/b.elapsed-Number(a.delta)/a.elapsed)[0];
@@ -332,10 +334,10 @@ function renderProfile() {
   wrapper.className="";
   const stats=[
     ["LAST BALANCE IN RANGE",compact(last.balance),latestUpdate?`Profile photo · rank #${last.rank} from earlier board`:`Rank #${last.rank} · photo checked`],
-    ["AVERAGE OBSERVED NET RATE",rateText(average),settlementBetween?"Window crosses weekend settlement; start on or after Saturday baseline":comparable?`${elapsedLabel(time)} first-to-last photos · gaps included`:"At least two photo readings required"],
+    [settlementBetween?"WEEKLY AVG OBSERVED NET CHANGE":"AVERAGE OBSERVED NET RATE",rateText(average,rateUnit),settlementBetween?`${elapsedLabel(time)} observed span · normalized to seven days · settlement and gaps included; not an earning rate`:hasEndpoints?`${elapsedLabel(time)} first-to-last photos · gaps included`:"At least two photo readings required"],
     ["NET IN RANGE",hasEndpoints?signed(gain):"—",hasEndpoints?`${rows.length} pictured photo points · ${settlementBetween?"includes weekly balance step":"held C$ change"}`:"Only one pictured balance"],
-    ["RAINBOW 1.5× BASE",comparable&&gain>0n?`≈${signed(rainbowBase(gain))}`:"—",comparable&&gain>0n?`(no multiplier ${signed(gain)} net C$)` : "Only comparable positive net changes",comparable&&gain>0n],
-    ["RAINBOW-EQUIVALENT NET RATE",average>0?rateText(average/1.5):"—",`(no multiplier ${rateText(average)}) · ${comparable?elapsedLabel(time):"unknown interval"}`,average>0],
+    ["RAINBOW 1.5× BASE EQUIVALENT",hasEndpoints&&gain>0n?`≈${signed(rainbowBase(gain))}`:"—",hasEndpoints&&gain>0n?`Hypothetical base for ${signed(gain)} observed net C$ in window` : "Only positive net changes have a base equivalent",hasEndpoints&&gain>0n],
+    [settlementBetween?"RAINBOW 1.5× WEEKLY BASE-EQUIV.":"RAINBOW-EQUIVALENT NET RATE",average>0?rateText(average/1.5,rateUnit):"—",`(no multiplier ${rateText(average,rateUnit)}) · ${hasEndpoints?elapsedLabel(time):"unknown interval"} · hypothetical`,average>0],
     ["LARGEST NON-SETTLEMENT INTERVAL",maximum?signed(maximum.delta):"—",maximum?`${maximum.elapsed.toFixed(1)}h between pictured readings`:"No non-settlement increase measured"],
     ["PEAK RAINBOW-EQUIVALENT RATE",fastest?rateText(timeRate(fastest.delta,fastest.elapsed)/1.5):"—",fastest?`(no multiplier ${rateText(timeRate(fastest.delta,fastest.elapsed))}) · ${fastest.elapsed.toFixed(1)}h`:"No positive interval",Boolean(fastest)],
     ["CHANGE IN RANGE",hasEndpoints&&BigInt(first.balance)>0n?`${(Number(gain)/Number(first.balance)*100).toFixed(1)}%`:"—","Observed held balance only"]

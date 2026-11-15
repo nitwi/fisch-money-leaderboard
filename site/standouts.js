@@ -11,8 +11,9 @@ function overviewRate() {
   }
   const first=rows[0], last=rows.at(-1), elapsed=hours(first.at,last.at);
   const delta=BigInt(last.balance)-BigInt(first.balance), settlement=crossesSettlement(first.at,last.at);
-  const rate=settlement?null:timeRate(delta,elapsed);
-  node.innerHTML=`<p>${rows.length} photographed points · ${safe(labelDate(first.at))} → ${safe(labelDate(last.at))} · ${elapsedLabel(elapsed)} between actual photos (gaps included).${settlement?" Window crosses a Saturday settlement; start on or after its baseline to inspect a rate.":""}</p><div class="overview-metrics"><div><span>OBSERVED NET RATE</span><b>${rateText(rate)}</b></div><div><span>NET HELD C$ CHANGE</span><b>${signed(delta)}</b></div>${rate>0?`<div><span>HYPOTHETICAL 1.5× BASE RATE</span><b class="rainbow-static">${rateText(rate/1.5)}</b></div>`:""}</div>`;
+  const hourly=timeRate(delta,elapsed),rate=hourly===null?null:settlement?hourly*168:hourly;
+  const unit=settlement?"week":"hr";
+  node.innerHTML=`<p>${rows.length} photographed points · ${safe(labelDate(first.at))} → ${safe(labelDate(last.at))} · ${elapsedLabel(elapsed)} between actual photos (gaps included).${settlement?" Saturday settlement included; normalize the entire observed window to seven days. This is held-balance change, not an earning pace.":""}</p><div class="overview-metrics"><div><span>${settlement?"WEEKLY AVG OBSERVED NET CHANGE":"OBSERVED NET RATE"}</span><b>${rateText(rate,unit)}</b></div><div><span>NET HELD C$ CHANGE</span><b>${signed(delta)}</b></div>${delta>0n?`<div><span>HYPOTHETICAL RAINBOW 1.5× BASE (WINDOW)</span><b class="rainbow-static">${signed(rainbowBase(delta))}</b></div>`:""}${rate>0?`<div><span>HYPOTHETICAL 1.5× BASE ${settlement?"WEEKLY AVG":"RATE"}</span><b class="rainbow-static">${rateText(rate/1.5,unit)}</b></div>`:""}</div>`;
 }
 
 function overviewRange(start,end) {
