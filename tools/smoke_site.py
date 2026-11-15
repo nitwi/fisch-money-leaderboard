@@ -33,6 +33,25 @@ try:
         assert page.locator("#capture-date").inner_text() == page.evaluate("dayLabel(state.data.checkpoints.at(-1).day_key)")
         assert page.locator("#stat-coverage").inner_text() == f"{last['verified']} / {last['coverage']}"
         assert page.locator(".proof").count() == len(last['evidence'])
+        if last['id']=='2026-11-14_2223':
+            assert page.locator('#capture-date').inner_text()=='Nov 14, 2026'
+            assert 'WEEKEND SETTLEMENT BASELINE' in page.locator('#capture-index').inner_text()
+            assert '10:23 PM' in page.locator('#capture-index').inner_text()
+            assert page.locator('#stat-hours').inner_text()=='24.5h'
+            assert page.locator('#stat-floor').inner_text()=='55.4B'
+            assert page.locator('.proof').count()==12
+            assert page.locator('.proof.earlier-proof').count()==8
+            assert 'LEFT PICTURED TOP 50' in page.locator('#movement-list').inner_text()
+            newcomer=next(p for p in data['players'] if p['name']=='hc2khunowpng43ntk1')
+            assert newcomer['roblox_id']=='11482999303'
+            assert '#32' in page.locator(f'.movement-item[data-player="{newcomer["key"]}"]').inner_text()
+            assert 'WEEKEND SETTLEMENT BASELINE' in page.locator(f'.movement-item[data-player="{newcomer["key"]}"]').inner_text()
+            assert '/hr' not in page.locator(f'.movement-item[data-player="{newcomer["key"]}"]').inner_text()
+            for image_id in ('EV0180','EV0184','EV0188','EV0190','EV0191'):
+                page.locator(f'.proof[data-proof="{image_id}"]').click()
+                page.wait_for_function("document.querySelector('#lightbox-image').naturalWidth > 0")
+                page.locator('#lightbox button').click()
+            assert page.locator('.event-card[data-event="weekend-settlement"] a').first.get_attribute('href').endswith('EV0188_Screenshot_2026-11-14_222156.png')
         weekend=next((i for i,cp in enumerate(data['checkpoints']) if cp['id']=='2026-11-14_1128'),None)
         if weekend is not None:
             page.locator('#capture-slider').evaluate("(el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}))}",str(weekend))
@@ -123,13 +142,22 @@ try:
         assert page.locator("#chart").evaluate("el => el.layout.xaxis.type") == "category"
         assert page.locator("#chart").evaluate("el => el.layout.xaxis.tickvals.includes('2026-10-18')")
         assert page.locator('#chart').evaluate("el => {const line=el.data.find(trace=>trace.meta?.key==='id:1316700350');return line.y[line.x.indexOf('2026-11-12')];}")==269064293664
+        if last['id']=='2026-11-14_2223':
+            assert page.locator('#chart').evaluate("el=>{const t=el.data.find(trace=>trace.meta?.key==='id:1316700350');return t.y[t.x.indexOf('2026-11-14')];}")==296016651408
+            assert page.locator('#chart').evaluate("el=>el.layout.xaxis.tickvals.includes('2026-11-14') && !el.layout.xaxis.tickvals.includes('2026-11-14#2')")
+            assert page.locator('#chart').evaluate("el=>el.layout.annotations.some(mark=>mark.text==='WEEKEND')")
+            assert not page.evaluate("standoutRows().some(item=>item.cp.day_key==='2026-11-14')")
+            page.locator('#search').fill('ismyaimbotworking')
+            assert page.locator('.profile-stats > div').filter(has_text='WEEKLY AVG OBSERVED NET CHANGE').locator('b').inner_text().endswith('/week')
+            assert 'WEEKEND SETTLEMENT · no hourly rate' in page.locator('.profile-history a').filter(has_text='Nov 14, 2026').first.inner_text()
+            page.locator('#profile-clear').click()
         if weekend is not None:
             assert page.locator('#chart').evaluate("el=>el.layout.xaxis.tickvals.includes('2026-11-14') && !el.layout.xaxis.tickvals.includes('2026-11-14#2')")
             assert page.locator('#chart').evaluate("el=>el.layout.annotations.some(mark=>mark.text==='WEEKEND') && !el.layout.annotations.some(mark=>mark.text==='SELL')")
         assert [event['day_key'] for event in data['checkpoints'] if event['day_key'] in ('2026-10-31','2026-11-07')]==['2026-10-31','2026-11-07']
         assert page.evaluate("patchEvents.map(event=>[event.day,localDay(event.at)])")==[['2026-10-31','2026-10-31'],['2026-11-07','2026-11-07']]
         assert {'v2.08','v2.09.1'}.issubset(set(page.locator('#chart').evaluate('el=>el.layout.annotations.map(event=>event.text)')))
-        assert page.locator('.event-card').count()==(3 if weekend is not None else 2)
+        assert page.locator('.event-card').count()==(3 if any(cp['day_key']=='2026-11-14' and cp['weekend_settlement'] for cp in data['checkpoints']) else 2)
         assert 'https://fischipedia.org/wiki/2.08#2.08.0'==page.locator('.event-card[data-event="venue-encore"] a').first.get_attribute('href')
         assert 'https://fischipedia.org/wiki/2.09#2.09.1'==page.locator('.event-card[data-event="stellarwave-change"] a').first.get_attribute('href')
         assert 'Oct 31, 2026, 11:00 AM' in page.locator('.event-card[data-event="venue-encore"]').inner_text()
