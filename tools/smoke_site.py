@@ -90,6 +90,7 @@ try:
             apathy=page.locator('.movement-item[data-player="id:1316700350"]')
             assert '+25.6B' in apathy.inner_text()
             assert 'WEEKEND SETTLEMENT BASELINE' in apathy.inner_text()
+            assert 'NOTABLE +8B' in apathy.inner_text()
             assert '/hr' not in apathy.inner_text()
             for image_id in ('EV0180','EV0184','EV0187'):
                 page.locator(f'.proof[data-proof="{image_id}"]').click()
@@ -171,7 +172,14 @@ try:
             assert page.locator('#chart').evaluate("el=>el.layout.xaxis.tickvals.includes('2026-11-14') && !el.layout.xaxis.tickvals.includes('2026-11-14#2')")
             assert page.locator('#chart').evaluate("el=>el.layout.annotations.some(mark=>mark.text==='WEEKEND')")
             assert page.evaluate("standoutRows().some(item=>item.cp.day_key==='2026-11-14' && item.kind==='appearance' && item.row.username==='hc2khunowpng43ntk1' && item.lowerBound===18724287019n && item.severity==='high')")
-            assert not page.evaluate("standoutRows().some(item=>item.cp.day_key==='2026-11-14' && item.kind==='movement')")
+            assert page.evaluate("standoutRows().some(item=>item.cp.day_key==='2026-11-14' && item.kind==='movement' && item.row.username==='ismyaimbotworking' && item.change.delta===25886181970n && item.severity==='extreme' && item.change.rate===null && !item.repeatWith)")
+            assert page.evaluate("""() => state.data.checkpoints.filter(cp=>weekendSettlement(cp)).every(cp=>{
+              const index=state.data.checkpoints.indexOf(cp), previous=state.data.checkpoints[index-1], flags=standoutRows();
+              return (state.byCapture.get(cp.id)||[]).filter(row=>{
+                const change=interval(cp,row,previous);
+                return confirmed(row)&&confirmed(change.old)&&change.elapsed>0&&(change.delta>=BigInt(state.data.threshold)||change.old.rank-row.rank>=5);
+              }).every(row=>flags.some(flag=>flag.kind==='movement'&&flag.index===index&&flag.row.key===row.key));
+            })""")
             page.locator('#search').fill('ismyaimbotworking')
             assert page.locator('.profile-stats > div').filter(has_text='WEEKLY AVG OBSERVED NET CHANGE').locator('b').inner_text().endswith('/week')
             assert 'WEEKEND SETTLEMENT · no hourly rate' in page.locator('.profile-history a').filter(has_text='Nov 14, 2026').first.inner_text()
@@ -244,11 +252,13 @@ try:
         standouts=page.evaluate("standoutRows().map(item=>({day:item.cp.day_key,name:item.row.username,kind:item.kind,gain:item.change.delta?.toString()??null,bound:item.lowerBound?.toString()??null,climb:item.climb}))")
         assert len(standouts)>8, "The archive-wide feed should paginate beyond its first eight flags"
         assert any(item['day']=='2026-11-14' and item['name']=='hc2khunowpng43ntk1' and item['kind']=='appearance' and item['bound']=='18724287019' and item['gain'] is None for item in standouts)
+        assert any(item['day']=='2026-11-14' and item['name']=='ismyaimbotworking' and item['kind']=='movement' and item['gain']=='25886181970' for item in standouts)
         assert any(item['day']=='2026-11-12' and item['name']=='Ceruleanflare2' and item['gain']=='26027711662' and item['climb']==6 for item in standouts)
         assert any(item['day']=='2026-11-10' and item['name']=='Ceruleanflare2' for item in standouts)
         repeated=page.evaluate("standoutRows().filter(item=>item.row.username==='Ceruleanflare2' && item.repeatWith).map(item=>[item.cp.day_key,item.severity,item.repeatWith.cp.day_key,Math.round(Math.abs(hours(item.repeatWith.row.at,item.row.at))*10)/10])")
         assert ['2026-11-12','extreme','2026-11-10',49.5] in repeated
         assert ['2026-11-10','extreme','2026-11-12',49.5] in repeated
+        assert page.evaluate("standoutRows().every(item=>!item.repeatWith || (!weekendSettlement(item.cp) && !weekendSettlement(item.repeatWith.cp)))")
         assert page.evaluate("standoutRows().some(item=>!item.bigGain && item.climb>=5)")
         assert page.evaluate("standoutRows().some(item=>item.severity==='notable') && standoutRows().some(item=>item.severity==='high')")
         assert page.evaluate("standoutRows().every(item=>item.row.status==='verified' && item.row.evidence.length && state.data.checkpoints[item.index-1].complete && (item.kind==='appearance'?item.previousFloor.status==='verified' && item.change.old===null:item.change.old?.status==='verified' && item.change.old.evidence.length && state.data.checkpoints[item.index-1].id===item.change.old.checkpoint))")
@@ -297,12 +307,29 @@ try:
         entry=analysis.locator('.highlight-card[data-flag-kind="appearance"][data-highlight-day="2026-11-14"]')
         assert entry.count()==1 and entry.get_attribute('data-severity')=='high'
         assert 'floor-derived minimum net increase' in entry.inner_text()
+        assert 'WEEKEND SELL CONTEXT' in entry.inner_text()
         assert '18,724,287,019' in entry.inner_text()
         assert '/hr' not in entry.inner_text()
         assert 'day=2026-11-13' in entry.locator('.highlight-proof-links a').first.get_attribute('href')
         assert 'EV0190' in entry.locator('.highlight-proof-links a').nth(1).get_attribute('href')
         analysis.locator('#flag-search').fill('hc2khunowpng43ntk1')
         assert analysis.locator('.highlight-card').count()==1
+        analysis.locator('#flag-search').fill('')
+        analysis.locator('#flag-search').fill('ismyaimbotworking')
+        settlement=analysis.locator('.highlight-card[data-highlight-day="2026-11-14"][data-highlight-player="id:1316700350"]')
+        assert settlement.count()==1 and settlement.get_attribute('data-severity')=='extreme'
+        assert 'WEEKEND SELL CONTEXT' in settlement.inner_text()
+        assert '+25.8B observed net C$' in settlement.inner_text()
+        assert 'no hourly earning rate inferred' in settlement.inner_text()
+        assert '/hr' not in settlement.inner_text()
+        assert 'EV0173' in settlement.locator('.highlight-proof-links').inner_text()
+        assert 'EV0188' in settlement.locator('.highlight-proof-links').inner_text()
+        settlement.locator('.highlight-open').click()
+        assert '25,886,181,970' in analysis.locator('#overview-content').inner_text()
+        assert 'WEEKEND SELL CONTEXT · SATURDAY BASELINE' in analysis.locator('#overview-content').inner_text()
+        assert 'HOURLY RATE ACROSS SETTLEMENT' in analysis.locator('#overview-content').inner_text()
+        assert 'Not inferred' in analysis.locator('#overview-content').inner_text()
+        assert 'WEEKLY AVG OBSERVED NET CHANGE' in analysis.locator('#overview-rate').inner_text()
         analysis.locator('#flag-search').fill('')
         cerulean=next(p for p in data['players'] if p['name']=='Ceruleanflare2')
         latest_flag=f'.highlight-card[data-highlight-day="2026-11-12"][data-highlight-player="{cerulean["key"]}"]'

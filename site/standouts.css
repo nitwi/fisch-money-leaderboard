@@ -34,6 +34,8 @@
 .overview-range-actions button{cursor:pointer}
 .overview-range-actions button:hover,.overview-range-actions button:focus-visible{border-color:var(--cyan)}
 .overview-emphasis{font-weight:800;color:var(--text)}
+.standout-overview .settlement-context{padding:10px;border-left:3px solid #61e5b3;background:rgba(97,229,179,.08)}
+.settlement-context strong{color:#61e5b3}
 .standout-teaser{display:flex;justify-content:space-between;align-items:center;gap:16px;margin:20px 0;padding:16px 21px;border:1px solid var(--border);border-radius:14px;background:var(--panel)}
 .standout-teaser h2{font-size:19px;margin:5px 0}
 .standout-teaser p:not(.eyebrow){color:var(--muted);font-size:12px;margin:4px 0}

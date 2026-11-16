@@ -225,7 +225,7 @@ function renderMovement() {
     const positionChange=old?positionDelta>0?`<b class="rank-move up" title="Up ${positionDelta} places">↑${positionDelta}</b>`:positionDelta<0?`<b class="rank-move down" title="Down ${-positionDelta} places">↓${-positionDelta}</b>`:`<b class="rank-move steady" title="Rank unchanged">→0</b>`:previous?.complete?`<b class="rank-move new">NEW</b>`:"";
     const known=delta!==null;
     const tentative=!confirmed(row)||(old&&!confirmed(old));
-    const large=known && !tentative && !weekendSettlement(cp) && delta>=BigInt(state.data.threshold);
+    const large=known && !tentative && delta>=BigInt(state.data.threshold);
     const entry=!old?floorEntry(cp,row,previous):null;
     const previousText=old?exact(old.balance):entry?`prior #50 floor ${exact(boardAmount(entry.floor))} (upper bound; player's previous amount unknown)`:"previous amount unknown";
     const deltaText=known?`${tentative?"≈":""}${signed(delta)} observed net C$`:entry?`at least ${signed(entry.lowerBound)} floor-derived net C$; exact prior balance unknown`:"no adjacent measurement";
@@ -256,12 +256,13 @@ function standoutRows() {
           severity:!settlement&&entry.lowerBound>=25_000_000_000n?"extreme":"high"});
         continue;
       }
-      if(settlement||!confirmed(change.old)||change.delta===null||!(change.elapsed>0))continue;
+      if(!confirmed(change.old)||change.delta===null||!(change.elapsed>0))continue;
       const climb=change.old.rank-row.rank, bigGain=change.delta>=threshold;
       if(bigGain||climb>=5){
         const item={kind:"movement",index,cp,previous,row,change,climb,bigGain,repeatWith:null,severity:"notable"};
         flags.push(item);
-        if(change.delta>=20_000_000_000n){
+        // A settlement is a flagged balance step, but not a repeated-gain pattern.
+        if(!settlement&&change.delta>=20_000_000_000n){
           const earlier=recentLarge.get(row.key);
           if(earlier && hours(earlier.row.at,row.at)>0 && hours(earlier.row.at,row.at)<=72){
             item.repeatWith=earlier;
@@ -296,7 +297,7 @@ function appearanceBeforeProof(item){
 function appearanceCard(item){
   const {index,cp,previous,row,lowerBound,previousFloor,severity}=item;
   const firstSeen=!memberHistory(row.key).some(reading=>new Date(reading.at)<new Date(row.at));
-  return `<article class="highlight-card appearance ${state.index===index?"active":""}" data-severity="${severity}" data-flag-kind="appearance" data-highlight-day="${safe(cp.day_key)}" data-highlight-player="${safe(row.key)}"><button class="highlight-open" type="button" data-highlight-open="${index}" data-player="${safe(row.key)}" aria-label="Open ${safe(row.username)} top-50 entry on ${safe(dayLabel(cp.day_key))}"><span class="highlight-head"><span class="highlight-player">${avatar(player(row.key))}${safe(row.username)}</span><span class="highlight-badges"><b class="severity-badge">${severity.toUpperCase()}</b><b>${firstSeen?"FIRST SEEN":"RETURNED"} · TOP 50</b></span></span><p><strong>${safe(dayLabel(previous.day_key))} outside pictured Top 50 → ${safe(dayLabel(cp.day_key))} #${row.rank}</strong></p><p class="highlight-amounts">Previous exact balance unknown · pictured #50 floor ${safe(exact(boardAmount(previousFloor)))}<br>Current ${safe(exact(row.balance))} · <strong>floor-derived minimum net increase ≥${safe(exact(lowerBound))}</strong></p><p>${weekendSettlement(cp)?"Weekend settlement entry · new held-balance baseline.":"Ranked entry from a complete previous board."} Neither the exact prior balance nor an hourly rate is known.</p></button><div class="highlight-proof-links">${appearanceBeforeProof(item)}${standoutProof(row,"Current rank proof")}</div></article>`;
+  return `<article class="highlight-card appearance ${state.index===index?"active":""}" data-severity="${severity}" data-flag-kind="appearance" data-highlight-day="${safe(cp.day_key)}" data-highlight-player="${safe(row.key)}"><button class="highlight-open" type="button" data-highlight-open="${index}" data-player="${safe(row.key)}" aria-label="Open ${safe(row.username)} top-50 entry on ${safe(dayLabel(cp.day_key))}"><span class="highlight-head"><span class="highlight-player">${avatar(player(row.key))}${safe(row.username)}</span><span class="highlight-badges"><b class="severity-badge">${severity.toUpperCase()}</b>${weekendSettlement(cp)?'<b class="settlement-badge">WEEKEND SELL CONTEXT</b>':""}<b>${firstSeen?"FIRST SEEN":"RETURNED"} · TOP 50</b></span></span><p><strong>${safe(dayLabel(previous.day_key))} outside pictured Top 50 → ${safe(dayLabel(cp.day_key))} #${row.rank}</strong></p><p class="highlight-amounts">Previous exact balance unknown · pictured #50 floor ${safe(exact(boardAmount(previousFloor)))}<br>Current ${safe(exact(row.balance))} · <strong>floor-derived minimum net increase ≥${safe(exact(lowerBound))}</strong></p><p>${weekendSettlement(cp)?"Weekend settlement entry · new held-balance baseline.":"Ranked entry from a complete previous board."} Neither the exact prior balance nor an hourly rate is known.</p></button><div class="highlight-proof-links">${appearanceBeforeProof(item)}${standoutProof(row,"Current rank proof")}</div></article>`;
 }
 function renderHighlights() {
   const flags=standoutRows().filter(item=>(state.standoutSeverity==="all"||item.severity===state.standoutSeverity) && item.row.username.toLocaleLowerCase().includes(state.standoutSearch)), pageSize=8, lastPage=Math.max(0,Math.ceil(flags.length/pageSize)-1);
@@ -310,9 +311,9 @@ function renderHighlights() {
     <article class="highlight-card ${state.index===index?"active":""}" data-severity="${severity}" data-highlight-day="${safe(cp.day_key)}" data-highlight-player="${safe(row.key)}">
       <button class="highlight-open" type="button" data-highlight-open="${index}" data-player="${safe(row.key)}" aria-label="Open ${safe(row.username)} on ${safe(dayLabel(cp.day_key))}">
         <span class="highlight-head"><span class="highlight-player">${avatar(player(row.key))}${safe(row.username)}</span>
-          <span class="highlight-badges"><b class="severity-badge">${severity.toUpperCase()}</b>${bigGain?'<b>+8B NET</b>':""}${climb>=5?'<b>↑5+ RANKS</b>':""}</span></span>
+          <span class="highlight-badges"><b class="severity-badge">${severity.toUpperCase()}</b>${weekendSettlement(cp)?'<b class="settlement-badge">WEEKEND SELL CONTEXT</b>':""}${bigGain?'<b>+8B NET</b>':""}${climb>=5?'<b>↑5+ RANKS</b>':""}</span></span>
         <p><strong>${safe(dayLabel(previous.day_key))} #${change.old.rank} → ${safe(dayLabel(cp.day_key))} #${row.rank}</strong> · ${signed(change.delta)} observed net C$${climb>0?` · ↑${climb} ranks`:""}</p>
-        <p class="highlight-amounts">${safe(exact(change.old.balance))} → ${safe(exact(row.balance))}<br>Photos ${safe(labelDate(change.old.at))} → ${safe(labelDate(row.at))} · ${elapsedLabel(change.elapsed)} elapsed</p>
+        <p class="highlight-amounts">${safe(exact(change.old.balance))} → ${safe(exact(row.balance))}<br>Photos ${safe(labelDate(change.old.at))} → ${safe(labelDate(row.at))} · ${elapsedLabel(change.elapsed)} elapsed${weekendSettlement(cp)?' · Saturday settlement baseline; no hourly earning rate inferred':""}</p>
         ${repeatedGainNote({row,cp,change,repeatWith})}
       </button>
       <div class="highlight-proof-links">${standoutProof(change.old,"Before proof")}${standoutProof(row,"After proof")}</div>
