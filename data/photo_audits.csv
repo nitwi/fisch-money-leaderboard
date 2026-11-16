@@ -133,3 +133,7 @@ EV0188,1-16,Read Nov 14 late Saturday top-board names and exact balances from or
 EV0189,16-31,Read Nov 14 late Saturday middle-board names and exact balances from original 22:22:09 PNG; #16 corroborates EV0188
 EV0190,30-45,Read Nov 14 late Saturday lower-board names and exact balances from original 22:22:27 PNG; #30-31 corroborate EV0189
 EV0191,44-50,Read Nov 14 late Saturday bottom-board names and exact balances from original 22:22:37 PNG; #44-45 corroborate EV0190
+EV0192,1-16,Read every Nov 15 top-board rank name and exact C$ directly from original screenshot at 21:37:19
+EV0193,17-32,Read every Nov 15 middle-board rank name and exact C$ directly from original screenshot at 21:39:23
+EV0194,30-45,Read Nov 15 lower-board ranks directly from original at 21:40:05; #30-32 corroborate EV0193
+EV0195,43-50,Read Nov 15 bottom-board ranks directly from original at 21:40:17; #43-45 corroborate EV0194

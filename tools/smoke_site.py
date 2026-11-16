@@ -33,6 +33,28 @@ try:
         assert page.locator("#capture-date").inner_text() == page.evaluate("dayLabel(state.data.checkpoints.at(-1).day_key)")
         assert page.locator("#stat-coverage").inner_text() == f"{last['verified']} / {last['coverage']}"
         assert page.locator(".proof").count() == len(last['evidence'])
+        if last['id']=='2026-11-15_2140':
+            assert page.locator('#capture-date').inner_text()=='Nov 15, 2026'
+            assert '9:40 PM' in page.locator('#capture-index').inner_text()
+            assert 'WEEKEND SETTLEMENT BASELINE' not in page.locator('#capture-index').inner_text()
+            assert page.locator('#stat-hours').inner_text()=='23.3h'
+            assert page.locator('#stat-floor').inner_text()=='55.4B'
+            assert page.locator('.proof').count()==4
+            assert page.locator('.proof.earlier-proof').count()==0
+            newcomer=next(p for p in data['players'] if p['name']=='hc2khunowpng43ntk1')
+            row=page.locator(f'.movement-item[data-player="{newcomer["key"]}"]')
+            assert '#32 → #32' in row.inner_text()
+            assert '−277.6M observed net C$' in row.inner_text()
+            assert 'MAJOR TOP-50 ENTRY' not in row.inner_text()
+            assert page.locator('.movement-item[data-player="id:1316700350"]').inner_text().count('+159M')==1
+            for image_id in ('EV0192','EV0193','EV0194','EV0195'):
+                page.locator(f'.proof[data-proof="{image_id}"]').click()
+                page.wait_for_function("document.querySelector('#lightbox-image').naturalWidth > 0")
+                page.locator('#lightbox button').click()
+            page.locator('#prev').click()
+            assert page.locator('#capture-date').inner_text()=='Nov 14, 2026'
+            assert 'WEEKEND SETTLEMENT BASELINE' in page.locator('#capture-index').inner_text()
+            page.locator('#next').click()
         if last['id']=='2026-11-14_2223':
             assert page.locator('#capture-date').inner_text()=='Nov 14, 2026'
             assert 'WEEKEND SETTLEMENT BASELINE' in page.locator('#capture-index').inner_text()
@@ -144,7 +166,7 @@ try:
         assert page.locator("#chart").evaluate("el => el.layout.xaxis.type") == "category"
         assert page.locator("#chart").evaluate("el => el.layout.xaxis.tickvals.includes('2026-10-18')")
         assert page.locator('#chart').evaluate("el => {const line=el.data.find(trace=>trace.meta?.key==='id:1316700350');return line.y[line.x.indexOf('2026-11-12')];}")==269064293664
-        if last['id']=='2026-11-14_2223':
+        if any(cp['id']=='2026-11-14_2223' for cp in data['checkpoints']):
             assert page.locator('#chart').evaluate("el=>{const t=el.data.find(trace=>trace.meta?.key==='id:1316700350');return t.y[t.x.indexOf('2026-11-14')];}")==296016651408
             assert page.locator('#chart').evaluate("el=>el.layout.xaxis.tickvals.includes('2026-11-14') && !el.layout.xaxis.tickvals.includes('2026-11-14#2')")
             assert page.locator('#chart').evaluate("el=>el.layout.annotations.some(mark=>mark.text==='WEEKEND')")
@@ -232,7 +254,7 @@ try:
         assert page.evaluate("standoutRows().every(item=>item.row.status==='verified' && item.row.evidence.length && state.data.checkpoints[item.index-1].complete && (item.kind==='appearance'?item.previousFloor.status==='verified' && item.change.old===null:item.change.old?.status==='verified' && item.change.old.evidence.length && state.data.checkpoints[item.index-1].id===item.change.old.checkpoint))")
         assert f'{len(standouts)} photo-backed flags' in page.locator('#standout-teaser-summary').inner_text()
         assert page.evaluate("""() => {
-          const cps=state.data.checkpoints, cp=cps.at(-1), previous=cps.at(-2);
+          const cps=state.data.checkpoints, index=cps.findIndex(item=>item.id==='2026-11-14_2223'), cp=cps[index], previous=cps[index-1];
           const row=state.byCapture.get(cp.id).find(item=>item.username==='hc2khunowpng43ntk1');
           const originals=state.byCapture.get(previous.id), floor=atRank(previous,50);
           const threshold=BigInt(state.data.threshold), min=BigInt(floor.balance)+threshold;
@@ -266,7 +288,12 @@ try:
         assert '53,905,288,849' in analysis.locator('#overview-content').inner_text()
         assert 'Unknown · no rate' in analysis.locator('#overview-content').inner_text()
         assert 'EV0190' in analysis.locator('#overview-content').inner_text()
-        assert 'Two are needed' in analysis.locator('#overview-rate').inner_text()
+        if last['id']=='2026-11-15_2140':
+            assert '2 photographed points' in analysis.locator('#overview-rate').inner_text()
+            assert 'OBSERVED NET RATE' in analysis.locator('#overview-rate').inner_text()
+            assert '−277.6M' in analysis.locator('#overview-rate').inner_text()
+        else:
+            assert 'Two are needed' in analysis.locator('#overview-rate').inner_text()
         entry=analysis.locator('.highlight-card[data-flag-kind="appearance"][data-highlight-day="2026-11-14"]')
         assert entry.count()==1 and entry.get_attribute('data-severity')=='high'
         assert 'floor-derived minimum net increase' in entry.inner_text()

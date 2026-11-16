@@ -257,6 +257,39 @@ class LedgerTests(unittest.TestCase):
         self.assertEqual((proofs['EV0190']['min'],proofs['EV0190']['max']),(30,45))
         self.assertEqual((proofs['EV0191']['min'],proofs['EV0191']['max']),(44,50))
 
+    def test_november_15_complete_board_follows_saturday_baseline(self):
+        data=self.data
+        self.assertEqual(data['checkpoints'][-1]['id'],'2026-11-15_2140')
+        current=data['checkpoints'][-1]
+        previous=data['checkpoints'][-2]
+        self.assertEqual((current['day_key'],current['at'],current['precision']),('2026-11-15','2026-11-16T03:40:00Z','screenshot-filename-minute'))
+        self.assertEqual((current['complete'],current['coverage'],current['verified'],current['weekend_settlement']),(True,50,50,False))
+        self.assertEqual(current['primary_evidence'],['EV0192','EV0193','EV0194','EV0195'])
+        self.assertEqual((current['evidence'],current['daily_source_sessions']),(current['primary_evidence'],['2026-11-15_2140']))
+        self.assertEqual((previous['id'],previous['weekend_settlement']),('2026-11-14_2223',True))
+        rows={row['rank']:row for row in data['observations'] if row['checkpoint']==current['id']}
+        former={row['key']:row for row in data['observations'] if row['checkpoint']==previous['id']}
+        self.assertEqual(len(rows),50)
+        self.assertTrue(all(row['status']=='verified' and row['key'] in former for row in rows.values()))
+        self.assertEqual((rows[1]['balance'],rows[2]['balance'],rows[50]['balance']),('310638245713','296175744231','55478619899'))
+        self.assertEqual((rows[4]['username'],rows[4]['balance'],rows[5]['username']),('n6sy','188128107282','xNnoel'))
+        self.assertEqual((rows[20]['username'],rows[20]['balance']),('0egoistic','92199178765'))
+        self.assertEqual((rows[32]['username'],rows[32]['balance'],rows[32]['key'],rows[32]['evidence']),('hc2khunowpng43ntk1','72351910368','id:11482999303',['EV0193']))
+        self.assertEqual(int(rows[32]['balance'])-int(former[rows[32]['key']]['balance']),-277_665_500)
+        self.assertEqual(int(rows[2]['balance'])-int(former[rows[2]['key']]['balance']),159_092_823)
+        self.assertEqual((rows[43]['balance'],rows[44]['balance'],rows[45]['balance']),('61871485099','61674336721','59417872848'))
+        proofs={proof['id']:proof for proof in data['evidence']}
+        for proof_id,filename,span in (
+            ('EV0192','Screenshot_2026-11-15_213719.png',(1,16)),
+            ('EV0193','Screenshot_2026-11-15_213923.png',(17,32)),
+            ('EV0194','Screenshot_2026-11-15_214005.png',(30,45)),
+            ('EV0195','Screenshot_2026-11-15_214017.png',(43,50)),
+        ):
+            proof=proofs[proof_id]
+            self.assertEqual((proof['min'],proof['max']),span)
+            self.assertTrue(proof['url'].endswith(filename))
+            self.assertEqual(hashlib.sha256((ROOT/'site'/proof['url']).read_bytes()).hexdigest(),proof['sha256'])
+
     def test_lower_band_backfills_complete_three_existing_days_without_rewriting_oct30_rank_47(self):
         data=self.data
         days={cp['day_key']:cp for cp in data['checkpoints']}
