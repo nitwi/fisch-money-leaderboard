@@ -137,3 +137,7 @@ EV0192,1-16,Read every Nov 15 top-board rank name and exact C$ directly from ori
 EV0193,17-32,Read every Nov 15 middle-board rank name and exact C$ directly from original screenshot at 21:39:23
 EV0194,30-45,Read Nov 15 lower-board ranks directly from original at 21:40:05; #30-32 corroborate EV0193
 EV0195,43-50,Read Nov 15 bottom-board ranks directly from original at 21:40:17; #43-45 corroborate EV0194
+EV0196,1-16,Read all Nov 16 top-board names and exact C$ directly from the original 22:22:42 screenshot; rank 16 corroborated by EV0197
+EV0197,16-31,Read Nov 16 middle-board ranks directly from original 22:23:06 screenshot; #30-31 corroborated by EV0198
+EV0198,30-45,Read Nov 16 lower-board names and exact values directly from original 22:23:17 screenshot; #36-45 corroborated by EV0199
+EV0199,36-50,Read Nov 16 bottom-board names and exact values directly from original 22:23:31 screenshot; #35 is obscured by UI and verified only in EV0198

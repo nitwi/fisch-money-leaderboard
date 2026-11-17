@@ -33,6 +33,28 @@ try:
         assert page.locator("#capture-date").inner_text() == page.evaluate("dayLabel(state.data.checkpoints.at(-1).day_key)")
         assert page.locator("#stat-coverage").inner_text() == f"{last['verified']} / {last['coverage']}"
         assert page.locator(".proof").count() == len(last['evidence'])
+        if last['id']=='2026-11-16_2223':
+            assert page.locator('#capture-date').inner_text()=='Nov 16, 2026'
+            assert '10:23 PM' in page.locator('#capture-index').inner_text()
+            assert 'WEEKEND SETTLEMENT BASELINE' not in page.locator('#capture-index').inner_text()
+            assert page.locator('#stat-hours').inner_text()=='24.7h'
+            assert page.locator('#stat-floor').inner_text()=='55.6B'
+            assert page.locator('.proof').count()==4
+            assert page.locator('.proof.earlier-proof').count()==0
+            assert '+1.9B observed net C$' in page.locator('.movement-item[data-player="id:1316700350"]').inner_text()
+            minkib=page.locator('.movement-item[data-player="id:1528395974"]')
+            assert '#48' in minkib.inner_text()
+            assert 'RETURNED TO TOP 50' in minkib.inner_text()
+            assert 'MAJOR TOP-50 ENTRY' not in minkib.inner_text()
+            departed=next(p for p in data['players'] if p['name']=='1234mysterio')
+            assert 'LEFT PICTURED TOP 50' in page.locator(f'.movement-item[data-player="{departed["key"]}"]').inner_text()
+            for image_id in ('EV0196','EV0197','EV0198','EV0199'):
+                page.locator(f'.proof[data-proof="{image_id}"]').click()
+                page.wait_for_function("document.querySelector('#lightbox-image').naturalWidth > 0")
+                page.locator('#lightbox button').click()
+            page.locator('#prev').click()
+            assert page.locator('#capture-date').inner_text()=='Nov 15, 2026'
+            page.locator('#next').click()
         if last['id']=='2026-11-15_2140':
             assert page.locator('#capture-date').inner_text()=='Nov 15, 2026'
             assert '9:40 PM' in page.locator('#capture-index').inner_text()
@@ -298,10 +320,10 @@ try:
         assert '53,905,288,849' in analysis.locator('#overview-content').inner_text()
         assert 'Unknown · no rate' in analysis.locator('#overview-content').inner_text()
         assert 'EV0190' in analysis.locator('#overview-content').inner_text()
-        if last['id']=='2026-11-15_2140':
-            assert '2 photographed points' in analysis.locator('#overview-rate').inner_text()
+        if last['day_key']>='2026-11-15':
+            assert ('2 photographed points' if last['id']=='2026-11-15_2140' else '3 photographed points') in analysis.locator('#overview-rate').inner_text()
             assert 'OBSERVED NET RATE' in analysis.locator('#overview-rate').inner_text()
-            assert '−277.6M' in analysis.locator('#overview-rate').inner_text()
+            assert ('−277.6M' if last['id']=='2026-11-15_2140' else '−275.6M') in analysis.locator('#overview-rate').inner_text()
         else:
             assert 'Two are needed' in analysis.locator('#overview-rate').inner_text()
         entry=analysis.locator('.highlight-card[data-flag-kind="appearance"][data-highlight-day="2026-11-14"]')
