@@ -6,6 +6,8 @@ const patchEvents = [
   {id:"venue-encore",day:"2026-10-31",at:"2026-10-31T16:00:00Z",version:"v2.08",title:"Venue Encore · Black Fairy introduced",description:"Black Fairy became obtainable in Venue Encore; a new money-making option entered the game.",color:"#61e5b3",glyph:"✦",source:"https://fischipedia.org/wiki/2.08#2.08.0",icon:"https://static.wikitide.net/fischwiki/thumb/3/33/Black_Fairy.png/145px-Black_Fairy.png",credit:"https://fischipedia.org/wiki/File:Black_Fairy.png"},
   {id:"stellarwave-change",day:"2026-11-07",at:"2026-11-08T02:34:00Z",version:"v2.09.1",title:"Stellarwave Melody balance changes",description:"Sign and milestone bonuses and extra-catch benefits were sharply reduced; the patch also removed a weight penalty.",color:"#ffd166",glyph:"✧",source:"https://fischipedia.org/wiki/2.09#2.09.1",icon:"https://static.wikitide.net/fischwiki/thumb/4/45/Stellarwave_Melody.png/206px-Stellarwave_Melody.png",credit:"https://fischipedia.org/wiki/File:Stellarwave_Melody.png"}
 ];
+// Preserve this verified reading in the archive; omit only its trace from the graph scale.
+const chartExcludedKeys = new Set(["id:8144154137"]);
 const state = {data:null, index:0, selected:null, view:"all", filter:"all", highlightPage:0, standoutSeverity:"all", standoutSearch:"", rangeStart:null, rangeEnd:null, byCapture:new Map(), byPlayer:new Map(), playerMeta:new Map(), proofs:new Map(), profileUpdates:new Map(), chartBound:false};
 const byId = (id) => state.proofs.get(id);
 const compact = (amount) => {
@@ -167,24 +169,24 @@ function renderChart() {
   const slots=chartSlots(cps,cps[0].day_key,cps.at(-1).day_key).filter(slot=>!state.selected || slot.day>=state.rangeStart && slot.day<=state.rangeEnd);
   const days=slots.map(slot=>slot.id);
   const compactTicks=node.clientWidth<500;
-  const selected=state.selected, limit=state.filter==="all"?50:Number(state.filter);
-  const allowed=new Set(cps.flatMap((cp)=>(state.byCapture.get(cp.id)||[]).filter((row)=>row.rank<=limit).map((row)=>row.key)));
-  if(selected)allowed.add(selected);
+  const selected=state.selected, graphedSelected=selected&&!chartExcludedKeys.has(selected)?selected:null, limit=state.filter==="all"?50:Number(state.filter);
+  const allowed=new Set(cps.flatMap((cp)=>(state.byCapture.get(cp.id)||[]).filter((row)=>row.rank<=limit&&!chartExcludedKeys.has(row.key)).map((row)=>row.key)));
+  if(graphedSelected)allowed.add(graphedSelected);
   const keys=[...allowed].sort((a,b)=>memberHistory(a)[0]?.rank-memberHistory(b)[0]?.rank || a.localeCompare(b));
   if (!keys.length) {node.textContent="No screenshot readings yet for this range.";return;}
   const plot=[];
   keys.forEach((key,i)=>{
     const rows=slots.map(slot=>slot.cp?point(slot.cp,key):null);
     if (!rows.some(Boolean))return;
-    const color=selected && selected!==key?"rgba(125,151,164,.22)":palette[i%palette.length];
+    const color=graphedSelected && graphedSelected!==key?"rgba(125,151,164,.22)":palette[i%palette.length];
     const xs=days, ys=rows.map((row)=>row?Number(row.balance):null);
     plot.push({type:"scatter",mode:"lines+markers",name:player(key).name,x:xs,y:ys,connectgaps:false,meta:{key},
-      line:{color,width:selected===key?3.5:1.5,shape:"linear"},marker:{size:rows.map(row=>row?(selected===key?8:5):0),symbol:"circle",color},
+      line:{color,width:graphedSelected===key?3.5:1.5,shape:"linear"},marker:{size:rows.map(row=>row?(graphedSelected===key?8:5):0),symbol:"circle",color},
       customdata:rows.map((row,index)=>row?[`#${row.rank}`,exact(row.balance),(row.balance_evidence||row.evidence).join(", "),labelDate(row.at),row.board_at?`Rank pictured ${labelDate(row.board_at)} · board balance ${exact(row.board_balance)}`:"Rank and balance pictured together",dayLabel(slots[index].day),weekendSettlement(slots[index].cp)?"Saturday settlement baseline · no hourly earning pace":"Selected daily photo",slots[index].cp.id]:["unknown","unknown","","unknown","",dayLabel(slots[index].day),"No photo",""]),
       hovertemplate:"<b>%{fullData.name}</b><br>Leaderboard day %{customdata[5]}<br>%{customdata[6]}<br>Balance photo %{customdata[3]} (Chicago)<br>%{customdata[0]} · %{customdata[1]}<br>%{customdata[4]}<br>Balance proof: %{customdata[2]}<extra></extra>",showlegend:false});
     // A faint dashed bridge marks an unobserved span rather than inventing intermediate points.
     let previous=-1;
-    rows.forEach((row,index)=>{if(!row)return;if(previous>=0 && index-previous>1){plot.push({type:"scatter",mode:"lines",x:[xs[previous],xs[index]],y:[ys[previous],ys[index]],line:{color:selected && selected!==key?"rgba(125,151,164,.11)":color,width:1,dash:"dot"},hoverinfo:"skip",showlegend:false});}previous=index;});
+    rows.forEach((row,index)=>{if(!row)return;if(previous>=0 && index-previous>1){plot.push({type:"scatter",mode:"lines",x:[xs[previous],xs[index]],y:[ys[previous],ys[index]],line:{color:graphedSelected && graphedSelected!==key?"rgba(125,151,164,.11)":color,width:1,dash:"dot"},hoverinfo:"skip",showlegend:false});}previous=index;});
   });
   const selectedSlot=slots.find(slot=>slot.cp?.id===cps[state.index].id);
   const maxY=plot.flatMap((item)=>item.y||[]).filter((x)=>Number.isFinite(x));
@@ -208,7 +210,7 @@ function renderChart() {
     });
     state.chartBound=true;
   }
-  $("chart-title").textContent=selected?`${player(selected).name} · balance history`:"Leaderboard trajectories";
+  $("chart-title").textContent=selected?chartExcludedKeys.has(selected)?`${player(selected).name} · omitted from graph`:`${player(selected).name} · balance history`:"Leaderboard trajectories";
 }
 function renderMovement() {
   const cp=state.data.checkpoints[state.index], previous=state.data.checkpoints[state.index-1];

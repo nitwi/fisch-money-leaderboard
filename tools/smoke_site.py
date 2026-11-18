@@ -33,6 +33,10 @@ try:
         assert page.locator("#capture-date").inner_text() == page.evaluate("dayLabel(state.data.checkpoints.at(-1).day_key)")
         assert page.locator("#stat-coverage").inner_text() == f"{last['verified']} / {last['coverage']}"
         assert page.locator(".proof").count() == len(last['evidence'])
+        page.locator('#chart.js-plotly-plot').wait_for(timeout=20000)
+        assert page.locator('#chart').evaluate("el=>el.data.every(trace=>trace.meta?.key!=='id:8144154137') && el.layout.yaxis.range[1]>300000000000 && el.layout.yaxis.range[1]<400000000000")
+        assert 'Nov 17\'s #1 outlier is omitted' in page.locator('#chart-subtitle').inner_text()
+        assert 'day=2026-11-17' in page.locator('#chart-subtitle a').get_attribute('href')
         if last['id']=='2026-11-17_2350':
             assert page.locator('#capture-date').inner_text()=='Nov 17, 2026'
             assert '11:50 PM' in page.locator('#capture-index').inner_text()
@@ -47,6 +51,17 @@ try:
                 assert 'FIRST SEEN IN TOP 50' in row.inner_text()
                 assert '/hr' not in row.inner_text()
             assert '1,195,852,462,505,654 C$' in page.locator('#movement-list').inner_html()
+            assert page.evaluate("standoutRows().some(item=>item.row.key==='id:8144154137' && item.kind==='appearance' && item.lowerBound===1195796845523354n)")
+            page.locator('.movement-item[data-player="id:8144154137"]').click()
+            assert page.locator('#profile-title').inner_text()=='75percent3r'
+            assert '1195.8T' in page.locator('#profile-content').inner_text()
+            assert 'omitted from graph' in page.locator('#chart-title').inner_text()
+            for top in ('10','25','50','all'):
+                page.locator('#top-filter').select_option(top)
+                assert page.locator('#chart').evaluate("el=>el.data.every(trace=>trace.meta?.key!=='id:8144154137') && el.layout.yaxis.range[1]<400000000000")
+            assert page.locator('#chart').evaluate("el=>el.data.some(trace=>trace.name==='LowTierNova' && trace.line.color!=='rgba(125,151,164,.22)')")
+            page.locator('#profile-clear').click()
+            assert page.locator('#chart-title').inner_text()=='Leaderboard trajectories'
             for departed in ('KNG_GBS','Zantrille'):
                 meta=next(p for p in data['players'] if p['name']==departed)
                 assert 'LEFT PICTURED TOP 50' in page.locator(f'.movement-item[data-player="{meta["key"]}"]').inner_text()
@@ -355,6 +370,14 @@ try:
             assert '/hr' not in leader.inner_text()
             assert 'day=2026-11-16' in leader.locator('.highlight-proof-links a').first.get_attribute('href')
             assert 'EV0200' in leader.locator('.highlight-proof-links a').nth(1).get_attribute('href')
+            linked=browser.new_page(viewport={'width':1300,'height':930})
+            linked.on('pageerror',lambda error: errors.append(str(error)))
+            linked.goto(analysis.locator('.overview-dashboard-link').get_attribute('href'),wait_until='domcontentloaded')
+            linked.locator('#profile-title').get_by_text('75percent3r').wait_for(timeout=20000)
+            linked.locator('#chart.js-plotly-plot').wait_for(timeout=20000)
+            assert linked.locator('#chart').evaluate("el=>el.data.every(trace=>trace.meta?.key!=='id:8144154137') && el.layout.yaxis.range[1]<400000000000")
+            assert '1195.8T' in linked.locator('#profile-content').inner_text()
+            linked.close()
             analysis.locator('#flag-search').fill('Farniluque049')
             assert analysis.locator('.highlight-card').count()==1
             runner=analysis.locator('.highlight-card[data-flag-kind="appearance"]')
@@ -589,6 +612,7 @@ try:
         assert f"DAY {calendar_days:02d} / {calendar_days}" in page.locator("#capture-index").inner_text()
         assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 4"), "Mobile page overflows horizontally"
         assert page.locator("#chart").evaluate("el => el.layout.xaxis.tickvals.length > el.layout.xaxis.ticktext.filter(Boolean).length")
+        assert page.locator("#chart").evaluate("el => el.data.every(trace=>trace.meta?.key!=='id:8144154137') && el.layout.yaxis.range[1]<400000000000")
         page.locator(".evidence-section").scroll_into_view_if_needed()
         page.wait_for_function("document.querySelector('.proof img').naturalWidth > 0")
         page.screenshot(path=str(ROOT / "preview-mobile.png"), full_page=True)
