@@ -292,8 +292,9 @@ class LedgerTests(unittest.TestCase):
 
     def test_november_16_complete_board_preserves_verified_returning_identity(self):
         data=self.data
-        current=data['checkpoints'][-1]
-        previous=data['checkpoints'][-2]
+        index=next(i for i,cp in enumerate(data['checkpoints']) if cp['id']=='2026-11-16_2223')
+        current=data['checkpoints'][index]
+        previous=data['checkpoints'][index-1]
         self.assertEqual((current['id'],current['at'],current['precision']),('2026-11-16_2223','2026-11-17T04:23:00Z','screenshot-filename-minute'))
         self.assertEqual((current['verified'],current['coverage'],current['complete'],current['weekend_settlement']),(50,50,True,False))
         self.assertEqual((previous['id'],previous['verified']),('2026-11-15_2140',50))
@@ -319,6 +320,41 @@ class LedgerTests(unittest.TestCase):
             ('EV0197','Screenshot_2026-11-16_222306.png',(16,31)),
             ('EV0198','Screenshot_2026-11-16_222317.png',(30,45)),
             ('EV0199','Screenshot_2026-11-16_222331.png',(36,50)),
+        ):
+            proof=proofs[proof_id]
+            self.assertEqual((proof['min'],proof['max']),span)
+            self.assertTrue(proof['url'].endswith(filename))
+            self.assertEqual(hashlib.sha256((ROOT/'site'/proof['url']).read_bytes()).hexdigest(),proof['sha256'])
+
+    def test_november_17_new_leader_and_rank_15_have_exact_id_and_floor_bounds(self):
+        data=self.data
+        current=data['checkpoints'][-1]
+        previous=data['checkpoints'][-2]
+        self.assertEqual((current['id'],current['at'],current['precision']),('2026-11-17_2350','2026-11-18T05:50:00Z','screenshot-filename-minute'))
+        self.assertEqual((current['verified'],current['coverage'],current['complete'],current['weekend_settlement']),(50,50,True,False))
+        self.assertEqual((previous['id'],previous['verified']),('2026-11-16_2223',50))
+        self.assertEqual((current['primary_evidence'],current['daily_source_sessions']),(['EV0200','EV0201','EV0202','EV0203'],[current['id']]))
+        rows={row['rank']:row for row in data['observations'] if row['checkpoint']==current['id']}
+        old={row['key']:row for row in data['observations'] if row['checkpoint']==previous['id']}
+        self.assertEqual(len(rows),50)
+        self.assertTrue(all(row['status']=='verified' for row in rows.values()))
+        self.assertEqual((rows[1]['username'],rows[1]['balance'],rows[1]['key'],rows[1]['evidence']),('75percent3r','1195852462505654','id:8144154137',['EV0200']))
+        self.assertEqual((rows[15]['username'],rows[15]['balance'],rows[15]['key']),('Farniluque049','119647603225','id:8204267816'))
+        self.assertNotIn(rows[1]['key'],old)
+        self.assertNotIn(rows[15]['key'],old)
+        self.assertEqual((rows[2]['username'],rows[2]['balance'],rows[3]['balance']),('LowTierNova','310638332173','299419468977'))
+        self.assertEqual((rows[34]['username'],rows[34]['balance']),('hc2khunowpng43ntk1','72353975828'))
+        self.assertEqual((rows[50]['username'],rows[50]['balance']),('Minkib7661','57254241892'))
+        self.assertNotIn('KNG_GBS',[row['username'] for row in rows.values()])
+        self.assertNotIn('Zantrille',[row['username'] for row in rows.values()])
+        self.assertEqual(int(rows[1]['balance'])-int(old[next(row['key'] for row in data['observations'] if row['checkpoint']==previous['id'] and row['rank']==50)]['balance']),1_195_796_845_523_354)
+        self.assertEqual(int(rows[15]['balance'])-int(old[next(row['key'] for row in data['observations'] if row['checkpoint']==previous['id'] and row['rank']==50)]['balance']),64_030_620_925)
+        proofs={proof['id']:proof for proof in data['evidence']}
+        for proof_id,filename,span in (
+            ('EV0200','Screenshot_2026-11-17_235001.png',(1,16)),
+            ('EV0201','Screenshot_2026-11-17_235029.png',(16,31)),
+            ('EV0202','Screenshot_2026-11-17_235048.png',(30,45)),
+            ('EV0203','Screenshot_2026-11-17_235055.png',(36,50)),
         ):
             proof=proofs[proof_id]
             self.assertEqual((proof['min'],proof['max']),span)

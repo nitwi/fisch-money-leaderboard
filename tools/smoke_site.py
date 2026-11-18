@@ -33,6 +33,30 @@ try:
         assert page.locator("#capture-date").inner_text() == page.evaluate("dayLabel(state.data.checkpoints.at(-1).day_key)")
         assert page.locator("#stat-coverage").inner_text() == f"{last['verified']} / {last['coverage']}"
         assert page.locator(".proof").count() == len(last['evidence'])
+        if last['id']=='2026-11-17_2350':
+            assert page.locator('#capture-date').inner_text()=='Nov 17, 2026'
+            assert '11:50 PM' in page.locator('#capture-index').inner_text()
+            assert page.locator('#stat-hours').inner_text()=='25.4h'
+            assert page.locator('#stat-floor').inner_text()=='57.2B'
+            assert page.locator('.proof').count()==4
+            for username,rank,bound in [('75percent3r','#1','+1195.7T'),('Farniluque049','#15','+64B')]:
+                meta=next(p for p in data['players'] if p['name']==username)
+                row=page.locator(f'.movement-item[data-player="{meta["key"]}"]')
+                assert rank in row.inner_text() and bound in row.inner_text()
+                assert 'MAJOR TOP-50 ENTRY' in row.inner_text()
+                assert 'FIRST SEEN IN TOP 50' in row.inner_text()
+                assert '/hr' not in row.inner_text()
+            assert '1,195,852,462,505,654 C$' in page.locator('#movement-list').inner_html()
+            for departed in ('KNG_GBS','Zantrille'):
+                meta=next(p for p in data['players'] if p['name']==departed)
+                assert 'LEFT PICTURED TOP 50' in page.locator(f'.movement-item[data-player="{meta["key"]}"]').inner_text()
+            for image_id in ('EV0200','EV0201','EV0202','EV0203'):
+                page.locator(f'.proof[data-proof="{image_id}"]').click()
+                page.wait_for_function("document.querySelector('#lightbox-image').naturalWidth > 0")
+                page.locator('#lightbox button').click()
+            page.locator('#prev').click()
+            assert page.locator('#capture-date').inner_text()=='Nov 16, 2026'
+            page.locator('#next').click()
         if last['id']=='2026-11-16_2223':
             assert page.locator('#capture-date').inner_text()=='Nov 16, 2026'
             assert '10:23 PM' in page.locator('#capture-index').inner_text()
@@ -273,6 +297,10 @@ try:
         assert page.locator('.standout-teaser').is_visible()
         standouts=page.evaluate("standoutRows().map(item=>({day:item.cp.day_key,name:item.row.username,kind:item.kind,gain:item.change.delta?.toString()??null,bound:item.lowerBound?.toString()??null,climb:item.climb}))")
         assert len(standouts)>8, "The archive-wide feed should paginate beyond its first eight flags"
+        if last['id']=='2026-11-17_2350':
+            assert any(item['day']=='2026-11-17' and item['name']=='75percent3r' and item['kind']=='appearance' and item['bound']=='1195796845523354' and item['gain'] is None for item in standouts)
+            assert any(item['day']=='2026-11-17' and item['name']=='Farniluque049' and item['kind']=='appearance' and item['bound']=='64030620925' and item['gain'] is None for item in standouts)
+            assert page.evaluate("standoutRows().filter(item=>item.cp.day_key==='2026-11-17' && item.kind==='appearance').every(item=>item.severity==='extreme' && item.previousFloor.rank===50 && item.change.rate===null)")
         assert any(item['day']=='2026-11-14' and item['name']=='hc2khunowpng43ntk1' and item['kind']=='appearance' and item['bound']=='18724287019' and item['gain'] is None for item in standouts)
         assert any(item['day']=='2026-11-14' and item['name']=='ismyaimbotworking' and item['kind']=='movement' and item['gain']=='25886181970' for item in standouts)
         assert any(item['day']=='2026-11-12' and item['name']=='Ceruleanflare2' and item['gain']=='26027711662' and item['climb']==6 for item in standouts)
@@ -315,13 +343,41 @@ try:
         assert analysis.locator('.highlight-card').count()==8 and analysis.locator('#highlight-pages').is_visible()
         assert analysis.locator('#highlight-list').evaluate('el=>getComputedStyle(el).display')=='grid'
         assert analysis.locator('.standout-layout').evaluate('el=>{const [left,right]=el.children;const ratio=left.getBoundingClientRect().width/right.getBoundingClientRect().width;return ratio>1.8&&ratio<2.2}')
+        if last['id']=='2026-11-17_2350':
+            assert '75percent3r' in analysis.locator('#overview-content').inner_text()
+            assert '1,195,852,462,505,654' in analysis.locator('#overview-content').inner_text()
+            assert '1,195,796,845,523,354' in analysis.locator('#overview-content').inner_text()
+            assert '55,616,982,300' in analysis.locator('#overview-content').inner_text()
+            assert 'Two are needed' in analysis.locator('#overview-rate').inner_text()
+            leader=analysis.locator('.highlight-card[data-flag-kind="appearance"][data-highlight-day="2026-11-17"]').first
+            assert leader.get_attribute('data-severity')=='extreme'
+            assert '1,195,796,845,523,354' in leader.inner_text()
+            assert '/hr' not in leader.inner_text()
+            assert 'day=2026-11-16' in leader.locator('.highlight-proof-links a').first.get_attribute('href')
+            assert 'EV0200' in leader.locator('.highlight-proof-links a').nth(1).get_attribute('href')
+            analysis.locator('#flag-search').fill('Farniluque049')
+            assert analysis.locator('.highlight-card').count()==1
+            runner=analysis.locator('.highlight-card[data-flag-kind="appearance"]')
+            assert runner.get_attribute('data-severity')=='extreme'
+            assert '64,030,620,925' in runner.inner_text()
+            assert 'EV0200' in runner.locator('.highlight-proof-links').inner_text()
+            giant_mobile=browser.new_page(viewport={'width':390,'height':840})
+            giant_mobile.on('pageerror',lambda error: errors.append(str(error)))
+            giant_mobile.goto(f'http://127.0.0.1:{server.server_address[1]}/standouts.html',wait_until='domcontentloaded')
+            giant_mobile.locator('.highlight-card[data-highlight-day="2026-11-17"]').first.wait_for(timeout=20000)
+            assert '1,195,852,462,505,654' in giant_mobile.locator('#overview-content').inner_text()
+            assert giant_mobile.evaluate('document.documentElement.scrollWidth <= window.innerWidth + 4')
+            giant_mobile.close()
+            analysis.locator('#flag-search').fill('hc2khunowpng43ntk1')
+            analysis.locator('.highlight-card[data-highlight-day="2026-11-14"] .highlight-open').click()
+            analysis.locator('#flag-search').fill('')
         assert 'hc2khunowpng43ntk1' in analysis.locator('#overview-content').inner_text()
         assert '18,724,287,019' in analysis.locator('#overview-content').inner_text()
         assert '53,905,288,849' in analysis.locator('#overview-content').inner_text()
         assert 'Unknown · no rate' in analysis.locator('#overview-content').inner_text()
         assert 'EV0190' in analysis.locator('#overview-content').inner_text()
         if last['day_key']>='2026-11-15':
-            assert ('2 photographed points' if last['id']=='2026-11-15_2140' else '3 photographed points') in analysis.locator('#overview-rate').inner_text()
+            assert ('2 photographed points' if last['id']=='2026-11-15_2140' else '4 photographed points' if last['id']=='2026-11-17_2350' else '3 photographed points') in analysis.locator('#overview-rate').inner_text()
             assert 'OBSERVED NET RATE' in analysis.locator('#overview-rate').inner_text()
             assert ('−277.6M' if last['id']=='2026-11-15_2140' else '−275.6M') in analysis.locator('#overview-rate').inner_text()
         else:

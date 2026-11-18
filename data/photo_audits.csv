@@ -141,3 +141,7 @@ EV0196,1-16,Read all Nov 16 top-board names and exact C$ directly from the origi
 EV0197,16-31,Read Nov 16 middle-board ranks directly from original 22:23:06 screenshot; #30-31 corroborated by EV0198
 EV0198,30-45,Read Nov 16 lower-board names and exact values directly from original 22:23:17 screenshot; #36-45 corroborated by EV0199
 EV0199,36-50,Read Nov 16 bottom-board names and exact values directly from original 22:23:31 screenshot; #35 is obscured by UI and verified only in EV0198
+EV0200,1-16,Read all Nov 17 top-board names and exact amounts from original 23:50:01 screenshot; enlarged the #1 value behind the XP overlay to confirm every digit
+EV0201,16-31,Read Nov 17 middle-board names and exact amounts directly from original 23:50:29 screenshot; #16 corroborates EV0200
+EV0202,30-45,Read Nov 17 lower-board names and exact amounts directly from original 23:50:48 screenshot; #30-31 corroborate EV0201
+EV0203,36-50,Read Nov 17 bottom-board names and exact amounts directly from original 23:50:55 screenshot; #36-45 corroborate EV0202 and #35 stays unassigned to this image
