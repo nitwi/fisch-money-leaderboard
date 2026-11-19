@@ -37,6 +37,31 @@ try:
         assert page.locator('#chart').evaluate("el=>el.data.every(trace=>trace.meta?.key!=='id:8144154137') && el.layout.yaxis.range[1]>300000000000 && el.layout.yaxis.range[1]<400000000000")
         assert 'Nov 17\'s #1 outlier is omitted' in page.locator('#chart-subtitle').inner_text()
         assert 'day=2026-11-17' in page.locator('#chart-subtitle a').get_attribute('href')
+        if last['id']=='2026-11-18_2237':
+            assert page.locator('#capture-date').inner_text()=='Nov 18, 2026'
+            assert '10:37 PM' in page.locator('#capture-index').inner_text()
+            assert page.locator('#stat-hours').inner_text()=='22.8h'
+            assert page.locator('#stat-floor').inner_text()=='56.9B'
+            assert page.locator('.proof').count()==4
+            assert page.locator('#stat-largest').inner_text()=='+55.4B'
+            assert page.locator('#stat-largest-name').inner_text()=='Ceruleanflare2'
+            cerulean=next(p for p in data['players'] if p['name']=='Ceruleanflare2')
+            cerulean_row=page.locator(f'.movement-item[data-player="{cerulean["key"]}"]')
+            assert '#14 ↗ #7' in cerulean_row.inner_text() and '↑7' in cerulean_row.inner_text()
+            assert '+55.4B observed net C$' in cerulean_row.inner_text()
+            assert 'NOTABLE +8B' in cerulean_row.inner_text()
+            assert '1195.8T' in page.locator('.movement-item[data-player="id:8144154137"]').inner_text()
+            returnee=next(p for p in data['players'] if p['name']=='Zantrille')
+            assert 'RETURNED TO TOP 50' in page.locator(f'.movement-item[data-player="{returnee["key"]}"]').inner_text()
+            departed=next(p for p in data['players'] if p['name']=='Farniluque049')
+            assert 'LEFT PICTURED TOP 50' in page.locator(f'.movement-item[data-player="{departed["key"]}"]').inner_text()
+            for image_id in ('EV0204','EV0205','EV0206','EV0207'):
+                page.locator(f'.proof[data-proof="{image_id}"]').click()
+                page.wait_for_function("document.querySelector('#lightbox-image').naturalWidth > 0")
+                page.locator('#lightbox button').click()
+            page.locator('#prev').click()
+            assert page.locator('#capture-date').inner_text()=='Nov 17, 2026'
+            page.locator('#next').click()
         if last['id']=='2026-11-17_2350':
             assert page.locator('#capture-date').inner_text()=='Nov 17, 2026'
             assert '11:50 PM' in page.locator('#capture-index').inner_text()
@@ -312,6 +337,9 @@ try:
         assert page.locator('.standout-teaser').is_visible()
         standouts=page.evaluate("standoutRows().map(item=>({day:item.cp.day_key,name:item.row.username,kind:item.kind,gain:item.change.delta?.toString()??null,bound:item.lowerBound?.toString()??null,climb:item.climb}))")
         assert len(standouts)>8, "The archive-wide feed should paginate beyond its first eight flags"
+        if last['id']=='2026-11-18_2237':
+            assert any(item['day']=='2026-11-18' and item['name']=='Ceruleanflare2' and item['kind']=='movement' and item['gain']=='55410839236' and item['climb']==7 for item in standouts)
+            assert not any(item['day']=='2026-11-18' and item['name']=='75percent3r' for item in standouts)
         if last['id']=='2026-11-17_2350':
             assert any(item['day']=='2026-11-17' and item['name']=='75percent3r' and item['kind']=='appearance' and item['bound']=='1195796845523354' and item['gain'] is None for item in standouts)
             assert any(item['day']=='2026-11-17' and item['name']=='Farniluque049' and item['kind']=='appearance' and item['bound']=='64030620925' and item['gain'] is None for item in standouts)
@@ -358,6 +386,21 @@ try:
         assert analysis.locator('.highlight-card').count()==8 and analysis.locator('#highlight-pages').is_visible()
         assert analysis.locator('#highlight-list').evaluate('el=>getComputedStyle(el).display')=='grid'
         assert analysis.locator('.standout-layout').evaluate('el=>{const [left,right]=el.children;const ratio=left.getBoundingClientRect().width/right.getBoundingClientRect().width;return ratio>1.8&&ratio<2.2}')
+        if last['id']=='2026-11-18_2237':
+            assert 'Ceruleanflare2' in analysis.locator('#overview-content').inner_text()
+            assert '55,410,839,236' in analysis.locator('#overview-content').inner_text()
+            assert 'EV0200' in analysis.locator('#overview-content').inner_text()
+            assert 'EV0204' in analysis.locator('#overview-content').inner_text()
+            latest=analysis.locator('.highlight-card[data-highlight-day="2026-11-18"]')
+            assert latest.count()==1 and latest.get_attribute('data-severity')=='extreme'
+            assert '+55.4B observed net C$' in latest.inner_text() and '↑7 ranks' in latest.inner_text()
+            assert 'EV0200' in latest.locator('.highlight-proof-links').inner_text()
+            assert 'EV0204' in latest.locator('.highlight-proof-links').inner_text()
+            analysis.locator('#flag-search').fill('75percent3r')
+            assert analysis.locator('.highlight-card[data-flag-kind="appearance"][data-highlight-day="2026-11-17"]').count()==1
+            analysis.locator('#flag-search').fill('hc2khunowpng43ntk1')
+            analysis.locator('.highlight-card[data-highlight-day="2026-11-14"] .highlight-open').click()
+            analysis.locator('#flag-search').fill('')
         if last['id']=='2026-11-17_2350':
             assert '75percent3r' in analysis.locator('#overview-content').inner_text()
             assert '1,195,852,462,505,654' in analysis.locator('#overview-content').inner_text()
@@ -400,7 +443,7 @@ try:
         assert 'Unknown · no rate' in analysis.locator('#overview-content').inner_text()
         assert 'EV0190' in analysis.locator('#overview-content').inner_text()
         if last['day_key']>='2026-11-15':
-            assert ('2 photographed points' if last['id']=='2026-11-15_2140' else '4 photographed points' if last['id']=='2026-11-17_2350' else '3 photographed points') in analysis.locator('#overview-rate').inner_text()
+            assert ('2 photographed points' if last['id']=='2026-11-15_2140' else '5 photographed points' if last['id']=='2026-11-18_2237' else '4 photographed points' if last['id']=='2026-11-17_2350' else '3 photographed points') in analysis.locator('#overview-rate').inner_text()
             assert 'OBSERVED NET RATE' in analysis.locator('#overview-rate').inner_text()
             assert ('−277.6M' if last['id']=='2026-11-15_2140' else '−275.6M') in analysis.locator('#overview-rate').inner_text()
         else:
