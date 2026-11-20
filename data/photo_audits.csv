@@ -149,3 +149,7 @@ EV0204,1-16,Read every Nov 18 top-board name and exact amount from original 22:3
 EV0205,16-31,Read Nov 18 middle-board names and exact amounts directly from original 22:36:37 screenshot; #16 corroborates EV0204
 EV0206,30-45,Read Nov 18 lower-board names and exact amounts directly from original 22:36:57 screenshot; #30-31 corroborate EV0205
 EV0207,36-50,Read Nov 18 bottom-board names and exact amounts directly from original 22:37:04 screenshot; #36-45 corroborate EV0206 and #35 is verified in EV0206
+EV0208,1-16,Read every Nov 20 00:07:25 top-board name and exact amount directly from original; the prior excluded #1 is absent
+EV0209,16-31,Read Nov 20 00:07:45 middle-board names and exact amounts directly from original; #16 corroborates EV0208
+EV0210,30-45,Read Nov 20 00:07:57 lower-board names and exact amounts directly from original; #30-31 corroborate EV0209
+EV0211,36-50,Read Nov 20 00:08:04 bottom-board names and exact amounts directly from original; #36-45 corroborate EV0210 and #35 is verified only in EV0210

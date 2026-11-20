@@ -364,8 +364,9 @@ class LedgerTests(unittest.TestCase):
 
     def test_november_18_full_capture_keeps_banned_leader_and_flags_cerulean(self):
         data=self.data
-        current=data['checkpoints'][-1]
-        previous=data['checkpoints'][-2]
+        index=next(i for i,cp in enumerate(data['checkpoints']) if cp['id']=='2026-11-18_2237')
+        current=data['checkpoints'][index]
+        previous=data['checkpoints'][index-1]
         self.assertEqual((current['id'],current['at'],current['precision']),('2026-11-18_2237','2026-11-19T04:37:00Z','screenshot-filename-minute'))
         self.assertEqual((current['verified'],current['coverage'],current['complete'],current['weekend_settlement']),(50,50,True,False))
         self.assertEqual((previous['id'],previous['verified']),('2026-11-17_2350',50))
@@ -389,6 +390,40 @@ class LedgerTests(unittest.TestCase):
             ('EV0205','Screenshot_2026-11-18_223637.png',(16,31)),
             ('EV0206','Screenshot_2026-11-18_223657.png',(30,45)),
             ('EV0207','Screenshot_2026-11-18_223704.png',(36,50)),
+        ):
+            proof=proofs[proof_id]
+            self.assertEqual((proof['min'],proof['max']),span)
+            self.assertTrue(proof['url'].endswith(filename))
+            self.assertEqual(hashlib.sha256((ROOT/'site'/proof['url']).read_bytes()).hexdigest(),proof['sha256'])
+
+    def test_november_20_early_am_completes_november_19_day_without_new_nov20_point(self):
+        data=self.data
+        current=data['checkpoints'][-1]
+        previous=data['checkpoints'][-2]
+        raw=next(cp for cp in data['captures'] if cp['id']=='2026-11-20_0008')
+        self.assertEqual((raw['at'],raw['verified'],raw['coverage']),('2026-11-20T06:08:00Z',50,50))
+        self.assertEqual((current['id'],current['day_key'],current['early_am_rollover']),('2026-11-20_0008','2026-11-19',True))
+        self.assertFalse(any(cp['day_key']=='2026-11-20' for cp in data['checkpoints']))
+        self.assertEqual((current['complete'],current['verified'],current['coverage'],current['weekend_settlement']),(True,50,50,False))
+        self.assertEqual((current['primary_evidence'],current['daily_source_sessions']),(['EV0208','EV0209','EV0210','EV0211'],[raw['id']]))
+        self.assertEqual((previous['id'],previous['day_key']),('2026-11-18_2237','2026-11-18'))
+        previous_rows={row['rank']:row for row in data['observations'] if row['checkpoint']==previous['id']}
+        self.assertEqual((previous_rows[1]['username'],previous_rows[7]['balance']),('75percent3r','179087576757'))
+        rows={row['rank']:row for row in data['observations'] if row['checkpoint']==current['id']}
+        self.assertEqual(len(rows),50)
+        self.assertTrue(all(row['status']=='verified' and row['day_key']=='2026-11-19' for row in rows.values()))
+        self.assertEqual((rows[1]['username'],rows[1]['balance'],rows[2]['balance']),('LowTierNova','317828434415','302070128990'))
+        self.assertEqual((rows[6]['username'],rows[6]['balance']),('Ceruleanflare2','179111299561'))
+        self.assertEqual((rows[48]['username'],rows[48]['balance'],rows[48]['key']),('sanguifereum','59059200357','id:8804353958'))
+        self.assertEqual((rows[50]['username'],rows[50]['balance']),('Zantrille','56911822954'))
+        self.assertEqual(int(rows[48]['balance'])-int(previous_rows[50]['balance']),2_147_377_403)
+        self.assertNotIn('75percent3r',[row['username'] for row in rows.values()])
+        proofs={proof['id']:proof for proof in data['evidence']}
+        for proof_id,filename,span in (
+            ('EV0208','Screenshot_2026-11-20_000725.png',(1,16)),
+            ('EV0209','Screenshot_2026-11-20_000745.png',(16,31)),
+            ('EV0210','Screenshot_2026-11-20_000757.png',(30,45)),
+            ('EV0211','Screenshot_2026-11-20_000804.png',(36,50)),
         ):
             proof=proofs[proof_id]
             self.assertEqual((proof['min'],proof['max']),span)
