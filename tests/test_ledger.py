@@ -396,14 +396,15 @@ class LedgerTests(unittest.TestCase):
             self.assertTrue(proof['url'].endswith(filename))
             self.assertEqual(hashlib.sha256((ROOT/'site'/proof['url']).read_bytes()).hexdigest(),proof['sha256'])
 
-    def test_november_20_early_am_completes_november_19_day_without_new_nov20_point(self):
+    def test_november_20_early_am_completes_november_19_cycle_with_original_time(self):
         data=self.data
-        current=data['checkpoints'][-1]
-        previous=data['checkpoints'][-2]
+        index=next(i for i,cp in enumerate(data['checkpoints']) if cp['id']=='2026-11-20_0008')
+        current=data['checkpoints'][index]
+        previous=data['checkpoints'][index-1]
         raw=next(cp for cp in data['captures'] if cp['id']=='2026-11-20_0008')
         self.assertEqual((raw['at'],raw['verified'],raw['coverage']),('2026-11-20T06:08:00Z',50,50))
         self.assertEqual((current['id'],current['day_key'],current['early_am_rollover']),('2026-11-20_0008','2026-11-19',True))
-        self.assertFalse(any(cp['day_key']=='2026-11-20' for cp in data['checkpoints']))
+        self.assertEqual(current['day_snapshot_count'],1)
         self.assertEqual((current['complete'],current['verified'],current['coverage'],current['weekend_settlement']),(True,50,50,False))
         self.assertEqual((current['primary_evidence'],current['daily_source_sessions']),(['EV0208','EV0209','EV0210','EV0211'],[raw['id']]))
         self.assertEqual((previous['id'],previous['day_key']),('2026-11-18_2237','2026-11-18'))
@@ -424,6 +425,36 @@ class LedgerTests(unittest.TestCase):
             ('EV0209','Screenshot_2026-11-20_000745.png',(16,31)),
             ('EV0210','Screenshot_2026-11-20_000757.png',(30,45)),
             ('EV0211','Screenshot_2026-11-20_000804.png',(36,50)),
+        ):
+            proof=proofs[proof_id]
+            self.assertEqual((proof['min'],proof['max']),span)
+            self.assertTrue(proof['url'].endswith(filename))
+            self.assertEqual(hashlib.sha256((ROOT/'site'/proof['url']).read_bytes()).hexdigest(),proof['sha256'])
+
+    def test_november_20_evening_starts_its_own_day_after_early_am_prior_cycle(self):
+        data=self.data
+        current=data['checkpoints'][-1]
+        previous=data['checkpoints'][-2]
+        self.assertEqual((current['id'],current['day_key'],current['at']),('2026-11-20_2256','2026-11-20','2026-11-21T04:56:00Z'))
+        self.assertEqual((previous['id'],previous['day_key'],previous['at']),('2026-11-20_0008','2026-11-19','2026-11-20T06:08:00Z'))
+        self.assertFalse(current['early_am_rollover'])
+        self.assertEqual((current['verified'],current['coverage'],current['complete']),(50,50,True))
+        self.assertEqual((current['primary_evidence'],current['daily_source_sessions']),(['EV0212','EV0213','EV0214','EV0215'],[current['id']]))
+        rows={row['rank']:row for row in data['observations'] if row['checkpoint']==current['id']}
+        earlier={row['key']:row for row in data['observations'] if row['checkpoint']==previous['id']}
+        self.assertEqual(len(rows),50)
+        self.assertTrue(all(row['status']=='verified' and row['day_key']=='2026-11-20' for row in rows.values()))
+        self.assertEqual((rows[1]['balance'],rows[2]['balance'],rows[50]['balance']),('319490885797','303092694285','56911822954'))
+        self.assertEqual((rows[6]['username'],rows[6]['balance']),('Ceruleanflare2','179135125490'))
+        self.assertEqual((rows[48]['username'],rows[48]['balance'],rows[48]['key'],rows[48]['evidence']),('sanguifereum','59062373946','id:8804353958',['EV0215']))
+        self.assertEqual(int(rows[48]['balance'])-int(earlier[rows[48]['key']]['balance']),3_173_589)
+        self.assertNotIn('75percent3r',[row['username'] for row in rows.values()])
+        proofs={proof['id']:proof for proof in data['evidence']}
+        for proof_id,filename,span in (
+            ('EV0212','Screenshot_2026-11-20_225526.png',(1,16)),
+            ('EV0213','Screenshot_2026-11-20_225620.png',(16,31)),
+            ('EV0214','Screenshot_2026-11-20_225634.png',(30,41)),
+            ('EV0215','Screenshot_2026-11-20_225644.png',(36,50)),
         ):
             proof=proofs[proof_id]
             self.assertEqual((proof['min'],proof['max']),span)

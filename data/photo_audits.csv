@@ -153,3 +153,7 @@ EV0208,1-16,Read every Nov 20 00:07:25 top-board name and exact amount directly 
 EV0209,16-31,Read Nov 20 00:07:45 middle-board names and exact amounts directly from original; #16 corroborates EV0208
 EV0210,30-45,Read Nov 20 00:07:57 lower-board names and exact amounts directly from original; #30-31 corroborate EV0209
 EV0211,36-50,Read Nov 20 00:08:04 bottom-board names and exact amounts directly from original; #36-45 corroborate EV0210 and #35 is verified only in EV0210
+EV0212,1-16,Read all Nov 20 22:55:26 top-board names and exact amounts from the clear original; #16 corroborated by EV0213
+EV0213,16-31,Read Nov 20 22:56:20 middle-board names and exact amounts from original; #30-31 corroborated by EV0214
+EV0214,30-41,Read Nov 20 22:56:34 lower-board names and exact amounts from original; #36-41 corroborated by EV0215
+EV0215,36-50,Read Nov 20 22:56:44 bottom-board names and exact amounts from original; #42-50 uniquely supplied here
