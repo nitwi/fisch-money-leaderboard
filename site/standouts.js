@@ -3,9 +3,9 @@
 let focusedFlag=null;
 
 function sinceWeekendHtml(key){
-  const result=sinceWeekendSettlement(key);
-  const detail=!result.cp?"No complete Saturday settlement in this date range":!result.baseline?`No pictured balance for this player at ${dayLabel(result.cp.day_key)} settlement`:!result.last?`Baseline ${labelDate(result.baseline.at)} · awaiting a later photographed balance`:`${dayLabel(result.cp.day_key)} photo ${labelDate(result.baseline.at)} → ${labelDate(result.last.at)} · ${elapsedLabel(result.elapsed)} · ${signed(result.delta)} observed net held C$`;
-  return `<section class="overview-settlement-averages"><h4>Since last weekend sell / settlement</h4><p>${safe(detail)}. Daily and weekly figures use the same pictured net change over actual elapsed photo time; the weekly figure is a seven-day equivalent, not verified sales or a forecast.</p><div class="overview-metrics"><div><span>DAILY AVG SINCE LAST WEEKEND SELL</span><b>${rateText(result.daily,"day")}</b></div><div><span>WEEKLY AVG SINCE LAST WEEKEND SELL</span><b>${rateText(result.weekly,"week")}</b></div></div></section>`;
+  const result=weekendAverages(key);
+  const detail=result.reason||`${labelDate(result.first.at)} → ${labelDate(result.last.at)} · ${elapsedLabel(result.elapsed)} · ${signed(result.delta)} observed net held C$${result.latest?` · includes ${dayLabel(result.latest.day_key)} weekend sell`:" · no weekend sell in this date range"}`;
+  return `<section class="overview-settlement-averages"><h4>Weekly change including weekend sells</h4><p>${safe(detail)}. The weekly figure normalizes the full photographed span to seven days, including the weekend balance change; daily is weekly ÷ 7. Neither is verified sales or a forecast.</p><div class="overview-metrics"><div><span>WEEKLY AVG INCLUDING WEEKEND SELL</span><b>${rateText(result.weekly,"week")}</b></div><div><span>DAILY AVG (WEEKLY ÷ 7)</span><b>${rateText(result.daily,"day")}</b></div></div></section>`;
 }
 
 function overviewRate() {

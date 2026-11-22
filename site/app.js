@@ -65,15 +65,22 @@ function point(cp,key) { return state.byCapture.get(cp.id)?.find((row)=>row.key=
 function atRank(cp,rank) { return state.byCapture.get(cp.id)?.find((row)=>row.rank===rank) || null; }
 function memberHistory(key) { return state.byPlayer.get(key) || []; }
 function rangedHistory(key) {return memberHistory(key).filter(row=>row.day_key>=state.rangeStart && row.day_key<=state.rangeEnd);}
-function sinceWeekendSettlement(key) {
-  const cp=state.data.checkpoints.findLast(item=>weekendSettlement(item)&&item.complete&&item.day_key>=state.rangeStart&&item.day_key<=state.rangeEnd);
-  if(!cp)return {cp:null,baseline:null,last:null,daily:null,weekly:null};
-  const baseline=point(cp,key);
-  if(!confirmed(baseline))return {cp,baseline:null,last:null,daily:null,weekly:null};
-  const last=memberHistory(key).filter(row=>confirmed(row)&&row.day_key>cp.day_key&&row.day_key<=state.rangeEnd&&hours(baseline.at,row.at)>0).at(-1);
-  if(!last)return {cp,baseline,last:null,daily:null,weekly:null};
-  const elapsed=hours(baseline.at,last.at),delta=BigInt(last.balance)-BigInt(baseline.balance),hourly=timeRate(delta,elapsed);
-  return {cp,baseline,last,elapsed,delta,daily:hourly===null?null:hourly*24,weekly:hourly===null?null:hourly*168};
+function weekendAverages(key) {
+  const rows=rangedHistory(key),last=rows.at(-1);
+  if(rows.length<2)return {first:null,last,latest:null,daily:null,weekly:null,reason:"Two pictured balances are needed"};
+  const settlements=state.data.checkpoints.filter(cp=>weekendSettlement(cp)&&cp.complete&&cp.day_key>=state.rangeStart&&cp.day_key<=state.rangeEnd&&hours(cp.at,last.at)>=0);
+  const latest=settlements.at(-1),previous=settlements.at(-2);
+  let first=rows[0];
+  if(latest){
+    const sale=point(latest,key);
+    if(!confirmed(sale))return {first:null,last,latest,daily:null,weekly:null,reason:`No pictured balance for this player at ${dayLabel(latest.day_key)} weekend sell`};
+    const prior=previous?point(previous,key):null;
+    first=confirmed(prior)?prior:rows.find(row=>hours(row.at,sale.at)>0);
+    if(!first)return {first:null,last,latest,daily:null,weekly:null,reason:"A pictured balance before the last weekend sell is needed"};
+  }
+  const elapsed=hours(first.at,last.at),delta=BigInt(last.balance)-BigInt(first.balance),hourly=timeRate(delta,elapsed);
+  const weekly=hourly===null?null:hourly*168;
+  return {first,last,latest,elapsed,delta,weekly,daily:weekly===null?null:weekly/7,reason:weekly===null?"Two different photo times are needed":null};
 }
 const boardAmount = (row) => row?.board_balance ?? row?.balance;
 function gapInfo(cp,row) {
@@ -379,12 +386,12 @@ function renderProfile() {
   const boardHours=update?hours(update.source_at,update.at):null;
   const profileNote=update?`<div class="profile-update-detail"><strong>Later player-profile balance · ${safe(labelDate(update.at,{second:"2-digit"}))}</strong><p>${safe(exact(update.source_balance))} at board photo ${safe(labelDate(update.source_at,{second:"2-digit"}))} → ${safe(exact(update.balance))} · ${signed(boardDelta)} observed net C$ in ${elapsedLabel(boardHours)} (no multiplier ${rateText(timeRate(boardDelta,boardHours))}). Rank #${rankAtUpdate} remains from the earlier board photo.</p><p>${safe(update.note)}. The observed net change is not an independently verified sale amount.</p><a href="${safe(evidenceUrl(byId(update.evidence[0])))}" rel="noopener noreferrer" target="_blank">Open original player-profile proof ${safe(update.id)} ↗</a></div>`:"";
   wrapper.className="";
-  const postSell=sinceWeekendSettlement(key);
-  const postSellDetail=!postSell.cp?"No complete Saturday settlement in this date range":!postSell.baseline?`No pictured balance for this player at ${dayLabel(postSell.cp.day_key)} settlement`:!postSell.last?`Baseline ${labelDate(postSell.baseline.at)} · awaiting a later photographed balance`:`${dayLabel(postSell.cp.day_key)} baseline ${labelDate(postSell.baseline.at)} → ${labelDate(postSell.last.at)} · ${elapsedLabel(postSell.elapsed)} · ${signed(postSell.delta)} net held C$; normalized observed change, not verified sales`;
+  const week=weekendAverages(key);
+  const weekDetail=week.reason||`${labelDate(week.first.at)} → ${labelDate(week.last.at)} · ${elapsedLabel(week.elapsed)} · ${signed(week.delta)} observed net held C$${week.latest?` · includes ${dayLabel(week.latest.day_key)} weekend sell`:" · no weekend sell in date range"}; normalized, not verified sales`;
   const stats=[
     ["LAST BALANCE IN RANGE",compact(last.balance),latestUpdate?`Profile photo · rank #${last.rank} from earlier board`:`Rank #${last.rank} · photo checked`],
-    ["DAILY AVG SINCE LAST WEEKEND SELL",rateText(postSell.daily,"day"),postSellDetail],
-    ["WEEKLY AVG SINCE LAST WEEKEND SELL",rateText(postSell.weekly,"week"),postSell.last?`${postSellDetail} · seven-day equivalent`:postSellDetail],
+    ["WEEKLY AVG INCLUDING WEEKEND SELL",rateText(week.weekly,"week"),weekDetail],
+    ["DAILY AVG (WEEKLY ÷ 7)",rateText(week.daily,"day"),weekDetail],
     [settlementBetween?"WEEKLY AVG OBSERVED NET CHANGE":"AVERAGE OBSERVED NET RATE",rateText(average,rateUnit),settlementBetween?`${elapsedLabel(time)} observed span · normalized to seven days · settlement and gaps included; not an earning rate`:hasEndpoints?`${elapsedLabel(time)} first-to-last photos · gaps included`:"At least two photo readings required"],
     ["NET IN RANGE",hasEndpoints?signed(gain):"—",hasEndpoints?`${rows.length} pictured photo points · ${settlementBetween?"includes weekly balance step":"held C$ change"}`:"Only one pictured balance"],
     ["RAINBOW 1.5× BASE EQUIVALENT",hasEndpoints&&gain>0n?`≈${signed(rainbowBase(gain))}`:"—",hasEndpoints&&gain>0n?`Hypothetical base for ${signed(gain)} observed net C$ in window` : "Only positive net changes have a base equivalent",hasEndpoints&&gain>0n],

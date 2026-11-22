@@ -50,19 +50,20 @@ try:
             assert 'WEEKEND SETTLEMENT BASELINE' in apathy.inner_text() and 'NOTABLE +8B' in apathy.inner_text()
             assert '/hr' not in apathy.inner_text()
             apathy.click()
-            daily=page.locator('.profile-stats > div').filter(has_text='DAILY AVG SINCE LAST WEEKEND SELL')
-            weekly=page.locator('.profile-stats > div').filter(has_text='WEEKLY AVG SINCE LAST WEEKEND SELL')
-            assert daily.locator('b').inner_text()==weekly.locator('b').inner_text()=='—'
-            assert 'awaiting a later photographed balance' in daily.inner_text()
-            assert page.evaluate("(()=>{const metric=sinceWeekendSettlement('id:1316700350');return metric.cp.id==='2026-11-21_2214' && metric.baseline.balance==='346829902904' && metric.last===null})()")
+            weekly=page.locator('.profile-stats > div').filter(has_text='WEEKLY AVG INCLUDING WEEKEND SELL')
+            daily=page.locator('.profile-stats > div').filter(has_text='DAILY AVG (WEEKLY ÷ 7)')
+            assert weekly.locator('b').inner_text()=='+50.8B/week'
+            assert daily.locator('b').inner_text()=='+7.2B/day'
+            assert 'Nov 14, 2026' in weekly.inner_text() and 'Nov 21, 2026' in weekly.inner_text()
+            assert 'includes Nov 21, 2026 weekend sell' in weekly.inner_text()
+            assert page.evaluate("(()=>{const metric=weekendAverages('id:1316700350');return metric.latest.id==='2026-11-21_2214' && metric.first.checkpoint==='2026-11-14_2223' && metric.last.balance==='346829902904' && metric.delta===50813251496n && Math.abs(metric.weekly-metric.daily*7)<1})()")
             page.locator('#range-end').fill('2026-11-20')
-            assert daily.locator('b').inner_text()=='+1.1B/day'
-            assert weekly.locator('b').inner_text()=='+8.2B/week'
-            assert 'Nov 14, 2026' in daily.inner_text() and 'Nov 20, 2026' in daily.inner_text()
-            assert page.evaluate("(()=>{const metric=sinceWeekendSettlement('id:1316700350');return metric.cp.id==='2026-11-14_2223' && metric.last.checkpoint==='2026-11-20_2256' && metric.delta===7076042877n && Math.abs(metric.weekly-metric.daily*7)<1})()")
+            assert 'Nov 14, 2026 weekend sell' in weekly.inner_text()
+            assert page.evaluate("(()=>{const metric=weekendAverages('id:1316700350');return metric.latest.id==='2026-11-14_2223' && metric.first.day_key==='2026-11-07' && metric.last.checkpoint==='2026-11-20_2256' && Math.abs(metric.weekly-metric.daily*7)<1})()")
+            assert weekly.locator('b').inner_text().endswith('/week') and daily.locator('b').inner_text().endswith('/day')
             page.locator('#range-start').fill('2026-11-15')
-            assert 'No complete Saturday settlement in this date range' in daily.inner_text()
-            assert daily.locator('b').inner_text()==weekly.locator('b').inner_text()=='—'
+            assert 'no weekend sell in date range' in daily.inner_text()
+            assert daily.locator('b').inner_text().endswith('/day') and weekly.locator('b').inner_text().endswith('/week')
             page.locator('#range-all').click()
             page.locator('#profile-clear').click()
             sabbath=next(p for p in data['players'] if p['name']=='sabbath553')
@@ -493,10 +494,11 @@ try:
             assert 'HOURLY RATE ACROSS SETTLEMENT' in analysis.locator('#overview-content').inner_text()
             assert 'Not inferred' in analysis.locator('#overview-content').inner_text()
             assert 'WEEKLY AVG OBSERVED NET CHANGE' in analysis.locator('#overview-rate').inner_text()
-            assert 'awaiting a later photographed balance' in analysis.locator('#overview-rate').inner_text()
-            assert analysis.locator('.overview-settlement-averages .overview-metrics b').all_inner_texts()==['—','—']
+            assert 'includes Nov 21, 2026 weekend sell' in analysis.locator('#overview-rate').inner_text()
+            assert analysis.locator('.overview-settlement-averages .overview-metrics b').all_inner_texts()==['+50.8B/week','+7.2B/day']
             analysis.locator('#overview-end').fill('2026-11-20')
-            assert analysis.locator('.overview-settlement-averages .overview-metrics b').all_inner_texts()==['+1.1B/day','+8.2B/week']
+            assert 'includes Nov 14, 2026 weekend sell' in analysis.locator('.overview-settlement-averages').inner_text()
+            assert analysis.locator('.overview-settlement-averages .overview-metrics b').evaluate_all("els=>els.length===2 && els[0].textContent.endsWith('/week') && els[1].textContent.endsWith('/day') && els[0].textContent!=='+50.8B/week'")
             analysis.locator('#overview-all').click()
             apathy_flag=analysis.locator('.highlight-card[data-highlight-day="2026-11-21"][data-highlight-player="id:1316700350"]')
             assert apathy_flag.count()==1 and apathy_flag.get_attribute('data-severity')=='extreme'
