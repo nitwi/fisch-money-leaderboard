@@ -157,3 +157,7 @@ EV0212,1-16,Read all Nov 20 22:55:26 top-board names and exact amounts from the 
 EV0213,16-31,Read Nov 20 22:56:20 middle-board names and exact amounts from original; #30-31 corroborated by EV0214
 EV0214,30-41,Read Nov 20 22:56:34 lower-board names and exact amounts from original; #36-41 corroborated by EV0215
 EV0215,36-50,Read Nov 20 22:56:44 bottom-board names and exact amounts from original; #42-50 uniquely supplied here
+EV0216,1-16,Read all Saturday Nov 21 top-board names and exact amounts directly from original owner-attached PNG; #16 corroborated by EV0217
+EV0217,16-31,Read Saturday Nov 21 middle-board names and exact amounts from original owner-attached PNG; #30-31 corroborated by EV0218
+EV0218,30-45,Read Saturday Nov 21 lower-board names and exact amounts from original owner-attached PNG; #36-45 corroborated by EV0219
+EV0219,36-50,Read Saturday Nov 21 bottom-board names and exact amounts from original owner-attached PNG; #35 is cropped and verified only by EV0218

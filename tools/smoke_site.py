@@ -37,6 +37,36 @@ try:
         assert page.locator('#chart').evaluate("el=>el.data.every(trace=>trace.meta?.key!=='id:8144154137') && el.layout.yaxis.range[1]>300000000000 && el.layout.yaxis.range[1]<400000000000")
         assert 'Nov 17\'s #1 outlier is omitted' in page.locator('#chart-subtitle').inner_text()
         assert 'day=2026-11-17' in page.locator('#chart-subtitle a').get_attribute('href')
+        if last['id']=='2026-11-21_2214':
+            assert page.locator('#capture-date').inner_text()=='Nov 21, 2026'
+            assert '10:14 PM' in page.locator('#capture-index').inner_text()
+            assert 'WEEKEND SETTLEMENT BASELINE' in page.locator('#capture-index').inner_text()
+            assert page.locator('#stat-hours').inner_text()=='23.3h'
+            assert page.locator('#stat-floor').inner_text()=='58B'
+            assert page.locator('#stat-largest').inner_text()=='+43.7B'
+            assert 'weekly settlement step' in page.locator('#stat-largest-name').inner_text()
+            apathy=page.locator('.movement-item[data-player="id:1316700350"]')
+            assert '#2 ↗ #1' in apathy.inner_text() and '+43.7B observed net C$' in apathy.inner_text()
+            assert 'WEEKEND SETTLEMENT BASELINE' in apathy.inner_text() and 'NOTABLE +8B' in apathy.inner_text()
+            assert '/hr' not in apathy.inner_text()
+            sabbath=next(p for p in data['players'] if p['name']=='sabbath553')
+            row=page.locator(f'.movement-item[data-player="{sabbath["key"]}"]')
+            assert '#41 ↗ #31' in row.inner_text() and '↑10' in row.inner_text()
+            assert '+9.9B observed net C$' in row.inner_text() and '/hr' not in row.inner_text()
+            forcepush=next(p for p in data['players'] if p['name']=='ForcePush_Sith')
+            assert 'RETURNED TO TOP 50' in page.locator(f'.movement-item[data-player="{forcepush["key"]}"]').inner_text()
+            zantrille=next(p for p in data['players'] if p['name']=='Zantrille')
+            assert 'LEFT PICTURED TOP 50' in page.locator(f'.movement-item[data-player="{zantrille["key"]}"]').inner_text()
+            assert page.locator('.proof').count()==4
+            assert page.locator('#chart').evaluate("el=>el.layout.annotations.some(mark=>mark.text==='WEEKEND' && mark.x==='2026-11-21') && el.data.every(trace=>trace.meta?.key!=='id:8144154137')")
+            for image_id in ('EV0216','EV0217','EV0218','EV0219'):
+                page.locator(f'.proof[data-proof="{image_id}"]').click()
+                page.wait_for_function("document.querySelector('#lightbox-image').naturalWidth > 0")
+                page.locator('#lightbox button').click()
+            page.locator('#prev').click()
+            assert page.locator('#capture-date').inner_text()=='Nov 20, 2026'
+            assert page.locator('.proof[data-proof="EV0212"]').count()==1
+            page.locator('#next').click()
         if last['id']=='2026-11-20_2256':
             assert page.locator('#capture-date').inner_text()=='Nov 20, 2026'
             assert '10:56 PM' in page.locator('#capture-index').inner_text()
@@ -380,6 +410,11 @@ try:
         assert page.locator('.standout-teaser').is_visible()
         standouts=page.evaluate("standoutRows().map(item=>({day:item.cp.day_key,name:item.row.username,kind:item.kind,gain:item.change.delta?.toString()??null,bound:item.lowerBound?.toString()??null,climb:item.climb}))")
         assert len(standouts)>8, "The archive-wide feed should paginate beyond its first eight flags"
+        if last['id']=='2026-11-21_2214':
+            assert any(item['day']=='2026-11-21' and item['name']=='ismyaimbotworking' and item['gain']=='43737208619' and item['kind']=='movement' for item in standouts)
+            assert any(item['day']=='2026-11-21' and item['name']=='sabbath553' and item['gain']=='9921712933' and item['climb']==10 for item in standouts)
+            assert not any(item['day']=='2026-11-21' and item['name']=='ForcePush_Sith' for item in standouts)
+            assert page.evaluate("standoutRows().filter(item=>item.cp.day_key==='2026-11-21').every(item=>item.kind==='movement' && item.change.rate===null && !item.repeatWith)")
         if last['id']=='2026-11-20_2256':
             assert not any(item['day']=='2026-11-20' for item in standouts)
             assert not any(item['day']=='2026-11-19' for item in standouts)
@@ -435,6 +470,32 @@ try:
         assert analysis.locator('.highlight-card').count()==8 and analysis.locator('#highlight-pages').is_visible()
         assert analysis.locator('#highlight-list').evaluate('el=>getComputedStyle(el).display')=='grid'
         assert analysis.locator('.standout-layout').evaluate('el=>{const [left,right]=el.children;const ratio=left.getBoundingClientRect().width/right.getBoundingClientRect().width;return ratio>1.8&&ratio<2.2}')
+        if last['id']=='2026-11-21_2214':
+            assert 'ismyaimbotworking' in analysis.locator('#overview-content').inner_text()
+            assert '43,737,208,619' in analysis.locator('#overview-content').inner_text()
+            assert 'WEEKEND SELL CONTEXT · SATURDAY BASELINE' in analysis.locator('#overview-content').inner_text()
+            assert 'HOURLY RATE ACROSS SETTLEMENT' in analysis.locator('#overview-content').inner_text()
+            assert 'Not inferred' in analysis.locator('#overview-content').inner_text()
+            assert 'WEEKLY AVG OBSERVED NET CHANGE' in analysis.locator('#overview-rate').inner_text()
+            apathy_flag=analysis.locator('.highlight-card[data-highlight-day="2026-11-21"][data-highlight-player="id:1316700350"]')
+            assert apathy_flag.count()==1 and apathy_flag.get_attribute('data-severity')=='extreme'
+            assert '+43.7B observed net C$' in apathy_flag.inner_text()
+            assert 'WEEKEND SELL CONTEXT' in apathy_flag.inner_text() and '/hr' not in apathy_flag.inner_text()
+            assert 'EV0212' in apathy_flag.locator('.highlight-proof-links').inner_text()
+            assert 'EV0216' in apathy_flag.locator('.highlight-proof-links').inner_text()
+            analysis.locator('#flag-search').fill('sabbath553')
+            sabbath_flag=analysis.locator('.highlight-card[data-highlight-day="2026-11-21"]')
+            assert sabbath_flag.count()==1 and sabbath_flag.get_attribute('data-severity')=='high'
+            assert '+9.9B observed net C$' in sabbath_flag.inner_text()
+            assert '↑10 ranks' in sabbath_flag.inner_text() and 'WEEKEND SELL CONTEXT' in sabbath_flag.inner_text()
+            assert 'EV0214' in sabbath_flag.locator('.highlight-proof-links').inner_text()
+            assert 'EV0217' in sabbath_flag.locator('.highlight-proof-links').inner_text()
+            sabbath_flag.locator('.highlight-open').click()
+            assert '9,921,712,933' in analysis.locator('#overview-content').inner_text()
+            assert 'Not inferred' in analysis.locator('#overview-content').inner_text()
+            analysis.locator('#flag-search').fill('hc2khunowpng43ntk1')
+            analysis.locator('.highlight-card[data-highlight-day="2026-11-14"] .highlight-open').click()
+            analysis.locator('#flag-search').fill('')
         if last['id'] in ('2026-11-18_2237','2026-11-20_0008','2026-11-20_2256'):
             assert 'Ceruleanflare2' in analysis.locator('#overview-content').inner_text()
             assert '55,410,839,236' in analysis.locator('#overview-content').inner_text()
@@ -492,8 +553,8 @@ try:
         assert 'Unknown · no rate' in analysis.locator('#overview-content').inner_text()
         assert 'EV0190' in analysis.locator('#overview-content').inner_text()
         if last['day_key']>='2026-11-15':
-            assert ('2 photographed points' if last['id']=='2026-11-15_2140' else '7 photographed points' if last['id']=='2026-11-20_2256' else '6 photographed points' if last['id']=='2026-11-20_0008' else '5 photographed points' if last['id']=='2026-11-18_2237' else '4 photographed points' if last['id']=='2026-11-17_2350' else '3 photographed points') in analysis.locator('#overview-rate').inner_text()
-            assert 'OBSERVED NET RATE' in analysis.locator('#overview-rate').inner_text()
+            assert ('2 photographed points' if last['id']=='2026-11-15_2140' else '8 photographed points' if last['id']=='2026-11-21_2214' else '7 photographed points' if last['id']=='2026-11-20_2256' else '6 photographed points' if last['id']=='2026-11-20_0008' else '5 photographed points' if last['id']=='2026-11-18_2237' else '4 photographed points' if last['id']=='2026-11-17_2350' else '3 photographed points') in analysis.locator('#overview-rate').inner_text()
+            assert ('WEEKLY AVG OBSERVED NET CHANGE' if last['id']=='2026-11-21_2214' else 'OBSERVED NET RATE') in analysis.locator('#overview-rate').inner_text()
             assert ('−277.6M' if last['id']=='2026-11-15_2140' else '−275.6M') in analysis.locator('#overview-rate').inner_text()
         else:
             assert 'Two are needed' in analysis.locator('#overview-rate').inner_text()

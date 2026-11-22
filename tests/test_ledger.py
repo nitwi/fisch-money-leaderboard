@@ -433,8 +433,9 @@ class LedgerTests(unittest.TestCase):
 
     def test_november_20_evening_starts_its_own_day_after_early_am_prior_cycle(self):
         data=self.data
-        current=data['checkpoints'][-1]
-        previous=data['checkpoints'][-2]
+        index=next(i for i,cp in enumerate(data['checkpoints']) if cp['id']=='2026-11-20_2256')
+        current=data['checkpoints'][index]
+        previous=data['checkpoints'][index-1]
         self.assertEqual((current['id'],current['day_key'],current['at']),('2026-11-20_2256','2026-11-20','2026-11-21T04:56:00Z'))
         self.assertEqual((previous['id'],previous['day_key'],previous['at']),('2026-11-20_0008','2026-11-19','2026-11-20T06:08:00Z'))
         self.assertFalse(current['early_am_rollover'])
@@ -460,6 +461,44 @@ class LedgerTests(unittest.TestCase):
             self.assertEqual((proof['min'],proof['max']),span)
             self.assertTrue(proof['url'].endswith(filename))
             self.assertEqual(hashlib.sha256((ROOT/'site'/proof['url']).read_bytes()).hexdigest(),proof['sha256'])
+
+    def test_november_21_saturday_settlement_flags_verified_gains_without_earning_rate(self):
+        data=self.data
+        current=data['checkpoints'][-1]
+        previous=data['checkpoints'][-2]
+        self.assertEqual((current['id'],current['day_key'],current['at']),('2026-11-21_2214','2026-11-21','2026-11-22T04:14:00Z'))
+        self.assertEqual((current['complete'],current['coverage'],current['verified'],current['weekend_settlement'],current['precision']),(True,50,50,True,'user-supplied'))
+        self.assertEqual((previous['id'],previous['weekend_settlement']),('2026-11-20_2256',False))
+        self.assertEqual((current['primary_evidence'],current['daily_source_sessions']),(['EV0216','EV0217','EV0218','EV0219'],[current['id']]))
+        rows={row['rank']:row for row in data['observations'] if row['checkpoint']==current['id']}
+        before={row['key']:row for row in data['observations'] if row['checkpoint']==previous['id']}
+        self.assertEqual(len(rows),50)
+        self.assertTrue(all(row['status']=='verified' for row in rows.values()))
+        self.assertEqual((rows[1]['username'],rows[1]['balance'],rows[2]['balance']),('ismyaimbotworking','346829902904','321171513317'))
+        self.assertEqual((before[rows[1]['key']]['rank'],before[rows[1]['key']]['balance']),(2,'303092694285'))
+        self.assertEqual(int(rows[1]['balance'])-int(before[rows[1]['key']]['balance']),43_737_208_619)
+        self.assertEqual((rows[31]['username'],rows[31]['balance'],rows[31]['evidence']),('sabbath553','73958417974',['EV0217']))
+        self.assertEqual((before[rows[31]['key']]['rank'],before[rows[31]['key']]['balance']),(41,'64036705041'))
+        self.assertEqual((before[rows[31]['key']]['rank']-rows[31]['rank'],int(rows[31]['balance'])-int(before[rows[31]['key']]['balance'])),(10,9_921_712_933))
+        self.assertEqual((rows[50]['username'],rows[50]['balance'],rows[50]['key']),('ForcePush_Sith','58029148644','id:4700793500'))
+        self.assertNotIn(rows[50]['key'],before)
+        self.assertEqual(int(rows[50]['balance'])-int(next(row['balance'] for row in before.values() if row['rank']==50)),1_117_325_690)
+        self.assertNotIn('Zantrille',[row['username'] for row in rows.values()])
+        self.assertNotIn('75percent3r',[row['username'] for row in rows.values()])
+        proofs={proof['id']:proof for proof in data['evidence']}
+        for proof_id,span,digest in (
+            ('EV0216',(1,16),'a68daa9ce2cc84b1d226a6665a851e99a3b70ee10eda266984b1adb6a56064ee'),
+            ('EV0217',(16,31),'d365bef023f428282a50f379fbbe05c7b9a677710c800cd4319d71866e4da3a7'),
+            ('EV0218',(30,45),'e142729c85c05575dff8acc386d918d5e12031872bce3ab39a8e92cb303f28ed'),
+            ('EV0219',(36,50),'27aa6e22cb05027b071ecacc594b6cd42a01d0eb5113dffdd6f61064f8a22870'),
+        ):
+            proof=proofs[proof_id]
+            self.assertEqual((proof['min'],proof['max']),span)
+            self.assertEqual(proof['sha256'],digest)
+            self.assertEqual(hashlib.sha256((ROOT/'site'/proof['url']).read_bytes()).hexdigest(),digest)
+        with (ROOT/'data/source/data/evidence_manifest.csv').open(encoding='utf-8-sig',newline='') as stream:
+            original_names={row['evidence_id']:row['original_filename'] for row in csv.DictReader(stream)}
+        self.assertTrue(all(original_names[proof_id]=='image.png' for proof_id in current['primary_evidence']))
 
     def test_lower_band_backfills_complete_three_existing_days_without_rewriting_oct30_rank_47(self):
         data=self.data
