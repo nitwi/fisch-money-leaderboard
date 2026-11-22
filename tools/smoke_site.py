@@ -70,6 +70,19 @@ try:
             row=page.locator(f'.movement-item[data-player="{sabbath["key"]}"]')
             assert '#41 ↗ #31' in row.inner_text() and '↑10' in row.inner_text()
             assert '+9.9B observed net C$' in row.inner_text() and '/hr' not in row.inner_text()
+            danish=next(p for p in data['players'] if p['name']=='TheDanishPlays')
+            sylilia=next(p for p in data['players'] if p['name']=='Sylilia')
+            assert page.locator(f'.movement-item[data-player="{danish["key"]}"] .gaps .negative').filter(has_text='lead below shrank by 58M').count()==1
+            assert page.locator(f'.movement-item[data-player="{sylilia["key"]}"] .gaps .positive').filter(has_text='closed gap above by 58M').count()==1
+            assert page.locator(f'.movement-item[data-player="{danish["key"]}"] .gaps .negative').filter(has_text='lead below shrank by 58M').evaluate('el=>getComputedStyle(el).color')!=page.locator(f'.movement-item[data-player="{sylilia["key"]}"] .gaps .positive').filter(has_text='closed gap above by 58M').evaluate('el=>getComputedStyle(el).color')
+            xnnoel=next(p for p in data['players'] if p['name']=='xNnoel')
+            cerulean=next(p for p in data['players'] if p['name']=='Ceruleanflare2')
+            assert page.locator(f'.movement-item[data-player="{xnnoel["key"]}"] .gaps .positive').filter(has_text='lead below grew by 612.2M').count()==1
+            assert page.locator(f'.movement-item[data-player="{cerulean["key"]}"] .gaps .negative').filter(has_text='fell further behind by 612.2M').count()==1
+            assert 'rank-relative lead below shrank by' in apathy.locator('.gaps').inner_text()
+            assert 'was ody_odinho' in apathy.locator('.gaps').inner_text()
+            metbepol=next(p for p in data['players'] if p['name']=='metbepol')
+            assert 'lead below unchanged' in page.locator(f'.movement-item[data-player="{metbepol["key"]}"] .gaps .muted').inner_text()
             forcepush=next(p for p in data['players'] if p['name']=='ForcePush_Sith')
             assert 'RETURNED TO TOP 50' in page.locator(f'.movement-item[data-player="{forcepush["key"]}"]').inner_text()
             zantrille=next(p for p in data['players'] if p['name']=='Zantrille')
@@ -787,6 +800,9 @@ try:
         page.wait_for_timeout(500)
         assert f"DAY {calendar_days:02d} / {calendar_days}" in page.locator("#capture-index").inner_text()
         assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 4"), "Mobile page overflows horizontally"
+        if last['id']=='2026-11-21_2214':
+            assert page.locator(f'.movement-item[data-player="{danish["key"]}"] .gaps .negative').filter(has_text='lead below shrank by 58M').count()==1
+            assert page.locator(f'.movement-item[data-player="{sylilia["key"]}"] .gaps .positive').filter(has_text='closed gap above by 58M').count()==1
         assert page.locator("#chart").evaluate("el => el.layout.xaxis.tickvals.length > el.layout.xaxis.ticktext.filter(Boolean).length")
         assert page.locator("#chart").evaluate("el => el.data.every(trace=>trace.meta?.key!=='id:8144154137') && el.layout.yaxis.range[1]<400000000000")
         page.locator(".evidence-section").scroll_into_view_if_needed()

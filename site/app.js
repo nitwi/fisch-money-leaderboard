@@ -108,9 +108,15 @@ function floorEntry(cp,row,previous){
 function nearbyLabel(position,current,previous) {
   if (!current) return `<span class="muted">${position}: unknown</span>`;
   const diff=previous ? current.gap-previous.gap : null;
-  const diffText=diff===null ? "" : ` <span class="${diff<0n?"negative":"positive"}">(${diff<0n?"narrowed":"widened"} ${compact(diff<0n?-diff:diff)})</span>`;
-  const switched=previous && current.key!==previous.key ? ` <span class="muted">· was ${safe(previous.name)}</span>` : "";
-  return `${position} ${safe(current.name)}: <b>${current.tentative?"≈":""}${compact(current.gap)}</b>${diffText}${switched}`;
+  const ahead=position==="↑", switched=previous && current.key!==previous.key;
+  let change="";
+  if(diff===0n)change=` <span class="muted">(${ahead?"gap above":"lead below"} unchanged)</span>`;
+  else if(diff!==null){
+    const closing=diff<0n, phrase=ahead?closing?"closed gap above by":"fell further behind by":closing?"lead below shrank by":"lead below grew by";
+    change=` <span class="${ahead===closing?"positive":"negative"}">(${switched?"rank-relative ":""}${phrase} ${compact(closing?-diff:diff)})</span>`;
+  }
+  const neighborNote=switched?` <span class="muted">· was ${safe(previous.name)}</span>`:"";
+  return `${position} ${safe(current.name)}: <b>${current.tentative?"≈":""}${compact(current.gap)}</b>${change}${neighborNote}`;
 }
 function setSelected(key) {
   state.selected = key;
