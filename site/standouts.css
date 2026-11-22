@@ -23,6 +23,9 @@
 .overview-metrics span{display:block;font-size:10px;color:var(--muted)}
 .overview-metrics b{display:block;font-size:14px;margin-top:5px;overflow-wrap:anywhere}
 .overview-metrics .overview-exact{display:block;margin-top:3px;color:var(--muted);font-size:10px;font-weight:400}
+.overview-settlement-averages{margin:12px 0 16px;padding:12px;border:1px solid rgba(97,229,179,.4);border-radius:10px;background:rgba(97,229,179,.06)}
+.overview-settlement-averages h4{margin:0;color:var(--green);font-size:13px}
+.overview-settlement-averages .overview-metrics{margin-bottom:0}
 .standout-overview a{color:var(--cyan);text-decoration:underline;text-underline-offset:3px;font-size:12px}
 .overview-links{display:flex;flex-wrap:wrap;gap:8px 13px;margin:12px 0}
 .overview-range{border-top:1px solid var(--border);margin-top:17px;padding-top:14px}

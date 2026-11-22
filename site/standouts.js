@@ -2,18 +2,24 @@
 
 let focusedFlag=null;
 
+function sinceWeekendHtml(key){
+  const result=sinceWeekendSettlement(key);
+  const detail=!result.cp?"No complete Saturday settlement in this date range":!result.baseline?`No pictured balance for this player at ${dayLabel(result.cp.day_key)} settlement`:!result.last?`Baseline ${labelDate(result.baseline.at)} · awaiting a later photographed balance`:`${dayLabel(result.cp.day_key)} photo ${labelDate(result.baseline.at)} → ${labelDate(result.last.at)} · ${elapsedLabel(result.elapsed)} · ${signed(result.delta)} observed net held C$`;
+  return `<section class="overview-settlement-averages"><h4>Since last weekend sell / settlement</h4><p>${safe(detail)}. Daily and weekly figures use the same pictured net change over actual elapsed photo time; the weekly figure is a seven-day equivalent, not verified sales or a forecast.</p><div class="overview-metrics"><div><span>DAILY AVG SINCE LAST WEEKEND SELL</span><b>${rateText(result.daily,"day")}</b></div><div><span>WEEKLY AVG SINCE LAST WEEKEND SELL</span><b>${rateText(result.weekly,"week")}</b></div></div></section>`;
+}
+
 function overviewRate() {
   if(!focusedFlag)return;
   const rows=rangedHistory(focusedFlag.row.key), node=$("overview-rate");
   if(rows.length<2){
-    node.innerHTML=`<p>${rows.length} photographed daily reading${rows.length===1?"":"s"} in this window. Two are needed to measure an average net rate.</p>`;
+    node.innerHTML=`${sinceWeekendHtml(focusedFlag.row.key)}<p>${rows.length} photographed daily reading${rows.length===1?"":"s"} in this window. Two are needed to measure an average net rate.</p>`;
     return;
   }
   const first=rows[0], last=rows.at(-1), elapsed=hours(first.at,last.at);
   const delta=BigInt(last.balance)-BigInt(first.balance), settlement=crossesSettlement(first.at,last.at);
   const hourly=timeRate(delta,elapsed),rate=hourly===null?null:settlement?hourly*168:hourly;
   const unit=settlement?"week":"hr";
-  node.innerHTML=`<p>${rows.length} photographed points · ${safe(labelDate(first.at))} → ${safe(labelDate(last.at))} · ${elapsedLabel(elapsed)} between actual photos (gaps included).${settlement?" Saturday settlement included; normalize the entire observed window to seven days. This is held-balance change, not an earning pace.":""}</p><div class="overview-metrics"><div><span>${settlement?"WEEKLY AVG OBSERVED NET CHANGE":"OBSERVED NET RATE"}</span><b>${rateText(rate,unit)}</b></div><div><span>NET HELD C$ CHANGE</span><b>${signed(delta)}</b></div>${delta>0n?`<div><span>HYPOTHETICAL RAINBOW 1.5× BASE (WINDOW)</span><b class="rainbow-static">${signed(rainbowBase(delta))}</b></div>`:""}${rate>0?`<div><span>HYPOTHETICAL 1.5× BASE ${settlement?"WEEKLY AVG":"RATE"}</span><b class="rainbow-static">${rateText(rate/1.5,unit)}</b></div>`:""}</div>`;
+  node.innerHTML=`${sinceWeekendHtml(focusedFlag.row.key)}<p>${rows.length} photographed points · ${safe(labelDate(first.at))} → ${safe(labelDate(last.at))} · ${elapsedLabel(elapsed)} between actual photos (gaps included).${settlement?" Saturday settlement included; normalize the entire observed window to seven days. This is held-balance change, not an earning pace.":""}</p><div class="overview-metrics"><div><span>${settlement?"WEEKLY AVG OBSERVED NET CHANGE":"OBSERVED NET RATE"}</span><b>${rateText(rate,unit)}</b></div><div><span>NET HELD C$ CHANGE</span><b>${signed(delta)}</b></div>${delta>0n?`<div><span>HYPOTHETICAL RAINBOW 1.5× BASE (WINDOW)</span><b class="rainbow-static">${signed(rainbowBase(delta))}</b></div>`:""}${rate>0?`<div><span>HYPOTHETICAL 1.5× BASE ${settlement?"WEEKLY AVG":"RATE"}</span><b class="rainbow-static">${rateText(rate/1.5,unit)}</b></div>`:""}</div>`;
 }
 
 function overviewRange(start,end) {
