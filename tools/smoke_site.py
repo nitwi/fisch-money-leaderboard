@@ -79,10 +79,16 @@ try:
             cerulean=next(p for p in data['players'] if p['name']=='Ceruleanflare2')
             assert page.locator(f'.movement-item[data-player="{xnnoel["key"]}"] .gaps .positive').filter(has_text='lead below grew by 612.2M').count()==1
             assert page.locator(f'.movement-item[data-player="{cerulean["key"]}"] .gaps .negative').filter(has_text='fell further behind by 612.2M').count()==1
-            assert 'rank-relative lead below shrank by' in apathy.locator('.gaps').inner_text()
-            assert 'was ody_odinho' in apathy.locator('.gaps').inner_text()
+            lowtier=next(p for p in data['players'] if p['name']=='LowTierNova')
+            apathy_swing=apathy.locator('.gaps .positive').filter(has_text='overtook by 42B net swing')
+            lowtier_swing=page.locator(f'.movement-item[data-player="{lowtier["key"]}"] .gaps .negative').filter(has_text='lost lead by 42B net swing')
+            assert apathy_swing.count()==lowtier_swing.count()==1
+            assert apathy_swing.evaluate('el=>getComputedStyle(el).color')!=lowtier_swing.evaluate('el=>getComputedStyle(el).color')
+            assert 'prior rank neighbor: ody_odinho' in apathy.locator('.gaps').inner_text()
+            assert page.evaluate("(()=>{const cp=state.data.checkpoints.at(-1),prior=state.data.checkpoints.at(-2),apathy=point(cp,'id:1316700350'),lowtier=point(cp,'id:2769135100'),oldA=point(prior,apathy.key),oldL=point(prior,lowtier.key);return BigInt(apathy.balance)-BigInt(lowtier.balance)===25658389587n && BigInt(oldA.balance)-BigInt(oldL.balance)===-16398191512n && interval(cp,apathy,prior).currentGap.behind.priorSpread===-16398191512n && interval(cp,lowtier,prior).currentGap.ahead.priorSpread===16398191512n})()")
+            assert page.evaluate("(()=>{const cps=state.data.checkpoints,cp=cps.find(c=>c.id==='2026-11-17_2350'),row=point(cp,'id:8144154137'),change=interval(cp,row,cps[cps.indexOf(cp)-1]);return change.old===null && nearbyLabel('↓',change.currentGap.behind,change.oldGap.behind).includes('previous head-to-head unknown')})()")
             metbepol=next(p for p in data['players'] if p['name']=='metbepol')
-            assert 'lead below unchanged' in page.locator(f'.movement-item[data-player="{metbepol["key"]}"] .gaps .muted').inner_text()
+            assert 'head-to-head unchanged' in page.locator(f'.movement-item[data-player="{metbepol["key"]}"] .gaps .muted').inner_text()
             forcepush=next(p for p in data['players'] if p['name']=='ForcePush_Sith')
             assert 'RETURNED TO TOP 50' in page.locator(f'.movement-item[data-player="{forcepush["key"]}"]').inner_text()
             zantrille=next(p for p in data['players'] if p['name']=='Zantrille')
@@ -803,6 +809,8 @@ try:
         if last['id']=='2026-11-21_2214':
             assert page.locator(f'.movement-item[data-player="{danish["key"]}"] .gaps .negative').filter(has_text='lead below shrank by 58M').count()==1
             assert page.locator(f'.movement-item[data-player="{sylilia["key"]}"] .gaps .positive').filter(has_text='closed gap above by 58M').count()==1
+            assert page.locator('.movement-item[data-player="id:1316700350"] .gaps .positive').filter(has_text='overtook by 42B net swing').count()==1
+            assert page.locator(f'.movement-item[data-player="{lowtier["key"]}"] .gaps .negative').filter(has_text='lost lead by 42B net swing').count()==1
         assert page.locator("#chart").evaluate("el => el.layout.xaxis.tickvals.length > el.layout.xaxis.ticktext.filter(Boolean).length")
         assert page.locator("#chart").evaluate("el => el.data.every(trace=>trace.meta?.key!=='id:8144154137') && el.layout.yaxis.range[1]<400000000000")
         page.locator(".evidence-section").scroll_into_view_if_needed()

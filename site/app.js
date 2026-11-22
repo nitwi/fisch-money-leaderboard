@@ -94,6 +94,10 @@ function interval(cp,row,previous) {
   const delta = old ? BigInt(row.balance)-BigInt(old.balance) : null;
   const elapsed = old ? hours(old.at,row.at) : null;
   const currentGap = gapInfo(cp,row), oldGap = old ? gapInfo(previous,old) : {ahead:null,behind:null};
+  if(previous&&confirmed(old))for(const side of ["ahead","behind"]){
+    const neighbor=currentGap[side], priorNeighbor=neighbor?point(previous,neighbor.key):null;
+    if(neighbor&&!neighbor.tentative&&confirmed(priorNeighbor))neighbor.priorSpread=BigInt(boardAmount(old))-BigInt(boardAmount(priorNeighbor));
+  }
   return {old,delta,elapsed,currentGap,oldGap,rate:delta===null||weekendSettlement(cp)?null:timeRate(delta,elapsed)};
 }
 function floorEntry(cp,row,previous){
@@ -107,15 +111,19 @@ function floorEntry(cp,row,previous){
 }
 function nearbyLabel(position,current,previous) {
   if (!current) return `<span class="muted">${position}: unknown</span>`;
-  const diff=previous ? current.gap-previous.gap : null;
-  const ahead=position==="↑", switched=previous && current.key!==previous.key;
+  const ahead=position==="↑", switched=previous&&current.key!==previous.key;
+  const now=ahead?-current.gap:current.gap, before=current.priorSpread;
   let change="";
-  if(diff===0n)change=` <span class="muted">(${ahead?"gap above":"lead below"} unchanged)</span>`;
-  else if(diff!==null){
-    const closing=diff<0n, phrase=ahead?closing?"closed gap above by":"fell further behind by":closing?"lead below shrank by":"lead below grew by";
-    change=` <span class="${ahead===closing?"positive":"negative"}">(${switched?"rank-relative ":""}${phrase} ${compact(closing?-diff:diff)})</span>`;
+  if(before===undefined)change=' <span class="muted">(previous head-to-head unknown)</span>';
+  else {
+    const swing=now-before;
+    if(swing===0n)change=' <span class="muted">(head-to-head unchanged)</span>';
+    else {
+      const phrase=before<0n&&now>0n?"overtook by":before>0n&&now<0n?"lost lead by":swing>0n?ahead?"closed gap above by":"lead below grew by":ahead?"fell further behind by":"lead below shrank by";
+      change=` <span class="${swing>0n?"positive":"negative"}">(${phrase} ${compact(swing<0n?-swing:swing)}${before*now<0n?" net swing":""})</span>`;
+    }
   }
-  const neighborNote=switched?` <span class="muted">· was ${safe(previous.name)}</span>`:"";
+  const neighborNote=switched?` <span class="muted">· prior rank neighbor: ${safe(previous.name)}</span>`:"";
   return `${position} ${safe(current.name)}: <b>${current.tentative?"≈":""}${compact(current.gap)}</b>${change}${neighborNote}`;
 }
 function setSelected(key) {
