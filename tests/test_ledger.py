@@ -464,8 +464,9 @@ class LedgerTests(unittest.TestCase):
 
     def test_november_21_saturday_settlement_flags_verified_gains_without_earning_rate(self):
         data=self.data
-        current=data['checkpoints'][-1]
-        previous=data['checkpoints'][-2]
+        index=next(i for i,cp in enumerate(data['checkpoints']) if cp['id']=='2026-11-21_2214')
+        current=data['checkpoints'][index]
+        previous=data['checkpoints'][index-1]
         self.assertEqual((current['id'],current['day_key'],current['at']),('2026-11-21_2214','2026-11-21','2026-11-22T04:14:00Z'))
         self.assertEqual((current['complete'],current['coverage'],current['verified'],current['weekend_settlement'],current['precision']),(True,50,50,True,'user-supplied'))
         self.assertEqual((previous['id'],previous['weekend_settlement']),('2026-11-20_2256',False))
@@ -491,6 +492,41 @@ class LedgerTests(unittest.TestCase):
             ('EV0217',(16,31),'d365bef023f428282a50f379fbbe05c7b9a677710c800cd4319d71866e4da3a7'),
             ('EV0218',(30,45),'e142729c85c05575dff8acc386d918d5e12031872bce3ab39a8e92cb303f28ed'),
             ('EV0219',(36,50),'27aa6e22cb05027b071ecacc594b6cd42a01d0eb5113dffdd6f61064f8a22870'),
+        ):
+            proof=proofs[proof_id]
+            self.assertEqual((proof['min'],proof['max']),span)
+            self.assertEqual(proof['sha256'],digest)
+            self.assertEqual(hashlib.sha256((ROOT/'site'/proof['url']).read_bytes()).hexdigest(),digest)
+        with (ROOT/'data/source/data/evidence_manifest.csv').open(encoding='utf-8-sig',newline='') as stream:
+            original_names={row['evidence_id']:row['original_filename'] for row in csv.DictReader(stream)}
+        self.assertTrue(all(original_names[proof_id]=='image.png' for proof_id in current['primary_evidence']))
+
+    def test_november_22_sunday_is_separate_from_weekend_settlement(self):
+        data=self.data
+        current=data['checkpoints'][-1]
+        previous=data['checkpoints'][-2]
+        self.assertEqual((current['id'],current['day_key'],current['at']),('2026-11-22_2213','2026-11-22','2026-11-23T04:13:00Z'))
+        self.assertEqual((current['complete'],current['coverage'],current['verified'],current['weekend_settlement'],current['precision']),(True,50,50,False,'user-supplied'))
+        self.assertEqual((previous['id'],previous['weekend_settlement']),('2026-11-21_2214',True))
+        self.assertEqual((current['primary_evidence'],current['daily_source_sessions']),(['EV0220','EV0221','EV0222','EV0223'],[current['id']]))
+        rows={row['rank']:row for row in data['observations'] if row['checkpoint']==current['id']}
+        before={row['key']:row for row in data['observations'] if row['checkpoint']==previous['id']}
+        self.assertEqual(len(rows),50)
+        self.assertTrue(all(row['status']=='verified' for row in rows.values()))
+        self.assertEqual((rows[1]['username'],rows[1]['balance'],rows[2]['balance']),('ismyaimbotworking','346827970518','322555706255'))
+        self.assertEqual((int(rows[1]['balance'])-int(before[rows[1]['key']]['balance']),int(rows[2]['balance'])-int(before[rows[2]['key']]['balance'])),(-1_932_386,1_384_192_938))
+        self.assertEqual((rows[31]['username'],rows[31]['balance']),('sabbath553','74013903088'))
+        self.assertEqual((rows[48]['username'],rows[48]['balance']),('sanguifereum','59062376966'))
+        self.assertEqual((rows[50]['username'],rows[50]['balance']),('ForcePush_Sith','57979483659'))
+        self.assertEqual(int(rows[50]['balance'])-int(before[rows[50]['key']]['balance']),-49_664_985)
+        self.assertTrue(all(row['key'] in before for row in rows.values()))
+        self.assertEqual(next(row['balance'] for row in data['observations'] if row['checkpoint']==previous['id'] and row['rank']==1),'346829902904')
+        proofs={proof['id']:proof for proof in data['evidence']}
+        for proof_id,span,digest in (
+            ('EV0220',(1,16),'d7c07542ef48f61d52ffff5b66fd8ff86c370eb475269e6ad1a1de3849d9b337'),
+            ('EV0221',(16,31),'77c7943143e59e6b1e17ffeb697e43566c946d9412821e9ba87f7c41b58d521c'),
+            ('EV0222',(30,45),'c99cc9db0dc8ced802c2aa15c45e9a08863d138e93f1eae9a9e30ce8c533224a'),
+            ('EV0223',(36,50),'15d326d2705a2266e41779e04c782a3e6c0cae220c8f5e17ccb12950a4256393'),
         ):
             proof=proofs[proof_id]
             self.assertEqual((proof['min'],proof['max']),span)

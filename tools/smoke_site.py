@@ -37,6 +37,32 @@ try:
         assert page.locator('#chart').evaluate("el=>el.data.every(trace=>trace.meta?.key!=='id:8144154137') && el.layout.yaxis.range[1]>300000000000 && el.layout.yaxis.range[1]<400000000000")
         assert 'Nov 17\'s #1 outlier is omitted' in page.locator('#chart-subtitle').inner_text()
         assert 'day=2026-11-17' in page.locator('#chart-subtitle a').get_attribute('href')
+        if last['id']=='2026-11-22_2213':
+            assert page.locator('#capture-date').inner_text()=='Nov 22, 2026'
+            assert '10:13 PM' in page.locator('#capture-index').inner_text()
+            assert 'WEEKEND SETTLEMENT BASELINE' not in page.locator('#capture-index').inner_text()
+            assert page.locator('#stat-hours').inner_text()=='24.0h'
+            assert page.locator('#stat-floor').inner_text()=='57.9B'
+            assert page.locator('#stat-largest').inner_text()=='+3.1B'
+            assert page.locator('#stat-largest-name').inner_text()=='Aumjung8267'
+            assert page.locator('.proof').count()==4
+            apathy=page.locator('.movement-item[data-player="id:1316700350"]')
+            assert '#1 → #1' in apathy.inner_text() and '−1.9M observed net C$' in apathy.inner_text()
+            assert 'WEEKEND SETTLEMENT BASELINE' not in apathy.inner_text()
+            apathy.click()
+            assert page.locator('.profile-stats > div').filter(has_text='WEEKLY AVG INCLUDING WEEKEND SELL').locator('b').inner_text()=='+44.4B/week'
+            assert page.locator('.profile-stats > div').filter(has_text='DAILY AVG (WEEKLY ÷ 7)').locator('b').inner_text()=='+6.3B/day'
+            assert page.evaluate("(()=>{const m=weekendAverages('id:1316700350');return m.latest.id==='2026-11-21_2214' && m.first.checkpoint==='2026-11-14_2223' && m.last.checkpoint==='2026-11-22_2213' && m.delta===50811319110n})()")
+            page.locator('#profile-clear').click()
+            for image_id in ('EV0220','EV0221','EV0222','EV0223'):
+                page.locator(f'.proof[data-proof="{image_id}"]').click()
+                page.wait_for_function("document.querySelector('#lightbox-image').naturalWidth > 0")
+                page.locator('#lightbox button').click()
+            page.locator('#prev').click()
+            assert page.locator('#capture-date').inner_text()=='Nov 21, 2026'
+            assert 'WEEKEND SETTLEMENT BASELINE' in page.locator('#capture-index').inner_text()
+            assert page.locator('.proof[data-proof="EV0216"]').count()==1
+            page.locator('#next').click()
         if last['id']=='2026-11-21_2214':
             assert page.locator('#capture-date').inner_text()=='Nov 21, 2026'
             assert '10:14 PM' in page.locator('#capture-index').inner_text()
@@ -446,6 +472,9 @@ try:
         assert page.locator('.standout-teaser').is_visible()
         standouts=page.evaluate("standoutRows().map(item=>({day:item.cp.day_key,name:item.row.username,kind:item.kind,gain:item.change.delta?.toString()??null,bound:item.lowerBound?.toString()??null,climb:item.climb}))")
         assert len(standouts)>8, "The archive-wide feed should paginate beyond its first eight flags"
+        if last['id']=='2026-11-22_2213':
+            assert not any(item['day']=='2026-11-22' for item in standouts)
+            assert any(item['day']=='2026-11-21' and item['name']=='ismyaimbotworking' and item['gain']=='43737208619' for item in standouts)
         if last['id']=='2026-11-21_2214':
             assert any(item['day']=='2026-11-21' and item['name']=='ismyaimbotworking' and item['gain']=='43737208619' and item['kind']=='movement' for item in standouts)
             assert any(item['day']=='2026-11-21' and item['name']=='sabbath553' and item['gain']=='9921712933' and item['climb']==10 for item in standouts)
@@ -506,6 +535,14 @@ try:
         assert analysis.locator('.highlight-card').count()==8 and analysis.locator('#highlight-pages').is_visible()
         assert analysis.locator('#highlight-list').evaluate('el=>getComputedStyle(el).display')=='grid'
         assert analysis.locator('.standout-layout').evaluate('el=>{const [left,right]=el.children;const ratio=left.getBoundingClientRect().width/right.getBoundingClientRect().width;return ratio>1.8&&ratio<2.2}')
+        if last['id']=='2026-11-22_2213':
+            assert 'ismyaimbotworking' in analysis.locator('#overview-content').inner_text()
+            assert '43,737,208,619' in analysis.locator('#overview-content').inner_text()
+            assert 'WEEKEND SELL CONTEXT' in analysis.locator('#overview-content').inner_text()
+            assert analysis.locator('.overview-settlement-averages .overview-metrics b').all_inner_texts()==['+44.4B/week','+6.3B/day']
+            analysis.locator('#flag-search').fill('hc2khunowpng43ntk1')
+            analysis.locator('.highlight-card[data-highlight-day="2026-11-14"] .highlight-open').click()
+            analysis.locator('#flag-search').fill('')
         if last['id']=='2026-11-21_2214':
             assert 'ismyaimbotworking' in analysis.locator('#overview-content').inner_text()
             assert '43,737,208,619' in analysis.locator('#overview-content').inner_text()
@@ -595,8 +632,8 @@ try:
         assert 'Unknown · no rate' in analysis.locator('#overview-content').inner_text()
         assert 'EV0190' in analysis.locator('#overview-content').inner_text()
         if last['day_key']>='2026-11-15':
-            assert ('2 photographed points' if last['id']=='2026-11-15_2140' else '8 photographed points' if last['id']=='2026-11-21_2214' else '7 photographed points' if last['id']=='2026-11-20_2256' else '6 photographed points' if last['id']=='2026-11-20_0008' else '5 photographed points' if last['id']=='2026-11-18_2237' else '4 photographed points' if last['id']=='2026-11-17_2350' else '3 photographed points') in analysis.locator('#overview-rate').inner_text()
-            assert ('WEEKLY AVG OBSERVED NET CHANGE' if last['id']=='2026-11-21_2214' else 'OBSERVED NET RATE') in analysis.locator('#overview-rate').inner_text()
+            assert ('2 photographed points' if last['id']=='2026-11-15_2140' else '9 photographed points' if last['id']=='2026-11-22_2213' else '8 photographed points' if last['id']=='2026-11-21_2214' else '7 photographed points' if last['id']=='2026-11-20_2256' else '6 photographed points' if last['id']=='2026-11-20_0008' else '5 photographed points' if last['id']=='2026-11-18_2237' else '4 photographed points' if last['id']=='2026-11-17_2350' else '3 photographed points') in analysis.locator('#overview-rate').inner_text()
+            assert ('WEEKLY AVG OBSERVED NET CHANGE' if last['id'] in ('2026-11-21_2214','2026-11-22_2213') else 'OBSERVED NET RATE') in analysis.locator('#overview-rate').inner_text()
             assert ('−277.6M' if last['id']=='2026-11-15_2140' else '−275.6M') in analysis.locator('#overview-rate').inner_text()
         else:
             assert 'Two are needed' in analysis.locator('#overview-rate').inner_text()

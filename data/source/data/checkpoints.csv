@@ -48,3 +48,4 @@
 2026-11-20_0008,2026-11-20,00:08,2026-11-20T00:08:00-06:00,2026-11-20T06:08:00+00:00,screenshot-filename-minute,50,50,0,4,EV0208;EV0209;EV0210;EV0211,Original screenshot filenames establish the minute-precision capture window,
 2026-11-20_2256,2026-11-20,22:56,2026-11-20T22:56:00-06:00,2026-11-21T04:56:00+00:00,screenshot-filename-minute,50,50,0,4,EV0212;EV0213;EV0214;EV0215,Original screenshot filenames establish the minute-precision capture window,
 2026-11-21_2214,2026-11-21,22:14,2026-11-21T22:14:00-06:00,2026-11-22T04:14:00+00:00,user-supplied,50,50,0,4,EV0216;EV0217;EV0218;EV0219,Exact original chat PNG bytes retained unmodified; owner-supplied Saturday 22:14 Chicago settlement baseline,
+2026-11-22_2213,2026-11-22,22:13,2026-11-22T22:13:00-06:00,2026-11-23T04:13:00+00:00,user-supplied,50,50,0,4,EV0220;EV0221;EV0222;EV0223,Exact original chat PNG bytes retained unmodified; owner-supplied Sunday 22:13 Chicago,
