@@ -8,6 +8,7 @@
 .standout-hero a{display:inline-block;margin-top:10px;color:var(--cyan);font-size:12px;text-underline-offset:3px}
 .standout-main>.severity-legend{margin:0}
 .standout-caveat{max-width:none;margin:12px 0 20px}
+.timezone-note{margin:12px 0;color:var(--muted);font-size:12px;line-height:1.5}
 .standout-layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(280px,1fr);gap:18px;align-items:start}
 .standout-layout .highlights-section{margin:0}
 .standout-controls{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0}

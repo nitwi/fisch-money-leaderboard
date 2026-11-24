@@ -24,12 +24,17 @@ const compact = (amount) => {
 };
 const exact = (amount) => amount === null || amount === undefined ? "unknown" : `${BigInt(amount).toLocaleString("en-US")} C$`;
 const signed = (amount) => amount === null ? "—" : `${BigInt(amount) >= 0n ? "+" : "−"}${compact(BigInt(amount) < 0n ? -BigInt(amount) : BigInt(amount))}`;
-const labelDate = (iso, options={}) => new Intl.DateTimeFormat("en-US",{timeZone:"America/Chicago",month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit",...options}).format(new Date(iso));
+const viewerTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+const labelDate = (iso, options={}) => new Intl.DateTimeFormat("en-US",{timeZone:viewerTimeZone,month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit",timeZoneName:"short",...options}).format(new Date(iso));
+const labelTime = (iso) => new Intl.DateTimeFormat("en-US",{timeZone:viewerTimeZone,hour:"numeric",minute:"2-digit",timeZoneName:"short"}).format(new Date(iso));
 const dayLabel = (day) => new Intl.DateTimeFormat("en-US",{timeZone:"UTC",month:"short",day:"numeric",year:"numeric"}).format(new Date(`${day}T12:00:00Z`));
-const localDay = (iso) => {
-  const fields=Object.fromEntries(new Intl.DateTimeFormat("en-US",{timeZone:"America/Chicago",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date(iso)).map(part=>[part.type,part.value]));
+const dayInZone = (iso,timeZone) => {
+  const fields=Object.fromEntries(new Intl.DateTimeFormat("en-US",{timeZone,year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date(iso)).map(part=>[part.type,part.value]));
   return `${fields.year}-${fields.month}-${fields.day}`;
 };
+const localDay = (iso) => dayInZone(iso,"America/Chicago");
+const viewerDay = (iso) => dayInZone(iso,viewerTimeZone);
+function renderTimeZoneNote(){if($("viewer-timezone"))$("viewer-timezone").textContent=`Photo and patch times: ${viewerTimeZone} (your browser) · leaderboard day labels: America/Chicago`;}
 function calendarDays(first,last) {
   const result=[];
   const cursor=new Date(`${first}T12:00:00Z`);
@@ -214,7 +219,7 @@ function renderChart() {
     plot.push({type:"scatter",mode:"lines+markers",name:player(key).name,x:xs,y:ys,connectgaps:false,meta:{key},
       line:{color,width:graphedSelected===key?3.5:1.5,shape:"linear"},marker:{size:rows.map(row=>row?(graphedSelected===key?8:5):0),symbol:"circle",color},
       customdata:rows.map((row,index)=>row?[`#${row.rank}`,exact(row.balance),(row.balance_evidence||row.evidence).join(", "),labelDate(row.at),row.board_at?`Rank pictured ${labelDate(row.board_at)} · board balance ${exact(row.board_balance)}`:"Rank and balance pictured together",dayLabel(slots[index].day),weekendSettlement(slots[index].cp)?"Saturday settlement baseline · no hourly earning pace":"Selected daily photo",slots[index].cp.id]:["unknown","unknown","","unknown","",dayLabel(slots[index].day),"No photo",""]),
-      hovertemplate:"<b>%{fullData.name}</b><br>Leaderboard day %{customdata[5]}<br>%{customdata[6]}<br>Balance photo %{customdata[3]} (Chicago)<br>%{customdata[0]} · %{customdata[1]}<br>%{customdata[4]}<br>Balance proof: %{customdata[2]}<extra></extra>",showlegend:false});
+      hovertemplate:"<b>%{fullData.name}</b><br>Leaderboard day %{customdata[5]}<br>%{customdata[6]}<br>Balance photo %{customdata[3]}<br>%{customdata[0]} · %{customdata[1]}<br>%{customdata[4]}<br>Balance proof: %{customdata[2]}<extra></extra>",showlegend:false});
     // A faint dashed bridge marks an unobserved span rather than inventing intermediate points.
     let previous=-1;
     rows.forEach((row,index)=>{if(!row)return;if(previous>=0 && index-previous>1){plot.push({type:"scatter",mode:"lines",x:[xs[previous],xs[index]],y:[ys[previous],ys[index]],line:{color:graphedSelected && graphedSelected!==key?"rgba(125,151,164,.11)":color,width:1,dash:"dot"},hoverinfo:"skip",showlegend:false});}previous=index;});
@@ -230,6 +235,8 @@ function renderChart() {
     yaxis:{title:"HELD C$",range:[0,ymax],tickformat:"~s",gridcolor:"rgba(154,219,231,.1)",zeroline:false},
     shapes:[...visibleEvents.map(event=>({type:"line",x0:event.day,x1:event.day,y0:0,y1:1,yref:"paper",line:{color:event.color,width:2,dash:"dash"}})),...saturdaySlots.map(slot=>({type:"line",x0:slot.id,x1:slot.id,y0:0,y1:1,yref:"paper",line:{color:"#61e5b3",width:1.6,dash:"dash"}})),...(selectedSlot?[{type:"line",x0:selectedSlot.id,x1:selectedSlot.id,y0:0,y1:1,yref:"paper",line:{color:"#ffd166",width:1.4,dash:"dot"}}]:[])],
     annotations:[...visibleEvents.map(event=>({x:event.day,xref:"x",y:1,yref:"paper",yanchor:"bottom",showarrow:false,text:event.version,font:{color:event.color,size:10},bgcolor:"#071927",bordercolor:event.color,borderwidth:1,borderpad:3})),...saturdaySlots.map(slot=>({x:slot.id,xref:"x",y:.90,yref:"paper",yanchor:"bottom",showarrow:false,captureevents:true,text:"WEEKEND",font:{color:"#61e5b3",size:9},bgcolor:"#071927",bordercolor:"#61e5b3",borderwidth:1,borderpad:2}))],uirevision:"money-ledger"};
+  // Extra intraday photo ticks follow the viewer's timezone; day buckets remain Chicago cycles.
+  layout.xaxis.ticktext=layout.xaxis.ticktext.map((text,index)=>slots[index].index&&!compactTicks?labelTime(slots[index].cp.at):text);
   Plotly.react(node,plot,layout,{displayModeBar:false,responsive:true,scrollZoom:false});
   if (!state.chartBound) {
     node.on("plotly_click",(event)=>{const marker=event.points?.[0],key=marker?.data?.meta?.key,id=marker?.customdata?.[7];const index=state.data.checkpoints.findIndex(cp=>cp.id===id);if(index>=0)moveTo(index);if(key)setSelected(key);if(index>=0){const u=new URL(location.href);u.searchParams.set("day",state.data.checkpoints[index].day_key);u.searchParams.set("snapshot",id);history.replaceState(null,"",u);}});
@@ -423,7 +430,7 @@ function renderProfile() {
     const elapsed=old?hours(old.at,row.at):0;
     const rate=change===null?null:timeRate(change,elapsed);
     const rankChange=old?old.rank>row.rank?`<b class="rank-move up">↑${old.rank-row.rank}</b>`:old.rank<row.rank?`<b class="rank-move down">↓${row.rank-old.rank}</b>`:`<b class="rank-move steady">→0</b>`:"";
-    const photoTime=localDay(row.at)===row.day_key?new Intl.DateTimeFormat("en-US",{timeZone:"America/Chicago",hour:"numeric",minute:"2-digit"}).format(new Date(row.at)):labelDate(row.at);
+    const photoTime=viewerDay(row.at)===row.day_key?labelTime(row.at):labelDate(row.at);
     const settlement=weekendSettlement(state.data.checkpoints[ix]);
     return `<a href="#evidence" data-capture="${ix}" data-proof="${safe((row.balance_evidence||row.evidence)[0]||"")}"><span>${safe(dayLabel(row.day_key))} · photo ${safe(photoTime)} · #${row.rank} ${rankChange}${row.board_at?` · rank photo ${safe(labelDate(row.board_at))}`:""}</span><strong title="${safe(exact(row.balance))}">${compact(row.balance)}</strong><span>${change!==null?`${signed(change)} · ${settlement?"WEEKEND SETTLEMENT · no hourly rate":rate>0?rainbowRateHtml(rate):rateText(rate)}`:settlement?"WEEKEND BASELINE":"—"} ↗</span></a>`;
   }).join("");
@@ -493,4 +500,5 @@ async function init(){
     render();
   }catch(error){$("notice").hidden=false;$("notice").textContent=`Could not load the evidence ledger: ${error.message}`;$("capture-date").textContent="Data unavailable";}
 }
+renderTimeZoneNote();
 if($("chart"))init();
