@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Choose a calendar date and local time to generate a copyable UTC command timestamp for Fisch moderation.">
+  <title>Timestamp Generator · Fisch Money Ledger</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="standouts.css">
+  <link rel="stylesheet" href="timestamp.css">
+  <script defer src="time-utils.js"></script>
+  <script defer src="timestamp.js"></script>
+</head>
+<body class="timestamp-page">
+  <header class="site-head">
+    <a class="brand" href="./"><span class="mark">C$</span><span>FISCH <b>MONEY LEDGER</b><small>TOP C$ · EVIDENCE ARCHIVE</small></span></a>
+    <nav class="site-nav" aria-label="Site pages">
+      <a href="./">Dashboard</a><a href="standouts.html">Standout analysis</a><a href="timestamp.html" aria-current="page">Timestamp generator</a>
+    </nav>
+  </header>
+  <main class="ts-main">
+    <section class="ts-intro">
+      <p class="eyebrow">MODERATOR UTILITIES</p>
+      <h1>Timestamp <em>generator.</em></h1>
+      <p>Pick a date and local time. Copy the UTC timestamp straight into your command.</p>
+    </section>
+    <p id="import-note" class="ts-notice" hidden></p>
+    <noscript><p class="ts-notice">Enable JavaScript to convert dates and copy timestamps.</p></noscript>
+    <div class="ts-grid">
+      <section class="ts-card" aria-labelledby="generator-title">
+        <div class="ts-card-heading"><div><p class="eyebrow">CALENDAR TO UTC</p><h2 id="generator-title">Choose your time</h2></div><button class="quiet-btn" id="now" type="button">Use current time</button></div>
+        <label for="zone">Timezone</label>
+        <input id="zone" type="search" list="timezone-options" autocomplete="off" spellcheck="false" aria-describedby="zone-help">
+        <datalist id="timezone-options"></datalist>
+        <p id="zone-help" class="ts-help">Type a city or IANA timezone, then choose a result. For Central Time, use America/Chicago.</p>
+        <div class="ts-date-row">
+          <div><label for="date">Calendar date</label><input id="date" type="date" min="0001-01-01" max="9999-12-31" required></div>
+          <div><label for="time-format">Time format</label><select id="time-format"><option value="12">12-hour · AM / PM</option><option value="24">24-hour</option></select></div>
+        </div>
+        <fieldset class="ts-clock"><legend>Local time</legend>
+          <label for="hour">Hour<input id="hour" type="number" min="1" max="12" step="1" inputmode="numeric" required></label>
+          <label for="minute">Minute<input id="minute" type="number" min="0" max="59" step="1" inputmode="numeric" required></label>
+          <label for="second">Second<input id="second" type="number" min="0" max="59" step="1" inputmode="numeric" required></label>
+          <label for="period" id="period-field">AM / PM<select id="period"><option value="AM">AM</option><option value="PM">PM</option></select></label>
+        </fieldset>
+        <details class="ts-advanced" id="advanced"><summary>Command prefix &amp; milliseconds</summary><div class="ts-date-row">
+          <div><label for="prefix">Command prefix</label><input id="prefix" value="latest:" maxlength="80" autocomplete="off" spellcheck="false" aria-describedby="prefix-help"><p id="prefix-help" class="ts-help">Use the prefix required by your command. Leave blank for only the timestamp.</p></div>
+          <div><label for="millisecond">Milliseconds</label><input id="millisecond" type="number" min="0" max="999" step="1" value="0" inputmode="numeric"></div>
+        </div></details>
+        <div id="ambiguity" class="ts-notice" hidden><label for="occurrence">Which occurrence?</label><select id="occurrence"><option value="">Choose first or second occurrence</option></select></div>
+        <p id="status" class="ts-validation" role="status" aria-live="polite"></p>
+        <div class="ts-previews"><div><span>SELECTED LOCAL TIME</span><p id="local-preview">—</p></div><div><span>UTC EQUIVALENT</span><p id="utc-preview">—</p></div></div>
+        <div class="ts-command"><label for="command">Ready to paste</label><textarea id="command" readonly rows="2" spellcheck="false" aria-label="Command-ready UTC timestamp" placeholder="Choose a valid date and time"></textarea><button id="copy-command" class="ts-primary" type="button" data-copy="command" disabled>Copy command timestamp</button></div>
+        <div class="ts-raw"><label for="raw">Raw ISO 8601 timestamp</label><input id="raw" readonly spellcheck="false" placeholder="YYYY-MM-DDTHH:mm:ss.sssZ"><button class="quiet-btn" type="button" data-copy="raw" disabled>Copy raw UTC</button></div>
+      </section>
+      <section class="ts-card ts-decode" aria-labelledby="decode-title">
+        <div class="ts-card-heading"><div><p class="eyebrow">UTC TO CALENDAR</p><h2 id="decode-title">Read a timestamp</h2></div></div>
+        <p>Paste an existing UTC timestamp or command fragment to see it in the selected timezone.</p>
+        <label for="reverse">Timestamp or command fragment</label>
+        <textarea id="reverse" rows="3" placeholder="latest:2026-09-29T02:25:52.000Z" autocomplete="off" spellcheck="false" aria-describedby="reverse-help reverse-status"></textarea>
+        <p id="reverse-help" class="ts-help">Include Z for UTC, or an explicit offset such as -05:00.</p>
+        <p id="reverse-status" class="ts-validation" role="status" aria-live="polite"></p>
+        <div class="ts-decoded"><span>IN YOUR SELECTED TIMEZONE</span><p id="decoded">Paste a timestamp to convert it.</p></div>
+        <div class="ts-decode-actions"><button class="quiet-btn" type="button" data-copy="decoded" disabled>Copy local date &amp; time</button><button class="quiet-btn" type="button" id="use-decoded" disabled>Use in generator</button></div>
+        <div class="ts-explanation"><h3>Working from the ledger?</h3><p>Select a data point on the dashboard to copy its recorded photo time directly. Open this generator when you want to choose or adjust a time.</p><a href="./">Open Fisch Money Ledger</a></div>
+      </section>
+    </div>
+    <p id="copy-status" class="ts-copy-status" role="status" aria-live="polite"></p>
+    <footer><span>FISCH MONEY LEDGER <span class="slash">/</span> moderator utilities</span><span>Timezone and daylight saving adjustments happen in your browser.</span></footer>
+  </main>
+</body>
+</html>

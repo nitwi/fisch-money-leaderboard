@@ -457,7 +457,29 @@ function renderEvidence() {
   }));
   if(state.selected){const row=point(cp,state.selected);if(row)spotlight((row.balance_evidence||row.evidence)[0]);}
 }
-function render(){renderControls();renderStandoutTeaser();renderChart();renderMovement();renderProfile();renderEvidence();}
+function renderCommandTimestamp() {
+  let container = $("point-timestamp");
+  if (!container) {
+    const card = $("chart")?.closest(".chart-card");
+    if (!card) return;
+    container = document.createElement("section");
+    container.id = "point-timestamp";
+    container.className = "point-timestamp";
+    container.setAttribute("aria-label", "Command timestamp for the selected data point");
+    card.append(container);
+  }
+  const cp = state.data.checkpoints[state.index];
+  FischTimestampPanel.render(container, {
+    displayTimeZone: viewerTimeZone,
+    checkpoint: cp,
+    row: state.selected ? point(cp, state.selected) : null,
+    selectedKey: state.selected,
+    playerName: state.selected ? player(state.selected).name : null,
+    captures: state.data.captures,
+    proofs: state.proofs
+  });
+}
+function render(){renderControls();renderStandoutTeaser();renderChart();renderMovement();renderProfile();renderEvidence();renderCommandTimestamp();}
 async function init(){
   try{
     const response=await fetch("data.json",{cache:"no-cache"});if(!response.ok)throw new Error(`HTTP ${response.status}`);
@@ -498,6 +520,7 @@ async function init(){
     document.querySelectorAll("[data-view]").forEach(el=>el.addEventListener("click",()=>{state.view=el.dataset.view;document.querySelectorAll("[data-view]").forEach(btn=>btn.classList.toggle("active",btn===el));renderMovement();}));
     $("lightbox").addEventListener("click",(ev)=>{if(ev.target===$("lightbox"))$("lightbox").close();});
     render();
+    if (location.hash === "#point-timestamp") $("point-timestamp")?.scrollIntoView({block:"start",behavior:"instant"});
   }catch(error){$("notice").hidden=false;$("notice").textContent=`Could not load the evidence ledger: ${error.message}`;$("capture-date").textContent="Data unavailable";}
 }
 renderTimeZoneNote();

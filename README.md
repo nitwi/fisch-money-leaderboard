@@ -16,6 +16,20 @@ For a later **single-player profile photo**, use `python tools/import_profile_up
 
 The site is deployed to GitHub Pages from `site/` via `.github/workflows/pages.yml`. No ShockieWockie dashboard or Worker resources are used. The public URL is `https://nitwi.github.io/fisch-money-leaderboard/`.
 
+## Moderator command timestamps
+
+Click a plotted balance point, select a player on the movement board, or choose a history row. The **Command timestamp** section beneath the chart follows the selected snapshot and player and provides a copyable `latest:YYYY-MM-DDTHH:mm:ss.sssZ` value. Standout Analysis includes the same control beside the selected flag, with a before-photo option for measured changes.
+
+The selected balance uses its stored `row.at`; a snapshot without a player uses `checkpoint.at`. Later player-profile balances offer separate choices for the balance photo, original rank/board photo (`board_at`), and session anchor when those differ. Leaderboard day labels never replace the recorded observation time, and a missing selected-player observation has no copyable timestamp. Approximate source times remain labeled approximate; three-digit milliseconds are command formatting, not additional capture precision.
+
+Use **Adjust date / time** to open `timestamp.html` with the selected instant already loaded. The standalone generator supports calendar input, 12-/24-hour time, IANA timezone selection, strict ISO decoding, and explicit choices for repeated daylight saving times. Both timezone and display-format preferences stay in the browser. All conversions run client-side without new dependencies.
+
+The command panel shows the photo time in the viewer's device timezone, with its IANA zone and UTC offset labeled. Display formatting never changes the stored observation, leaderboard day, elapsed-time calculations, or copied UTC command. The adjustment link carries the exact instant and the panel's display zone; importing that link does not overwrite the standalone generator's saved preferences.
+
+For a ledger timezone selector, pass its validated preference as `displayTimeZone` (and optionally `hour12`) to `FischTimestampPanel.render(container, context)` and rerender when the display settings change. Omitting the zone follows the device; invalid or unavailable detection safely falls back to UTC. This interface does not replace the ledger's date formatters, chart click handling, day grouping, or deployment workflow. Generator preferences use only `fisch-timestamp-zone` and `fisch-timestamp-format`.
+
+Run `node --test tests/test_timestamp.cjs tests/test_ledger_timestamp.cjs` for conversion and real-ledger source-selection checks. The timestamp workflow runs these checks on relevant pull requests and main-branch pushes.
+
 ## Capture sessions
 
 - Original captures are immutable. `site/data.json` retains all 50 raw `captures`/`capture_observations`, 48 reconciled `sessions`/`session_observations`, and the displayed `checkpoints`/`observations` used for the 43 daily points. Per-rank source capture IDs, actual timestamps, original PNG IDs and SHA-256 hashes remain available. To attach another original photo to an existing batch, preview `python tools/attach_capture_evidence.py --checkpoint YYYY-MM-DD_HHMM --image 'C:/path/original.png' --min-rank 33 --max-rank 48 --notes 'reviewed source context'` before repeating with `--apply` and recording its direct transcriptions in the photo review ledgers.

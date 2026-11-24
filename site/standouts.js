@@ -43,6 +43,24 @@ function bindOverviewRange(first,last){
   $("overview-all").addEventListener("click",()=>overviewRange(first,last));
 }
 
+function renderOverviewTimestamp(item) {
+  const container = document.createElement("section");
+  container.id = "standout-timestamp";
+  container.className = "point-timestamp";
+  container.setAttribute("aria-label", "Command timestamp for the selected standout");
+  $("overview-content").querySelector(".overview-range").before(container);
+  FischTimestampPanel.render(container, {
+    displayTimeZone: viewerTimeZone,
+    checkpoint: item.cp,
+    row: item.row,
+    selectedKey: item.row.key,
+    playerName: player(item.row.key).name,
+    previousRow: item.kind === "appearance" ? null : item.change.old,
+    captures: state.data.captures,
+    proofs: state.proofs
+  });
+}
+
 function renderAppearanceOverview(item){
   const {cp,previous,row,lowerBound,previousFloor,severity}=item;
   const first=state.data.checkpoints[0].day_key,last=state.data.checkpoints.at(-1).day_key;
@@ -54,6 +72,7 @@ function renderAppearanceOverview(item){
   $("overview-content").querySelector(".overview-emphasis").textContent=`${severity.toUpperCase()} · ${firstSeen?"FIRST PICTURED":"RETURNED"} TOP-50 ENTRY`;
   $("overview-content").querySelectorAll(".overview-metrics span")[3].textContent="BEFORE ENTRY · EXACT BALANCE / RATE";
   if(weekendSettlement(cp))$("overview-content").querySelector(".overview-metrics").insertAdjacentHTML("afterend",'<p class="settlement-context"><strong>WEEKEND SELL CONTEXT · SATURDAY BASELINE</strong> · The prior #50 floor only bounds the player’s earlier balance; the entry does not establish an individual sale or hourly rate.</p>');
+  renderOverviewTimestamp(item);
   overviewRate();bindOverviewRange(first,last);
 }
 
@@ -75,6 +94,7 @@ function renderOverview(){
     rateMetric.querySelector("b").textContent="Not inferred";
     $("overview-content").querySelector(".overview-metrics").insertAdjacentHTML("afterend",'<p class="settlement-context"><strong>WEEKEND SELL CONTEXT · SATURDAY BASELINE</strong> · The full net held-balance change and rank movement are flagged. The settlement window is not an hourly earning rate or proof of an individual sale.</p>');
   }
+  renderOverviewTimestamp(item);
   overviewRate();
   bindOverviewRange(first,last);
   $("overview-content").querySelector("[data-other-day]")?.addEventListener("click",(event)=>window.focusStandout(Number(event.currentTarget.dataset.otherDay),event.currentTarget.dataset.otherPlayer));

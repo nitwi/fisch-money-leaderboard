@@ -1,0 +1,31 @@
+name: Check timestamp utilities
+on:
+  pull_request:
+    paths:
+      - 'site/**'
+      - 'tests/*timestamp*'
+      - '.github/workflows/timestamp-checks.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'site/**'
+      - 'tests/*timestamp*'
+      - '.github/workflows/timestamp-checks.yml'
+permissions:
+  contents: read
+jobs:
+  timestamp-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate JavaScript and timestamp behavior
+        run: |
+          node --check site/app.js
+          node --check site/standouts.js
+          node --check site/time-utils.js
+          node --check site/ledger-timestamp.js
+          node --check site/timestamp.js
+          node --test tests/test_timestamp.cjs tests/test_ledger_timestamp.cjs
