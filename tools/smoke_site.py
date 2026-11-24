@@ -20,7 +20,7 @@ def assert_chart_scale(page):
     assert page.locator('#chart').evaluate("""el => {
         const values=el.data.flatMap(trace=>trace.y||[]).filter(Number.isFinite);
         const peak=Math.max(...values), [lower,upper]=el.layout.yaxis.range;
-        return el.data.every(trace=>trace.meta?.key!=='id:8144154137')
+        return el.data.every(trace=>!['id:8144154137','id:9579548886','id:12026234206'].includes(trace.meta?.key))
             && values.length>0 && Number.isFinite(peak) && peak>0
             && lower===0 && Number.isFinite(upper) && upper>peak && upper<=peak*1.1;
     }"""), 'Chart should fit all plotted balances with modest headroom and retain the existing outlier exclusion'
@@ -45,8 +45,8 @@ try:
         assert page.locator(".proof").count() == len(last['evidence'])
         page.locator('#chart.js-plotly-plot').wait_for(timeout=20000)
         assert_chart_scale(page)
-        assert 'Nov 17\'s #1 outlier is omitted' in page.locator('#chart-subtitle').inner_text()
-        assert 'day=2026-11-17' in page.locator('#chart-subtitle a').get_attribute('href')
+        assert all(name in page.locator('#chart-subtitle').inner_text() for name in ('75percent3r','BloxHeroj8','Nexvolt00'))
+        assert 'day=2026-11-17' in page.locator('#chart-subtitle a').first.get_attribute('href')
         if last['id']=='2026-11-22_2213':
             assert page.locator('#capture-date').inner_text()=='Nov 22, 2026'
             assert '10:13 PM' in page.locator('#capture-index').inner_text()
@@ -130,7 +130,7 @@ try:
             zantrille=next(p for p in data['players'] if p['name']=='Zantrille')
             assert 'LEFT PICTURED TOP 50' in page.locator(f'.movement-item[data-player="{zantrille["key"]}"]').inner_text()
             assert page.locator('.proof').count()==4
-            assert page.locator('#chart').evaluate("el=>el.layout.annotations.some(mark=>mark.text==='WEEKEND' && mark.x==='2026-11-21') && el.data.every(trace=>trace.meta?.key!=='id:8144154137')")
+            assert page.locator('#chart').evaluate("el=>el.layout.annotations.some(mark=>mark.text==='WEEKEND' && mark.x==='2026-11-21') && el.data.every(trace=>!['id:8144154137','id:9579548886','id:12026234206'].includes(trace.meta?.key))")
             for image_id in ('EV0216','EV0217','EV0218','EV0219'):
                 page.locator(f'.proof[data-proof="{image_id}"]').click()
                 page.wait_for_function("document.querySelector('#lightbox-image').naturalWidth > 0")
@@ -150,7 +150,7 @@ try:
             sangui=page.locator('.movement-item[data-player="id:8804353958"]')
             assert '#48 → #48' in sangui.inner_text() and '+3.1M observed net C$' in sangui.inner_text()
             assert 'FIRST SEEN IN TOP 50' not in sangui.inner_text()
-            assert page.locator('#chart').evaluate("el=>el.layout.xaxis.tickvals.includes('2026-11-19') && el.layout.xaxis.tickvals.includes('2026-11-20') && el.data.every(trace=>trace.meta?.key!=='id:8144154137')")
+            assert page.locator('#chart').evaluate("el=>el.layout.xaxis.tickvals.includes('2026-11-19') && el.layout.xaxis.tickvals.includes('2026-11-20') && el.data.every(trace=>!['id:8144154137','id:9579548886','id:12026234206'].includes(trace.meta?.key))")
             for image_id in ('EV0212','EV0213','EV0214','EV0215'):
                 page.locator(f'.proof[data-proof="{image_id}"]').click()
                 page.wait_for_function("document.querySelector('#lightbox-image').naturalWidth > 0")
@@ -173,7 +173,7 @@ try:
             assert '#48' in returnee.inner_text() and 'FIRST SEEN IN TOP 50' in returnee.inner_text()
             assert 'MAJOR TOP-50 ENTRY' not in returnee.inner_text()
             assert 'LEFT PICTURED TOP 50' in page.locator('.movement-item[data-player="id:8144154137"]').inner_text()
-            assert page.locator('#chart').evaluate("el=>el.layout.xaxis.tickvals.includes('2026-11-19') && !el.layout.xaxis.tickvals.includes('2026-11-20') && el.data.every(trace=>trace.meta?.key!=='id:8144154137')")
+            assert page.locator('#chart').evaluate("el=>el.layout.xaxis.tickvals.includes('2026-11-19') && !el.layout.xaxis.tickvals.includes('2026-11-20') && el.data.every(trace=>!['id:8144154137','id:9579548886','id:12026234206'].includes(trace.meta?.key))")
             for image_id in ('EV0208','EV0209','EV0210','EV0211'):
                 page.locator(f'.proof[data-proof="{image_id}"]').click()
                 page.wait_for_function("document.querySelector('#lightbox-image').naturalWidth > 0")

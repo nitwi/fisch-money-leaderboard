@@ -6,8 +6,9 @@ const patchEvents = [
   {id:"venue-encore",day:"2026-10-31",at:"2026-10-31T16:00:00Z",version:"v2.08",title:"Venue Encore · Black Fairy introduced",description:"Black Fairy became obtainable in Venue Encore; a new money-making option entered the game.",color:"#61e5b3",glyph:"✦",source:"https://fischipedia.org/wiki/2.08#2.08.0",icon:"https://static.wikitide.net/fischwiki/thumb/3/33/Black_Fairy.png/145px-Black_Fairy.png",credit:"https://fischipedia.org/wiki/File:Black_Fairy.png"},
   {id:"stellarwave-change",day:"2026-11-07",at:"2026-11-08T02:34:00Z",version:"v2.09.1",title:"Stellarwave Melody balance changes",description:"Sign and milestone bonuses and extra-catch benefits were sharply reduced; the patch also removed a weight penalty.",color:"#ffd166",glyph:"✧",source:"https://fischipedia.org/wiki/2.09#2.09.1",icon:"https://static.wikitide.net/fischwiki/thumb/4/45/Stellarwave_Melody.png/206px-Stellarwave_Melody.png",credit:"https://fischipedia.org/wiki/File:Stellarwave_Melody.png"}
 ];
-// Preserve this verified reading in the archive; omit only its trace from the graph scale.
-const chartExcludedKeys = new Set(["id:8144154137"]);
+// Preserve photographed balances and proofs; moderator-requested exclusions affect graph traces only.
+// BloxHeroj8 and Nexvolt00: game bans reported by the ledger owner on 2026-11-24.
+const chartExcludedKeys = new Set(["id:8144154137","id:9579548886","id:12026234206"]);
 const state = {data:null, index:0, selected:null, view:"all", filter:"all", highlightPage:0, standoutSeverity:"all", standoutSearch:"", rangeStart:null, rangeEnd:null, byCapture:new Map(), byPlayer:new Map(), playerMeta:new Map(), proofs:new Map(), profileUpdates:new Map(), chartBound:false};
 const byId = (id) => state.proofs.get(id);
 const compact = (amount) => {

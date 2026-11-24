@@ -16,6 +16,10 @@ For a later **single-player profile photo**, use `python tools/import_profile_up
 
 The site is deployed to GitHub Pages from `site/` via `.github/workflows/pages.yml`. No ShockieWockie dashboard or Worker resources are used. The public URL is `https://nitwi.github.io/fisch-money-leaderboard/`.
 
+## Moderator graph exclusions
+
+The chart omits the exact account IDs for `75percent3r` (8144154137), `BloxHeroj8` (9579548886), and `Nexvolt00` (12026234206). The latter two exclusions were requested by the ledger owner on November 24 after reporting game bans. This display policy preserves their photographed balances, original images, rank history, Standout Analysis, and command timestamps. A graph exclusion is a moderator decision, separate from API account status or automatically inferred relationships.
+
 ## Moderator command timestamps
 
 Click a plotted balance point, select a player on the movement board, or choose a history row. The **Command timestamp** section beneath the chart follows the selected snapshot and player and provides a copyable `latest:YYYY-MM-DDTHH:mm:ss.sssZ` value. Standout Analysis includes the same control beside the selected flag, with a before-photo option for measured changes.
