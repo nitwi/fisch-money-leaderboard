@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Compare cached public Roblox avatars, usernames and available friend or follow relationships across the Fisch Money Ledger.">
+  <title>Networker · Fisch Money Ledger</title>
+  <link rel="stylesheet" href="styles.css?v=b796ed7e2670">
+  <link rel="stylesheet" href="standouts.css?v=a5e0cf38dd14">
+  <link rel="stylesheet" href="networker.css?v=ea8d898f07fb">
+  <script defer src="time-utils.js?v=b2a56747d852"></script>
+  <script defer src="networker-core.js?v=9aeae1aa343b"></script>
+  <script defer src="networker.js?v=99eac1530dca"></script>
+</head>
+<body class="networker-page">
+  <header class="site-head">
+    <a class="brand" href="./"><span class="mark">C$</span><span>FISCH <b>MONEY LEDGER</b><small>TOP C$ · EVIDENCE ARCHIVE</small></span></a>
+    <nav class="site-nav" aria-label="Site pages"><a href="./">Dashboard</a><a href="standouts.html">Standout analysis</a><a href="timestamp.html">Timestamp generator</a><a href="networker.html" aria-current="page">Networker</a></nav>
+  </header>
+  <main class="nw-main">
+    <section class="nw-hero">
+      <div><p class="nw-kicker">ACCOUNT COMPARISON</p><h1>Networker<span>.</span></h1><p>Inspect public avatars, compare usernames, and trace social links when the source data is available.</p></div>
+      <div class="nw-cache"><span>PUBLIC DATA SNAPSHOT</span><strong id="cache-time">Loading…</strong><small id="cache-coverage">Reading cached accounts</small></div>
+    </section>
+    <p id="network-status" class="nw-status" role="status" aria-live="polite">Loading the latest collected account data…</p>
+    <noscript><p class="nw-status">Enable JavaScript to compare the cached accounts.</p></noscript>
+    <div id="networker-app" hidden>
+      <form id="target-form" class="nw-controls" aria-label="Choose comparison accounts">
+        <div class="nw-target-control"><label for="target-input">Reference account</label><div class="nw-input-action"><input id="target-input" type="search" list="target-options" autocomplete="off" spellcheck="false" placeholder="Search a username or Roblox ID" aria-describedby="target-help"><button type="submit" class="nw-primary">Set reference</button></div><datalist id="target-options"></datalist><p id="target-help">Choose any account in this public-data snapshot.</p></div>
+        <div><label for="candidate-scope">Compare against</label><select id="candidate-scope"><option value="latest">Latest Top 50</option><option value="all">All history + references</option></select></div>
+        <div><label for="candidate-sort">Sort by</label><select id="candidate-sort"><option value="avatar">Shared cosmetic assets</option><option value="name">Username similarity</option><option value="social">Observed social links</option></select></div>
+      </form>
+      <section id="reference-summary" class="nw-reference" aria-label="Selected reference account"></section>
+      <section class="nw-network" aria-labelledby="social-title">
+        <div class="nw-section-head"><div><p class="nw-kicker">FRIENDS &amp; FOLLOWS</p><h2 id="social-title">Recorded social links</h2></div><span id="social-coverage" class="nw-pill">Checking coverage</span></div>
+        <p id="social-summary"></p><div id="social-graph"></div>
+        <details class="nw-source-details"><summary>Source availability</summary><div id="capability-details"></div><p>Unavailable lists are unknown. A partial list can establish a visible link; it cannot establish that another link is absent.</p></details>
+      </section>
+      <div class="nw-workspace">
+        <section class="nw-candidates" aria-labelledby="candidates-title">
+          <div class="nw-section-head"><div><p class="nw-kicker">FIND A COMPARISON</p><h2 id="candidates-title">Accounts</h2></div><span id="candidate-count" class="nw-pill"></span></div>
+          <label class="nw-search-label" for="candidate-search">Filter candidates</label><input id="candidate-search" type="search" placeholder="Username or Roblox ID" autocomplete="off" spellcheck="false">
+          <p id="candidate-description" class="nw-help"></p>
+          <div id="candidate-list" class="nw-candidate-list" aria-label="Comparison candidates"></div>
+        </section>
+        <aside id="comparison-panel" class="nw-comparison" aria-labelledby="comparison-title">
+          <div class="nw-section-head"><div><p class="nw-kicker">SIDE BY SIDE</p><h2 id="comparison-title">Account details</h2></div><button id="share-comparison" type="button" class="nw-quiet" disabled>Copy link</button></div>
+          <div id="comparison-content"><p>Choose an account from the comparison list.</p></div>
+          <p id="share-status" class="nw-feedback" role="status" aria-live="polite"></p>
+        </aside>
+      </div>
+      <details class="nw-method"><summary>How these comparisons work</summary><div>
+        <p><strong>Avatar overlap:</strong> shared asset IDs ÷ the union of both equipped asset sets. Clothing and accessories are compared separately from body parts and animations so common defaults do not dominate the cosmetic comparison. An empty or unavailable avatar is never a 100% match.</p>
+        <p><strong>Username similarity:</strong> case-insensitive edit distance, calculated as 100 × (1 − edits ÷ the longer username length). One edit is a character insertion, deletion or substitution. Display names are not scored.</p>
+        <p><strong>Social links:</strong> only account IDs actually returned by a readable friend, follower or following list create links. Follow direction is preserved. Partial-list shared friends are a minimum observed count.</p>
+        <p>Matching assets and similar names describe public account features. They do not establish common ownership or misconduct.</p>
+      </div></details>
+    </div>
+    <footer><span>FISCH MONEY LEDGER <span class="slash">/</span> public account comparison</span><span>Checked times display in your browser timezone; hover a time for UTC.</span></footer>
+  </main>
+</body>
+</html>

@@ -398,7 +398,7 @@ function renderProfile() {
   const maximum=pairs.filter(x=>!x.settlement&&x.delta>0n).sort((a,b)=>a.delta>b.delta?-1:1)[0];
   const fastest=pairs.filter(x=>!x.settlement&&x.delta>0n && x.elapsed>0).sort((a,b)=>Number(b.delta)/b.elapsed-Number(a.delta)/a.elapsed)[0];
   const peak=rows.reduce((best,row)=>BigInt(row.balance)>BigInt(best.balance)?row:best,first);
-  const link=meta.roblox_id?`<a href="https://www.roblox.com/users/${safe(meta.roblox_id)}/profile" rel="noopener noreferrer" target="_blank">View Roblox profile ↗</a>`:"<small>Roblox account not yet independently matched</small>";
+  const link=meta.roblox_id?`<a href="https://www.roblox.com/users/${safe(meta.roblox_id)}/profile" rel="noopener noreferrer" target="_blank">View Roblox profile ↗</a> · <a href="networker.html?target=${encodeURIComponent(meta.roblox_id)}">Compare account in Networker</a>`:"<small>Roblox account not yet independently matched</small>";
   const selectedRow=point(state.data.checkpoints[state.index],key);
   const selectedUpdate=selectedRow&&selectedRow.day_key>=state.rangeStart&&selectedRow.day_key<=state.rangeEnd?state.profileUpdates.get(selectedRow.profile_update):null;
   const latestUpdate=state.profileUpdates.get(last.profile_update);

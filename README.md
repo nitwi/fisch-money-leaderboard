@@ -34,6 +34,20 @@ For a ledger timezone selector, pass its validated preference as `displayTimeZon
 
 Run `node --test tests/test_timestamp.cjs tests/test_ledger_timestamp.cjs` for conversion and real-ledger source-selection checks. The timestamp workflow runs these checks on relevant pull requests and main-branch pushes.
 
+## Account Networker
+
+`site/networker.html` compares exact Roblox accounts from the ledger and any explicitly resolved reference accounts in `site/network-data.json`. Dashboard and Standout Analysis link a selected account directly to the viewer. The first snapshot includes all 69 ledger accounts and the exact reference account `Lunary810` (12013950464); the reference label carries no automated allegation.
+
+The viewer separates direct social observations, shared friends, username text resemblance, and equipped-avatar asset overlap. Name similarity is a normalized edit-distance comparison of usernames; it does not merge identities. Avatar overlap is shared exact asset IDs divided by the union of equipped IDs, with clothing/accessories shown separately from body and animation assets. Matching equipped item sets are not sufficient to establish an identical rendered avatar or common ownership. Side-by-side thumbnails and item/profile links let a reviewer inspect the actual comparison. Avatars are current at their own scan timestamps, not at the historical board photo time.
+
+The social graph draws only API-observed friendship or directed following edges. Unavailable and capped/partial lists remain explicit; an API failure is never a zero connection count. Initial unauthenticated probes returned HTTP 403 for friends and 401 for followers/followings, so this snapshot contains no successfully retrieved social edges. Roblox [removed unauthenticated followers/followings access effective May 4, 2026](https://devforum.roblox.com/t/roblox-data-stewardship-principles-cookie-based-api-update/4579220/); the [current friends reference](https://create.roblox.com/docs/cloud/reference/domains/friends) labels the list endpoints Cookie-only. A generic friends 403 does not diagnose an account's privacy, age, region, or ban status.
+
+Refresh the bounded public snapshot with `python tools/scan_networker.py --target Lunary810`; repeat `--target USERNAME` for additional exact reference accounts. No Roblox credentials or third-party proxy are used. The collector paces avatar requests, respects rate-limit waits, preserves endpoint/error/coverage metadata, and writes the completed snapshot atomically. `--output PATH` can create a review copy. The manual **Collect account comparison snapshot** workflow produces a downloadable artifact for review; it does not change the published site. To publish a reviewed refresh, commit the resulting `site/network-data.json` through the normal Pages workflow. Browser reloads load the saved snapshot rather than rescan Roblox.
+
+The implementation takes the stable asset-set comparison approach from the owner's historical RBI Investigator versions. Its old friend-list assumptions, unvalidated suspicion score, and error-as-empty behavior are not carried over. No RBI runtime data, credentials, Discord components, or private investigation records are included.
+
+Run `node --test tests/test_networker.cjs` and `python -m unittest discover -s tests` for the comparison, coverage, identity, pagination, and retry checks. The Pages job checks these before deployment.
+
 ## Capture sessions
 
 - Original captures are immutable. `site/data.json` retains all 51 raw `captures`/`capture_observations`, 49 reconciled `sessions`/`session_observations`, and the displayed `checkpoints`/`observations` used for the 44 daily points. Per-rank source capture IDs, actual timestamps, original PNG IDs and SHA-256 hashes remain available. To attach another original photo to an existing batch, preview `python tools/attach_capture_evidence.py --checkpoint YYYY-MM-DD_HHMM --image 'C:/path/original.png' --min-rank 33 --max-rank 48 --notes 'reviewed source context'` before repeating with `--apply` and recording its direct transcriptions in the photo review ledgers.

@@ -1,0 +1,43 @@
+name: Collect account comparison snapshot
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Optional exact reference username in addition to ledger accounts
+        required: false
+        default: Lunary810
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: networker-snapshot
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate collector and comparison behavior
+        run: |
+          python -m unittest discover -s tests
+          node --test tests/test_networker.cjs
+      - name: Collect public account snapshot
+        env:
+          NETWORKER_TARGET: ${{ inputs.target }}
+        run: |
+          if [ -n "$NETWORKER_TARGET" ]; then
+            python tools/scan_networker.py --target "$NETWORKER_TARGET" --output network-data.json
+          else
+            python tools/scan_networker.py --output network-data.json
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: account-comparison-snapshot
+          path: network-data.json
+          if-no-files-found: error
+          retention-days: 14
