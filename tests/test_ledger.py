@@ -503,8 +503,9 @@ class LedgerTests(unittest.TestCase):
 
     def test_november_22_sunday_is_separate_from_weekend_settlement(self):
         data=self.data
-        current=data['checkpoints'][-1]
-        previous=data['checkpoints'][-2]
+        index=next(i for i,cp in enumerate(data['checkpoints']) if cp['id']=='2026-11-22_2213')
+        current=data['checkpoints'][index]
+        previous=data['checkpoints'][index-1]
         self.assertEqual((current['id'],current['day_key'],current['at']),('2026-11-22_2213','2026-11-22','2026-11-23T04:13:00Z'))
         self.assertEqual((current['complete'],current['coverage'],current['verified'],current['weekend_settlement'],current['precision']),(True,50,50,False,'user-supplied'))
         self.assertEqual((previous['id'],previous['weekend_settlement']),('2026-11-21_2214',True))
@@ -535,6 +536,38 @@ class LedgerTests(unittest.TestCase):
         with (ROOT/'data/source/data/evidence_manifest.csv').open(encoding='utf-8-sig',newline='') as stream:
             original_names={row['evidence_id']:row['original_filename'] for row in csv.DictReader(stream)}
         self.assertTrue(all(original_names[proof_id]=='image.png' for proof_id in current['primary_evidence']))
+
+    def test_november_23_owner_minute_and_exact_leaders_preserve_original_proof(self):
+        data=self.data
+        index=next(i for i,cp in enumerate(data['checkpoints']) if cp['id']=='2026-11-23_2317')
+        current=data['checkpoints'][index]
+        previous=data['checkpoints'][index-1]
+        self.assertEqual((current['day_key'],current['local'],current['at'],current['precision']),('2026-11-23','2026-11-23T23:17:00-06:00','2026-11-24T05:17:00Z','user-supplied'))
+        self.assertEqual((current['complete'],current['coverage'],current['verified'],current['weekend_settlement'],current['early_am_rollover']),(True,50,50,False,False))
+        self.assertEqual((current['primary_evidence'],current['daily_source_sessions']),(['EV0224','EV0225','EV0226','EV0227'],[current['id']]))
+        self.assertEqual((previous['id'],previous['at'],previous['verified']),('2026-11-22_2213','2026-11-23T04:13:00Z',50))
+        rows={row['rank']:row for row in data['observations'] if row['checkpoint']==current['id']}
+        self.assertEqual(set(rows),set(range(1,51)))
+        self.assertTrue(all(row['status']=='verified' and row['at']==current['at'] for row in rows.values()))
+        self.assertEqual((rows[1]['username'],rows[1]['balance']),('BloxHeroj8','23018702725151'))
+        self.assertEqual((rows[2]['username'],rows[2]['balance']),('Nexvolt00','23000015499673'))
+        self.assertEqual(next(row['balance'] for row in data['observations'] if row['checkpoint']==previous['id'] and row['rank']==1),'346827970518')
+        proofs={proof['id']:proof for proof in data['evidence']}
+        with (ROOT/'data/source/data/evidence_manifest.csv').open(encoding='utf-8-sig',newline='') as stream:
+            original_names={row['evidence_id']:row['original_filename'] for row in csv.DictReader(stream)}
+        for proof_id,span,filename,digest in (
+            ('EV0224',(1,16),'image(20261124-051724).png','0d95a78accc2e142ff9c61370c5e0ca4df4852b79dd7d87b0a036f355248c660'),
+            ('EV0225',(16,31),'image(20261124-051744).png','e0cd15dbaffb319a1ebbf21c177ca9b21f29cef5b73e09fe26d643b37b9e2284'),
+            ('EV0226',(30,45),'image(20261124-051801).png','4c605df8bb4922f09ef79ed9e23212d307264c424542a30f94b6342f3d0e375a'),
+            ('EV0227',(36,50),'image(20261124-051813).png','0173b4aa57be48a69702a501724e13d185dd395167816f3b6403307cc7dbd361'),
+        ):
+            with self.subTest(evidence=proof_id):
+                proof=proofs[proof_id]
+                self.assertEqual((proof['min'],proof['max']),span)
+                self.assertEqual((proof['checkpoint'],proof['captured_at']),(current['id'],current['at']))
+                self.assertEqual(original_names[proof_id],filename)
+                self.assertEqual(proof['sha256'],digest)
+                self.assertEqual(hashlib.sha256((ROOT/'site'/proof['url']).read_bytes()).hexdigest(),digest)
 
     def test_lower_band_backfills_complete_three_existing_days_without_rewriting_oct30_rank_47(self):
         data=self.data

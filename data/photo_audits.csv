@@ -165,3 +165,7 @@ EV0220,1-16,Read all Sunday Nov 22 top-board names and exact amounts directly fr
 EV0221,16-31,Read Sunday Nov 22 middle-board names and exact amounts from owner-attached PNG; #30-31 corroborated by EV0222
 EV0222,30-45,Read Sunday Nov 22 lower-board names and exact amounts from owner-attached PNG; #36-45 corroborated by EV0223
 EV0223,36-50,Read Sunday Nov 22 bottom-board names and exact amounts from owner-attached PNG; #35 is cropped and verified only by EV0222
+EV0224,1-16,Read Monday Nov 23 top-board names and every balance digit directly from original owner-attached PNG; independently cross-checked all fully visible overlap rows
+EV0225,16-31,Read Monday Nov 23 middle-board names and every balance digit directly from original owner-attached PNG; independently cross-checked all fully visible overlap rows
+EV0226,30-45,"Read Monday Nov 23 lower-board names and every balance digit directly from original owner-attached PNG; independently cross-checked all fully visible overlap rows; #35 quest overlay partly covers username, with visible characters corroborated by existing exact Roblox identity and adjacent bottom image"
+EV0227,36-50,Read Monday Nov 23 bottom-board names and every balance digit directly from original owner-attached PNG; independently cross-checked all fully visible overlap rows; cropped #35 not used

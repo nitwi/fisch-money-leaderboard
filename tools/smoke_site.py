@@ -16,6 +16,16 @@ class QuietHandler(SimpleHTTPRequestHandler):
         pass
 
 
+def assert_chart_scale(page):
+    assert page.locator('#chart').evaluate("""el => {
+        const values=el.data.flatMap(trace=>trace.y||[]).filter(Number.isFinite);
+        const peak=Math.max(...values), [lower,upper]=el.layout.yaxis.range;
+        return el.data.every(trace=>trace.meta?.key!=='id:8144154137')
+            && values.length>0 && Number.isFinite(peak) && peak>0
+            && lower===0 && Number.isFinite(upper) && upper>peak && upper<=peak*1.1;
+    }"""), 'Chart should fit all plotted balances with modest headroom and retain the existing outlier exclusion'
+
+
 server = ThreadingHTTPServer(("127.0.0.1", 0), partial(QuietHandler, directory=ROOT / "site"))
 Thread(target=server.serve_forever, daemon=True).start()
 errors = []
@@ -34,7 +44,7 @@ try:
         assert page.locator("#stat-coverage").inner_text() == f"{last['verified']} / {last['coverage']}"
         assert page.locator(".proof").count() == len(last['evidence'])
         page.locator('#chart.js-plotly-plot').wait_for(timeout=20000)
-        assert page.locator('#chart').evaluate("el=>el.data.every(trace=>trace.meta?.key!=='id:8144154137') && el.layout.yaxis.range[1]>300000000000 && el.layout.yaxis.range[1]<400000000000")
+        assert_chart_scale(page)
         assert 'Nov 17\'s #1 outlier is omitted' in page.locator('#chart-subtitle').inner_text()
         assert 'day=2026-11-17' in page.locator('#chart-subtitle a').get_attribute('href')
         if last['id']=='2026-11-22_2213':
@@ -218,7 +228,7 @@ try:
             assert 'omitted from graph' in page.locator('#chart-title').inner_text()
             for top in ('10','25','50','all'):
                 page.locator('#top-filter').select_option(top)
-                assert page.locator('#chart').evaluate("el=>el.data.every(trace=>trace.meta?.key!=='id:8144154137') && el.layout.yaxis.range[1]<400000000000")
+                assert_chart_scale(page)
             assert page.locator('#chart').evaluate("el=>el.data.some(trace=>trace.name==='LowTierNova' && trace.line.color!=='rgba(125,151,164,.22)')")
             page.locator('#profile-clear').click()
             assert page.locator('#chart-title').inner_text()=='Leaderboard trajectories'
@@ -607,7 +617,7 @@ try:
             linked.goto(analysis.locator('.overview-dashboard-link').get_attribute('href'),wait_until='domcontentloaded')
             linked.locator('#profile-title').get_by_text('75percent3r').wait_for(timeout=20000)
             linked.locator('#chart.js-plotly-plot').wait_for(timeout=20000)
-            assert linked.locator('#chart').evaluate("el=>el.data.every(trace=>trace.meta?.key!=='id:8144154137') && el.layout.yaxis.range[1]<400000000000")
+            assert_chart_scale(linked)
             assert '1195.8T' in linked.locator('#profile-content').inner_text()
             linked.close()
             analysis.locator('#flag-search').fill('Farniluque049')
@@ -731,7 +741,7 @@ try:
             context=browser.new_context(timezone_id=zone,locale='en-US',viewport={'width':390 if zone.endswith('Angeles') else 1300,'height':840})
             viewer=context.new_page()
             viewer.on('pageerror',lambda error: errors.append(str(error)))
-            viewer.goto(f'http://127.0.0.1:{server.server_address[1]}/',wait_until='domcontentloaded')
+            viewer.goto(f'http://127.0.0.1:{server.server_address[1]}/?day=2026-11-22',wait_until='domcontentloaded')
             viewer.locator('#capture-date').get_by_text('Nov 22, 2026').wait_for(timeout=20000)
             assert zone in viewer.locator('#viewer-timezone').inner_text()
             assert photo_time in viewer.locator('#capture-index').inner_text()
@@ -880,7 +890,7 @@ try:
             assert page.locator('.movement-item[data-player="id:1316700350"] .gaps .positive').filter(has_text='overtook by 42B net swing').count()==1
             assert page.locator(f'.movement-item[data-player="{lowtier["key"]}"] .gaps .negative').filter(has_text='lost lead by 42B net swing').count()==1
         assert page.locator("#chart").evaluate("el => el.layout.xaxis.tickvals.length > el.layout.xaxis.ticktext.filter(Boolean).length")
-        assert page.locator("#chart").evaluate("el => el.data.every(trace=>trace.meta?.key!=='id:8144154137') && el.layout.yaxis.range[1]<400000000000")
+        assert_chart_scale(page)
         page.locator(".evidence-section").scroll_into_view_if_needed()
         page.wait_for_function("document.querySelector('.proof img').naturalWidth > 0")
         page.screenshot(path=str(ROOT / "preview-mobile.png"), full_page=True)
