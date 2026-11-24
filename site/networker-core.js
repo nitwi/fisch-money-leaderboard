@@ -181,23 +181,39 @@
     return {record, items, readable: Boolean(readable), complete: Boolean(readable && record.status === "complete")};
   }
 
+  function socialEvidence(account, kind, item = null) {
+    const record = account?.[kind] || {}, ownerId = normalizeId(account?.id);
+    const details = item && Array.isArray(item.evidence) && item.evidence.length ? item.evidence : [item || record];
+    const seen = new Set();
+    return details.filter(detail => detail && typeof detail === "object").map(detail => {
+      const observed = detail.observed_at || item?.observed_at || record.fetched_at || null;
+      const method = detail.method || item?.method || record.method || "roblox_api";
+      return {ownerId, kind, targetId: normalizeId(item?.id),
+        observation_id: detail.observation_id || null,
+        observed_at: observed, fetched_at: observed,
+        source_url: detail.source_url || item?.source_url || record.source_url || null,
+        method,
+        source_label: detail.source_label || item?.source_label || record.source_label ||
+          (method === "roblox_website" ? "Roblox website observation" : method === "roblox_api" ? "Roblox API" : "Recorded source")};
+    }).filter(evidence => {
+      const key = JSON.stringify(evidence);
+      if (seen.has(key)) return false;
+      seen.add(key); return true;
+    });
+  }
+
   function relationEvidence(checks) {
     const observed = checks.filter(check => check.list.readable && check.list.items.has(check.id));
-    if (observed.length) return {status: "observed", evidence: observed.map(check => {
-      const item = check.list.items.get(check.id);
-      return {ownerId: check.ownerId, kind: check.kind,
-        fetched_at: item.observed_at || check.list.record.fetched_at,
-        source_url: item.source_url || check.list.record.source_url};
-    })};
+    if (observed.length) return {status: "observed", evidence: observed.flatMap(check => socialEvidence(check.account, check.kind, check.list.items.get(check.id)))};
     const complete = checks.filter(check => check.list.complete);
-    return {status: complete.length ? "not_observed" : "unknown", evidence: complete.map(check => ({ownerId: check.ownerId, kind: check.kind, fetched_at: check.list.record.fetched_at, source_url: check.list.record.source_url}))};
+    return {status: complete.length ? "not_observed" : "unknown", evidence: complete.flatMap(check => socialEvidence(check.account, check.kind))};
   }
 
   function directRelations(target, candidate) {
     const a = normalizeId(target?.id), b = normalizeId(candidate?.id);
     const unknown = () => ({status: "unknown", evidence: []});
     if (!a || !b || a === b) return {friends: unknown(), targetFollowsCandidate: unknown(), candidateFollowsTarget: unknown(), observedCount: 0};
-    const check = (account, kind, id) => ({ownerId: normalizeId(account.id), kind, id, list: socialList(account, kind)});
+    const check = (account, kind, id) => ({account, kind, id, list: socialList(account, kind)});
     const friends = relationEvidence([check(target, "friends", b), check(candidate, "friends", a)]);
     const targetFollowsCandidate = relationEvidence([check(target, "following", b), check(candidate, "followers", a)]);
     const candidateFollowsTarget = relationEvidence([check(candidate, "following", a), check(target, "followers", b)]);
@@ -209,30 +225,85 @@
     const a = socialList(target, "friends"), b = socialList(candidate, "friends");
     if (!a.readable || !b.readable) return {available: false, complete: false, count: null, items: []};
     const ownIds = new Set([normalizeId(target?.id), normalizeId(candidate?.id)]);
-    const items = [...a.items].filter(([id]) => b.items.has(id) && !ownIds.has(id)).map(([, item]) => item);
+    const items = [...a.items].filter(([id]) => b.items.has(id) && !ownIds.has(id)).map(([id, item]) => ({...item,
+      username: item.username || b.items.get(id).username || "",
+      display_name: item.display_name || b.items.get(id).display_name || "",
+      evidence: [...socialEvidence(target, "friends", item), ...socialEvidence(candidate, "friends", b.items.get(id))]}));
     return {available: true, complete: a.complete && b.complete, count: items.length, items};
   }
 
   function knownEdges(accounts) {
     const valid = new Map(accounts.map(account => [normalizeId(account?.id), account]).filter(([id]) => id));
     const edges = new Map();
-    function add(kind, from, to, record, item) {
-      if (!from || !to || from === to || !valid.has(from) || !valid.has(to)) return;
+    function add(kind, from, to, account, relation, item) {
+      if (!from || !to || from === to) return;
       const pair = kind === "friend" ? [from, to].sort() : [from, to];
       const key = `${kind}:${pair.join(":")}`;
       if (!edges.has(key)) edges.set(key, {kind, from: pair[0], to: pair[1], evidence: []});
-      edges.get(key).evidence.push({fetched_at: item.observed_at || record.fetched_at, source_url: item.source_url || record.source_url});
+      edges.get(key).evidence.push(...socialEvidence(account, relation, item));
     }
     for (const [id, account] of valid) for (const kind of ["friends", "followers", "following"]) {
       const list = socialList(account, kind);
       if (!list.readable) continue;
       for (const [otherId, item] of list.items) {
-        if (kind === "friends") add("friend", id, otherId, list.record, item);
-        else if (kind === "following") add("follow", id, otherId, list.record, item);
-        else add("follow", otherId, id, list.record, item);
+        if (kind === "friends") add("friend", id, otherId, account, kind, item);
+        else if (kind === "following") add("follow", id, otherId, account, kind, item);
+        else add("follow", otherId, id, account, kind, item);
       }
     }
     return [...edges.values()];
+  }
+
+  function socialNetwork(accounts, extraNodes = []) {
+    const nodes = new Map(), cachedIds = new Set();
+    for (const account of accounts) {
+      const id = normalizeId(account?.id);
+      if (!id || cachedIds.has(id)) continue;
+      cachedIds.add(id);
+      nodes.set(id, {...account, id, cached: true, external: false});
+    }
+    function addExternal(item) {
+      const id = normalizeId(item?.id);
+      if (!id || cachedIds.has(id)) return;
+      const prior = nodes.get(id) || {};
+      nodes.set(id, {...prior, ...item, id, username: prior.username || item.username || "",
+        display_name: prior.display_name || item.display_name || "", cached: false, external: true, ledger: false});
+    }
+    for (const item of extraNodes) addExternal(item);
+    for (const account of accounts) for (const kind of ["friends", "followers", "following"]) {
+      for (const item of socialList(account, kind).items.values()) addExternal(item);
+    }
+    const edges = knownEdges(accounts), adjacency = new Map(), friendAdjacency = new Map();
+    function connect(map, a, b) {
+      if (!map.has(a)) map.set(a, new Set());
+      map.get(a).add(b);
+    }
+    for (const edge of edges) {
+      connect(adjacency, edge.from, edge.to); connect(adjacency, edge.to, edge.from);
+      if (edge.kind === "friend") { connect(friendAdjacency, edge.from, edge.to); connect(friendAdjacency, edge.to, edge.from); }
+    }
+    return {nodes, edges, cachedIds, adjacency, friendAdjacency};
+  }
+
+  function oneHopNetwork(network, targetId, limit = 12) {
+    const id = normalizeId(targetId), target = network.nodes.get(id);
+    if (!target) return {target: null, nodes: [], edges: [], neighbors: [], friends: [], totalNeighbors: 0, totalEdges: 0, truncated: false};
+    const touching = network.edges.filter(edge => edge.from === id || edge.to === id);
+    const neighbors = [...(network.adjacency.get(id) || [])].map(otherId => {
+      const node = network.nodes.get(otherId);
+      const cachedFriendIds = [...(network.friendAdjacency.get(otherId) || [])].filter(friendId => friendId !== id && network.cachedIds.has(friendId));
+      const edges = touching.filter(edge => edge.from === otherId || edge.to === otherId);
+      return {node, edges, cachedFriendIds, friend: edges.some(edge => edge.kind === "friend")};
+    });
+    neighbors.sort((a, b) => Number(Boolean(b.node.ledger)) - Number(Boolean(a.node.ledger)) ||
+      Number(b.node.cached) - Number(a.node.cached) || b.cachedFriendIds.length - a.cachedFriendIds.length ||
+      String(a.node.username || a.node.display_name || a.node.id).localeCompare(String(b.node.username || b.node.display_name || b.node.id), "en", {sensitivity: "base"}) || a.node.id.localeCompare(b.node.id));
+    const maxNodes = Number.isFinite(limit) ? Math.max(1, Math.min(24, Math.floor(limit))) : 12;
+    const shown = neighbors.slice(0, maxNodes), included = new Set([id, ...shown.map(item => item.node.id)]);
+    return {target, nodes: [target, ...shown.map(item => item.node)],
+      edges: network.edges.filter(edge => included.has(edge.from) && included.has(edge.to)),
+      neighbors, friends: neighbors.filter(item => item.friend), totalNeighbors: neighbors.length,
+      totalEdges: touching.length, truncated: shown.length < neighbors.length};
   }
 
   function compareAccounts(target, candidate) {
@@ -268,5 +339,6 @@
 
   return Object.freeze({normalizeId, profileUrl, assetUrl, thumbnailUrl, sourceUrl, assetGroup, compareAvatars,
     RBI_AVATAR_RULES, reviewAvatar, matchesReviewFilter,
-    usernameSimilarity, socialList, directRelations, sharedFriends, knownEdges, compareAccounts, candidates});
+    usernameSimilarity, socialList, socialEvidence, directRelations, sharedFriends, knownEdges, socialNetwork,
+    oneHopNetwork, compareAccounts, candidates});
 });

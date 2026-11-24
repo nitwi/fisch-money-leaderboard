@@ -381,7 +381,7 @@ test('review UI exposes the complete library, present/missing IDs, filter contro
 test('published avatar observations reproduce independently audited all-history and latest-board review counts', t => {
   const snapshot = JSON.parse(fs.readFileSync(path.join(__dirname, '../site/network-data.json'), 'utf8'));
   // Lock the verified result only for this evidence snapshot; later refreshes legitimately change outfits.
-  if (snapshot.generated_at !== '2026-11-24T08:41:51Z') return t.skip('Avatar snapshot was refreshed; historical count fixture no longer applies.');
+  if ((snapshot.api_generated_at || snapshot.generated_at) !== '2026-11-24T08:41:51Z') return t.skip('Avatar snapshot was refreshed; historical count fixture no longer applies.');
   const summarize = accounts => accounts.reduce((counts, item) => {
     counts[network.reviewAvatar(item.avatar).status] += 1; return counts;
   }, {full: 0, partial: 0, none: 0, unknown: 0});
@@ -391,4 +391,161 @@ test('published avatar observations reproduce independently audited all-history 
   const full = snapshot.accounts.find(item => network.reviewAvatar(item.avatar).status === 'full');
   assert.equal(full.username, 'BloxHeroj8');
   assert.equal(network.reviewAvatar(full.avatar).fullMatches[0].id, 'beanie');
+});
+
+function websiteFriends(ownerId, ids, status = 'complete', observedAt = '2026-11-24T11:00:00.000Z') {
+  const source = `https://www.roblox.com/users/${ownerId}/friends#!/friends`;
+  return list(status, ids.map(value => {
+    const item = typeof value === 'object' ? value : {id: String(value), username: `friend_${value}`};
+    return {...item, observed_at: observedAt, source_url: source, method: 'roblox_website', source_label: 'Roblox website observation',
+      evidence: [{observation_id: `website-${ownerId}-${item.id}`, source_id: String(ownerId), target_id: String(item.id), observed_at: observedAt, source_url: source, method: 'roblox_website', source_label: 'Roblox website observation'}]};
+  }), {fetched_at: observedAt, checked_at: observedAt, source_url: source, method: 'roblox_website', source_label: 'Roblox website observation'});
+}
+
+test('website friend evidence retains each source observation and stays separate from the failed API record', () => {
+  const checked = '2026-11-24T13:00:00.000Z';
+  const a = account('1', {friends: websiteFriends('1', ['2']), friend_evidence: {api: list('unavailable', [], {http_status: 403, checked_at: checked, attempted: true})}});
+  a.friends.checked_at = checked;
+  a.friends.items[0].evidence.push({...a.friends.items[0].evidence[0], observation_id: 'second', observed_at: '2026-11-24T12:00:00.000Z'});
+  const relation = network.directRelations(a, account('2')).friends;
+  assert.equal(relation.status, 'observed');
+  assert.deepEqual(relation.evidence.map(item => item.observed_at), ['2026-11-24T11:00:00.000Z', '2026-11-24T12:00:00.000Z']);
+  assert.ok(relation.evidence.every(item => item.method === 'roblox_website' && item.ownerId === '1'));
+  assert.ok(relation.evidence.every(item => item.source_url === 'https://www.roblox.com/users/1/friends#!/friends'));
+  assert.equal(a.friend_evidence.api.status, 'unavailable');
+  assert.equal(network.sourceUrl(relation.evidence[0].source_url), relation.evidence[0].source_url);
+  assert.equal(network.sourceUrl('https://www.roblox.com/users/1/profile'), 'https://www.roblox.com/users/1/profile');
+  assert.equal(network.sourceUrl('https://www.roblox.com.evil.test/users/1/friends#!/friends'), null);
+});
+
+test('one-hop graph retains external friend IDs, prioritizes ledger and shared connectors, and never expands a second hop', () => {
+  const external = Array.from({length: 21}, (_, index) => String(100 + index));
+  const target = account('1', {friends: websiteFriends('1', ['2', ...external]), followers: list('partial', ['500'])});
+  const ledgerFriend = account('2');
+  const otherLedger = account('3', {friends: websiteFriends('3', ['100'])});
+  const otherReference = account('4', {ledger: false, friends: websiteFriends('4', ['101'])});
+  const accounts = [target, ledgerFriend, otherLedger, otherReference];
+  const graph = network.socialNetwork(accounts, [{id: '9999', username: 'OldRemovedFriend', external: true}, {id: '100', username: 'SharedConnector', ledger: true}]);
+  const view = network.oneHopNetwork(graph, '1', 3);
+  assert.equal(view.totalNeighbors, 23);
+  assert.equal(view.friends.length, 22);
+  assert.equal(view.truncated, true);
+  assert.deepEqual(view.nodes.slice(0, 2).map(item => item.id), ['1', '2']);
+  assert.deepEqual(view.nodes.slice(2).map(item => item.id).sort(), ['100', '101']);
+  assert.deepEqual(view.neighbors.find(item => item.node.id === '100').cachedFriendIds, ['3']);
+  assert.equal(graph.nodes.get('100').cached, false);
+  assert.equal(graph.nodes.get('100').ledger, false);
+  assert.equal(view.nodes.some(item => ['3', '4', '9999'].includes(item.id)), false);
+  assert.ok(graph.edges.some(edge => edge.kind === 'follow' && edge.from === '500' && edge.to === '1'));
+  assert.ok(graph.edges.some(edge => edge.kind === 'friend' && edge.from === '1' && edge.to === '100'));
+  assert.equal(accounts.length, 4);
+  assert.deepEqual(network.candidates(accounts, target, 'all').map(item => item.account.id).sort(), ['2', '3', '4']);
+});
+
+test('shared external friends retain exact identity and evidence from both source accounts with independent times', () => {
+  const a = account('1', {friends: websiteFriends('1', [{id: '88', username: '', display_name: 'Visible display'}], 'partial')});
+  const b = account('2', {friends: list('complete', [{id: '88', username: 'ExactUsername', observed_at: '2026-11-24T10:00:00.000Z', source_url: 'https://friends.roblox.com/v1/users/2/friends'}])});
+  const result = network.sharedFriends(a, b);
+  assert.equal(result.count, 1);
+  assert.equal(result.complete, false);
+  assert.equal(result.items[0].id, '88');
+  assert.equal(result.items[0].username, 'ExactUsername');
+  assert.deepEqual(result.items[0].evidence.map(item => item.ownerId), ['1', '2']);
+  assert.deepEqual(result.items[0].evidence.map(item => item.method), ['roblox_website', 'roblox_api']);
+  assert.deepEqual(result.items[0].evidence.map(item => item.observed_at), ['2026-11-24T11:00:00.000Z', '2026-11-24T10:00:00.000Z']);
+});
+
+test('Lunary website observation renders Bergkap as an external profile without adding an avatar candidate', async () => {
+  const target = account('12013950464', {username: 'Lunary810', ledger: false,
+    friends: websiteFriends('12013950464', [{id: '12019306184', username: 'Bergkap_99'}]),
+    friend_evidence: {api: list('unavailable', [], {http_status: 403, checked_at: CHECKED, attempted: true})}});
+  const candidate = account('2', {latest_rank: 1});
+  const metadata = {network_nodes: [{id: '12019306184', username: 'Bergkap_99', external: true}],
+    website_observations: {source_account_count: 1, ledger_source_count: 0, latest_observed_at: '2026-11-24T11:00:00.000Z'}};
+  const {elements, location} = await renderSnapshot([target, candidate], '', metadata);
+  assert.equal(elements.get('networker-app').hidden, false, elements.get('network-status').textContent);
+  assert.equal(elements.get('social-coverage').textContent, '1 observed link');
+  assert.match(elements.get('social-summary').textContent, /1 of 1 directly observed neighbors/);
+  assert.match(elements.get('friend-list').textContent, /@Bergkap_99/);
+  assert.match(elements.get('friend-list').textContent, /Roblox ID 12019306184 · External friend/);
+  assert.match(elements.get('friend-list').textContent, /Roblox website observation/);
+  assert.match(elements.get('capability-details').textContent, /Separate API record: Unknown/);
+  assert.match(elements.get('capability-details').textContent, /HTTP 403/);
+  assert.match(elements.get('website-coverage').textContent, /1 of 2 cached accounts/);
+  assert.equal(elements.get('candidate-count').textContent, '1 / 1');
+  assert.doesNotMatch(elements.get('candidate-list').textContent, /Bergkap_99/);
+  const external = descendants(elements.get('social-graph')).find(element => element.tagName === 'a' && element.attributes.href === 'https://www.roblox.com/users/12019306184/profile');
+  assert.ok(external);
+  assert.equal(external.attributes.role, 'link');
+  assert.equal(external.listeners.click, undefined);
+  assert.equal(new URL(location.href).searchParams.get('target'), '12013950464');
+  const times = descendants(elements.get('friend-list')).filter(element => element.tagName === 'time');
+  assert.ok(times.every(element => element.title.includes('2026-11-24T11:00:00.000Z')));
+});
+
+test('observed friend search covers the full list beyond the bounded graph and displayed page', async () => {
+  const friends = Array.from({length: 63}, (_, index) => ({id: String(1000 + index), username: `Friend${index}`}));
+  const target = account('1', {friends: websiteFriends('1', friends)});
+  const {elements} = await renderSnapshot([target, account('2', {latest_rank: 1})], '?target=1');
+  assert.equal(elements.get('networker-app').hidden, false);
+  assert.match(elements.get('social-summary').textContent, /12 of 63/);
+  assert.equal(elements.get('friend-list').children.length, 50);
+  assert.equal(elements.get('friend-load-more').hidden, false);
+  elements.get('friend-load-more').listeners.click[0]();
+  assert.equal(elements.get('friend-list').children.length, 63);
+  assert.equal(elements.get('friend-load-more').hidden, true);
+  elements.get('friend-search').listeners.input[0]({target: {value: '1062'}});
+  assert.equal(elements.get('friend-list').children.length, 1);
+  assert.match(elements.get('friend-list').textContent, /Friend62/);
+  assert.match(elements.get('friend-list-status').textContent, /1 of 1 matching observed friends \(63 total observed IDs\)/);
+});
+
+test('displayed website counts stay distinct from partial identity coverage and uninspected sources', async () => {
+  const observedAt = '2026-11-24T11:00:00.000Z';
+  const target = account('1', {friends: websiteFriends('1', ['88'], 'partial', observedAt),
+    friend_evidence: {latest_website: {observed_at: observedAt, source_url: 'https://www.roblox.com/users/1/friends#!/friends',
+      observed_id_count: 1, displayed_total_count: 336, coverage: {status: 'partial', pages_observed: [1, 2]}}}});
+  const {elements} = await renderSnapshot([target, account('2', {latest_rank: 1})], '?target=1', {
+    website_observations: {source_account_count: 1, ledger_source_count: 1, latest_observed_at: observedAt,
+      complete_source_count: 0, partial_source_count: 1, unavailable_source_count: 0}});
+  assert.match(elements.get('friend-list-coverage').textContent, /website displayed 336 friends/);
+  assert.match(elements.get('friend-list-coverage').textContent, /1 exact IDs were readable/);
+  assert.match(elements.get('friend-list-coverage').textContent, /absent IDs remain unknown/);
+  assert.doesNotMatch(elements.get('friend-list-coverage').textContent, /full friend total is unknown/);
+  assert.match(elements.get('census-coverage-table').textContent, /partial/);
+  assert.match(elements.get('census-coverage-table').textContent, /1 \/ 336/);
+  assert.match(elements.get('census-coverage-table').textContent, /No saved inspection/);
+  assert.match(elements.get('website-coverage').textContent, /0 complete, 1 partial, 0 unavailable/);
+});
+
+test('unavailable and partial empty friend lists stay unknown while a verified complete empty list is explicit', async () => {
+  for (const status of ['unavailable', 'partial', 'complete']) {
+    const target = account('1', {friends: list(status, [])});
+    const {elements} = await renderSnapshot([target, account('2', {latest_rank: 1})], '?target=1');
+    if (status === 'complete') {
+      assert.equal(elements.get('friend-list-count').textContent, 'Complete empty list');
+      assert.match(elements.get('friend-list-status').textContent, /complete reference observation contains no friend IDs/);
+    } else {
+      assert.equal(elements.get('friend-list-count').textContent, 'Unknown total');
+      assert.match(elements.get('friend-list-status').textContent, /does not establish zero friends/);
+    }
+  }
+});
+
+test('shared-friend UI exposes both sources and treats display names as text, never exact usernames or HTML', async () => {
+  const friend = {id: '88', username: '', display_name: '<img src=x onerror=bad>'};
+  const target = account('1', {friends: websiteFriends('1', [friend], 'partial')});
+  const candidate = account('2', {latest_rank: 1, friends: websiteFriends('2', [friend], 'complete', '2026-11-24T12:00:00.000Z')});
+  const {elements} = await renderSnapshot([target, candidate], '?target=1&compare=2');
+  const content = elements.get('comparison-content');
+  assert.match(content.textContent, /Roblox ID 88/);
+  assert.match(content.textContent, /<img src=x onerror=bad> \(display name\)/);
+  assert.doesNotMatch(content.textContent, /@<img/);
+  const links = descendants(content).filter(element => element.tagName === 'a');
+  assert.ok(links.some(link => link.href === 'https://www.roblox.com/users/1/friends#!/friends'));
+  assert.ok(links.some(link => link.href === 'https://www.roblox.com/users/2/friends#!/friends'));
+  const times = descendants(content).filter(element => element.tagName === 'time');
+  assert.ok(times.some(element => element.title.includes('2026-11-24T11:00:00.000Z')));
+  assert.ok(times.some(element => element.title.includes('2026-11-24T12:00:00.000Z')));
+  assert.equal(descendants(content).some(element => element.tagName === 'img' && element.src === 'x'), false);
 });

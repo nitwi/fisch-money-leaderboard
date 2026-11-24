@@ -1,0 +1,504 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-11-24T09:45:09Z",
+  "method": "roblox_website",
+  "relation": "friends",
+  "scope": "Every recorded ledger account, latest Top 50 first, plus the selected reference account; one-hop friends only.",
+  "ledger_checkpoint": {
+    "id": "2026-11-23_2317",
+    "at": "2026-11-24T05:17:00Z",
+    "day_key": "2026-11-23"
+  },
+  "targets": [
+    {
+      "id": "12013950464",
+      "username": "Lunary810",
+      "ledger": false,
+      "latest_rank": null,
+      "profile_url": "https://www.roblox.com/users/12013950464/profile"
+    },
+    {
+      "id": "9579548886",
+      "username": "BloxHeroj8",
+      "ledger": true,
+      "latest_rank": 1,
+      "profile_url": "https://www.roblox.com/users/9579548886/profile"
+    },
+    {
+      "id": "12026234206",
+      "username": "Nexvolt00",
+      "ledger": true,
+      "latest_rank": 2,
+      "profile_url": "https://www.roblox.com/users/12026234206/profile"
+    },
+    {
+      "id": "1316700350",
+      "username": "ismyaimbotworking",
+      "ledger": true,
+      "latest_rank": 3,
+      "profile_url": "https://www.roblox.com/users/1316700350/profile"
+    },
+    {
+      "id": "2769135100",
+      "username": "LowTierNova",
+      "ledger": true,
+      "latest_rank": 4,
+      "profile_url": "https://www.roblox.com/users/2769135100/profile"
+    },
+    {
+      "id": "137607436",
+      "username": "n6sy",
+      "ledger": true,
+      "latest_rank": 5,
+      "profile_url": "https://www.roblox.com/users/137607436/profile"
+    },
+    {
+      "id": "5118740924",
+      "username": "ody_odinho",
+      "ledger": true,
+      "latest_rank": 6,
+      "profile_url": "https://www.roblox.com/users/5118740924/profile"
+    },
+    {
+      "id": "2586153890",
+      "username": "xNnoel",
+      "ledger": true,
+      "latest_rank": 7,
+      "profile_url": "https://www.roblox.com/users/2586153890/profile"
+    },
+    {
+      "id": "4785293082",
+      "username": "Ceruleanflare2",
+      "ledger": true,
+      "latest_rank": 8,
+      "profile_url": "https://www.roblox.com/users/4785293082/profile"
+    },
+    {
+      "id": "128840304",
+      "username": "untoldmemoria",
+      "ledger": true,
+      "latest_rank": 9,
+      "profile_url": "https://www.roblox.com/users/128840304/profile"
+    },
+    {
+      "id": "8794906806",
+      "username": "shatter_yourselfgrgr",
+      "ledger": true,
+      "latest_rank": 10,
+      "profile_url": "https://www.roblox.com/users/8794906806/profile"
+    },
+    {
+      "id": "1295019815",
+      "username": "Force_oNature",
+      "ledger": true,
+      "latest_rank": 11,
+      "profile_url": "https://www.roblox.com/users/1295019815/profile"
+    },
+    {
+      "id": "1250452671",
+      "username": "sebax4514",
+      "ledger": true,
+      "latest_rank": 12,
+      "profile_url": "https://www.roblox.com/users/1250452671/profile"
+    },
+    {
+      "id": "1579077690",
+      "username": "TheDanishPlays",
+      "ledger": true,
+      "latest_rank": 13,
+      "profile_url": "https://www.roblox.com/users/1579077690/profile"
+    },
+    {
+      "id": "3935417559",
+      "username": "Sylilia",
+      "ledger": true,
+      "latest_rank": 14,
+      "profile_url": "https://www.roblox.com/users/3935417559/profile"
+    },
+    {
+      "id": "7198964730",
+      "username": "metbepol",
+      "ledger": true,
+      "latest_rank": 15,
+      "profile_url": "https://www.roblox.com/users/7198964730/profile"
+    },
+    {
+      "id": "7259361593",
+      "username": "YptSehjZiEs",
+      "ledger": true,
+      "latest_rank": 16,
+      "profile_url": "https://www.roblox.com/users/7259361593/profile"
+    },
+    {
+      "id": "8805316504",
+      "username": "Myvexxx",
+      "ledger": true,
+      "latest_rank": 17,
+      "profile_url": "https://www.roblox.com/users/8805316504/profile"
+    },
+    {
+      "id": "2464539843",
+      "username": "Erutobi",
+      "ledger": true,
+      "latest_rank": 18,
+      "profile_url": "https://www.roblox.com/users/2464539843/profile"
+    },
+    {
+      "id": "2868599306",
+      "username": "Luwuma",
+      "ledger": true,
+      "latest_rank": 19,
+      "profile_url": "https://www.roblox.com/users/2868599306/profile"
+    },
+    {
+      "id": "3942775137",
+      "username": "Aumjung8267",
+      "ledger": true,
+      "latest_rank": 20,
+      "profile_url": "https://www.roblox.com/users/3942775137/profile"
+    },
+    {
+      "id": "362858829",
+      "username": "SelenaTatsukii",
+      "ledger": true,
+      "latest_rank": 21,
+      "profile_url": "https://www.roblox.com/users/362858829/profile"
+    },
+    {
+      "id": "1785472665",
+      "username": "emitnick",
+      "ledger": true,
+      "latest_rank": 22,
+      "profile_url": "https://www.roblox.com/users/1785472665/profile"
+    },
+    {
+      "id": "3060545720",
+      "username": "Canizan",
+      "ledger": true,
+      "latest_rank": 23,
+      "profile_url": "https://www.roblox.com/users/3060545720/profile"
+    },
+    {
+      "id": "2730453267",
+      "username": "0egoistic",
+      "ledger": true,
+      "latest_rank": 24,
+      "profile_url": "https://www.roblox.com/users/2730453267/profile"
+    },
+    {
+      "id": "1844128408",
+      "username": "LasTnIghT2011",
+      "ledger": true,
+      "latest_rank": 25,
+      "profile_url": "https://www.roblox.com/users/1844128408/profile"
+    },
+    {
+      "id": "1631997852",
+      "username": "DerpyPoopManXD",
+      "ledger": true,
+      "latest_rank": 26,
+      "profile_url": "https://www.roblox.com/users/1631997852/profile"
+    },
+    {
+      "id": "209160228",
+      "username": "JPaltaa",
+      "ledger": true,
+      "latest_rank": 27,
+      "profile_url": "https://www.roblox.com/users/209160228/profile"
+    },
+    {
+      "id": "3510772801",
+      "username": "zerealali",
+      "ledger": true,
+      "latest_rank": 28,
+      "profile_url": "https://www.roblox.com/users/3510772801/profile"
+    },
+    {
+      "id": "2246025273",
+      "username": "johncenagaming347v2",
+      "ledger": true,
+      "latest_rank": 29,
+      "profile_url": "https://www.roblox.com/users/2246025273/profile"
+    },
+    {
+      "id": "10092025879",
+      "username": "injurylowk",
+      "ledger": true,
+      "latest_rank": 30,
+      "profile_url": "https://www.roblox.com/users/10092025879/profile"
+    },
+    {
+      "id": "1529100107",
+      "username": "Renvuz",
+      "ledger": true,
+      "latest_rank": 31,
+      "profile_url": "https://www.roblox.com/users/1529100107/profile"
+    },
+    {
+      "id": "7897184784",
+      "username": "anyokc",
+      "ledger": true,
+      "latest_rank": 32,
+      "profile_url": "https://www.roblox.com/users/7897184784/profile"
+    },
+    {
+      "id": "3611741224",
+      "username": "sabbath553",
+      "ledger": true,
+      "latest_rank": 33,
+      "profile_url": "https://www.roblox.com/users/3611741224/profile"
+    },
+    {
+      "id": "9543810680",
+      "username": "heanmichrkke_3",
+      "ledger": true,
+      "latest_rank": 34,
+      "profile_url": "https://www.roblox.com/users/9543810680/profile"
+    },
+    {
+      "id": "11482999303",
+      "username": "hc2khunowpng43ntk1",
+      "ledger": true,
+      "latest_rank": 35,
+      "profile_url": "https://www.roblox.com/users/11482999303/profile"
+    },
+    {
+      "id": "1696267689",
+      "username": "Zipidy24",
+      "ledger": true,
+      "latest_rank": 36,
+      "profile_url": "https://www.roblox.com/users/1696267689/profile"
+    },
+    {
+      "id": "8193346658",
+      "username": "minmin8280",
+      "ledger": true,
+      "latest_rank": 37,
+      "profile_url": "https://www.roblox.com/users/8193346658/profile"
+    },
+    {
+      "id": "67343676",
+      "username": "jonnhy1835",
+      "ledger": true,
+      "latest_rank": 38,
+      "profile_url": "https://www.roblox.com/users/67343676/profile"
+    },
+    {
+      "id": "8503122110",
+      "username": "Nnoelq",
+      "ledger": true,
+      "latest_rank": 39,
+      "profile_url": "https://www.roblox.com/users/8503122110/profile"
+    },
+    {
+      "id": "3382416559",
+      "username": "10ne17",
+      "ledger": true,
+      "latest_rank": 40,
+      "profile_url": "https://www.roblox.com/users/3382416559/profile"
+    },
+    {
+      "id": "8504842261",
+      "username": "Hxtaroo",
+      "ledger": true,
+      "latest_rank": 41,
+      "profile_url": "https://www.roblox.com/users/8504842261/profile"
+    },
+    {
+      "id": "200918130",
+      "username": "ewoofs",
+      "ledger": true,
+      "latest_rank": 42,
+      "profile_url": "https://www.roblox.com/users/200918130/profile"
+    },
+    {
+      "id": "1481603669",
+      "username": "Tbpoqqq",
+      "ledger": true,
+      "latest_rank": 43,
+      "profile_url": "https://www.roblox.com/users/1481603669/profile"
+    },
+    {
+      "id": "3747162372",
+      "username": "AliceSekai",
+      "ledger": true,
+      "latest_rank": 44,
+      "profile_url": "https://www.roblox.com/users/3747162372/profile"
+    },
+    {
+      "id": "3228802017",
+      "username": "zNaN_Rot",
+      "ledger": true,
+      "latest_rank": 45,
+      "profile_url": "https://www.roblox.com/users/3228802017/profile"
+    },
+    {
+      "id": "987922899",
+      "username": "pflugerson",
+      "ledger": true,
+      "latest_rank": 46,
+      "profile_url": "https://www.roblox.com/users/987922899/profile"
+    },
+    {
+      "id": "249484397",
+      "username": "m1_zm",
+      "ledger": true,
+      "latest_rank": 47,
+      "profile_url": "https://www.roblox.com/users/249484397/profile"
+    },
+    {
+      "id": "1528395974",
+      "username": "Minkib7661",
+      "ledger": true,
+      "latest_rank": 48,
+      "profile_url": "https://www.roblox.com/users/1528395974/profile"
+    },
+    {
+      "id": "4849818285",
+      "username": "NoRoblox_Support",
+      "ledger": true,
+      "latest_rank": 49,
+      "profile_url": "https://www.roblox.com/users/4849818285/profile"
+    },
+    {
+      "id": "8804353958",
+      "username": "sanguifereum",
+      "ledger": true,
+      "latest_rank": 50,
+      "profile_url": "https://www.roblox.com/users/8804353958/profile"
+    },
+    {
+      "id": "1712148517",
+      "username": "1234mysterio",
+      "ledger": true,
+      "latest_rank": null,
+      "profile_url": "https://www.roblox.com/users/1712148517/profile"
+    },
+    {
+      "id": "8144154137",
+      "username": "75percent3r",
+      "ledger": true,
+      "latest_rank": null,
+      "profile_url": "https://www.roblox.com/users/8144154137/profile"
+    },
+    {
+      "id": "1910484000",
+      "username": "anthonqt13",
+      "ledger": true,
+      "latest_rank": null,
+      "profile_url": "https://www.roblox.com/users/1910484000/profile"
+    },
+    {
+      "id": "8102463207",
+      "username": "aurunqwer",
+      "ledger": true,
+      "latest_rank": null,
+      "profile_url": "https://www.roblox.com/users/8102463207/profile"
+    },
+    {
+      "id": "2533535288",
+      "username": "BigBoyyChriss",
+      "ledger": true,
+      "latest_rank": null,
+      "profile_url": "https://www.roblox.com/users/2533535288/profile"
+    },
+    {
+      "id": "482292467",
+      "username": "casketdream",
+      "ledger": true,
+      "latest_rank": null,
+      "profile_url": "https://www.roblox.com/users/482292467/profile"
+    },
+    {
+      "id": "1399635767",
+      "username": "cekersetan",
+      "ledger": true,
+      "latest_rank": null,
+      "profile_url": "https://www.roblox.com/users/1399635767/profile"
+    },
+    {
+      "id": "1094289238",
+      "username": "EnderTitanKid",
+      "ledger": true,
+      "latest_rank": null,
+      "profile_url": "https://www.roblox.com/users/1094289238/profile"
+    },
+    {
+      "id": "8204267816",
+      "username": "Farniluque049",
+      "ledger": true,
+      "latest_rank": null,
+      "profile_url": "https://www.roblox.com/users/8204267816/profile"
+    },
+    {
+      "id": "7867477313",
+      "username": "Fischerwunk",
+      "ledger": true,
+      "latest_rank": null,
+      "profile_url": "https://www.roblox.com/users/7867477313/profile"
+    },
+    {
+      "id": "4700793500",
+      "username": "ForcePush_Sith",
+      "ledger": true,
+      "latest_rank": null,
+      "profile_url": "https://www.roblox.com/users/4700793500/profile"
+    },
+    {
+      "id": "3066100978",
+      "username": "Gamer3535356466",
+      "ledger": true,
+      "latest_rank": null,
+      "profile_url": "https://www.roblox.com/users/3066100978/profile"
+    },
+    {
+      "id": "1445327370",
+      "username": "KNG_GBS",
+      "ledger": true,
+      "latest_rank": null,
+      "profile_url": "https://www.roblox.com/users/1445327370/profile"
+    },
+    {
+      "id": "655658280",
+      "username": "kvllrx",
+      "ledger": true,
+      "latest_rank": null,
+      "profile_url": "https://www.roblox.com/users/655658280/profile"
+    },
+    {
+      "id": "1568527608",
+      "username": "Ledino_rex",
+      "ledger": true,
+      "latest_rank": null,
+      "profile_url": "https://www.roblox.com/users/1568527608/profile"
+    },
+    {
+      "id": "7608364841",
+      "username": "stoicc_xx",
+      "ledger": true,
+      "latest_rank": null,
+      "profile_url": "https://www.roblox.com/users/7608364841/profile"
+    },
+    {
+      "id": "3135553986",
+      "username": "tranquanghieu20",
+      "ledger": true,
+      "latest_rank": null,
+      "profile_url": "https://www.roblox.com/users/3135553986/profile"
+    },
+    {
+      "id": "3293820394",
+      "username": "zackbourbon",
+      "ledger": true,
+      "latest_rank": null,
+      "profile_url": "https://www.roblox.com/users/3293820394/profile"
+    },
+    {
+      "id": "5088236758",
+      "username": "Zantrille",
+      "ledger": true,
+      "latest_rank": null,
+      "profile_url": "https://www.roblox.com/users/5088236758/profile"
+    }
+  ]
+}

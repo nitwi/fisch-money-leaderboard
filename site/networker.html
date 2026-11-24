@@ -7,10 +7,10 @@
   <title>Networker · Fisch Money Ledger</title>
   <link rel="stylesheet" href="styles.css?v=b796ed7e2670">
   <link rel="stylesheet" href="standouts.css?v=a5e0cf38dd14">
-  <link rel="stylesheet" href="networker.css?v=cd3bb25d78a2">
+  <link rel="stylesheet" href="networker.css?v=78b8acad99b3">
   <script defer src="time-utils.js?v=b2a56747d852"></script>
-  <script defer src="networker-core.js?v=4267aee297f9"></script>
-  <script defer src="networker.js?v=d6b9de8a1b46"></script>
+  <script defer src="networker-core.js?v=68582c3d3b1d"></script>
+  <script defer src="networker.js?v=50aa231867ad"></script>
 </head>
 <body class="networker-page">
   <header class="site-head">
@@ -40,7 +40,17 @@
       </section>
       <section class="nw-network" aria-labelledby="social-title">
         <div class="nw-section-head"><div><p class="nw-kicker">FRIENDS &amp; FOLLOWS</p><h2 id="social-title">Recorded social links</h2></div><span id="social-coverage" class="nw-pill">Checking coverage</span></div>
-        <p id="social-summary"></p><div id="social-graph"></div>
+        <p id="social-summary"></p><p id="website-coverage" class="nw-help"></p>
+        <details class="nw-source-details"><summary>Inspection coverage for all accounts</summary><div id="census-coverage-table" class="nw-census-table"></div><p class="nw-help">A displayed friend count is preserved separately from the exact IDs saved. Partial lists, unavailable cards and accounts without a saved inspection leave missing identities unknown.</p></details>
+        <p class="nw-data-downloads"><a href="network-database.sqlite.gz" download>Download SQLite database (.gz)</a><span aria-hidden="true"> · </span><a href="network-data.json" download>Download network JSON</a><span aria-hidden="true"> · </span><a href="https://github.com/nitwi/fisch-money-leaderboard/tree/main/data/network" target="_blank" rel="noopener noreferrer">Observation journal &amp; method</a></p>
+        <div id="social-graph"></div>
+        <section class="nw-observed-friends" aria-labelledby="observed-friends-title">
+          <div class="nw-section-head"><h3 id="observed-friends-title">Observed direct friends</h3><span id="friend-list-count" class="nw-pill"></span></div>
+          <p id="friend-list-coverage" class="nw-help"></p>
+          <label class="nw-search-label" for="friend-search">Search all observed friends</label><input id="friend-search" type="search" placeholder="Username, display name or Roblox ID" autocomplete="off" spellcheck="false">
+          <p id="friend-list-status" class="nw-help" role="status" aria-live="polite"></p>
+          <ul id="friend-list" class="nw-observed-friend-list"></ul><button id="friend-load-more" class="nw-quiet" type="button" hidden>Show more observed friends</button>
+        </section>
         <details class="nw-source-details"><summary>Source availability</summary><div id="capability-details"></div><p>Unavailable lists are unknown. A partial list can establish a visible link; it cannot establish that another link is absent.</p></details>
       </section>
       <div class="nw-workspace">
@@ -61,7 +71,7 @@
         <p><strong>RBI avatar review:</strong> each preset is a specific set of asset IDs from the linked published RBI release. Full means every preset ID is equipped; partial means at least one, but not every, ID is equipped. A one-item preset can produce a full 1/1 match. Review order puts full matches first, then partial matches by the number of distinct preset IDs observed. Results describe the avatar observation time, independently of the historical leaderboard photo.</p>
         <p><strong>Avatar overlap:</strong> shared asset IDs ÷ the union of both equipped asset sets. Clothing and accessories are compared separately from body parts and animations so common defaults do not dominate the cosmetic comparison. An empty or unavailable avatar is never a 100% match.</p>
         <p><strong>Username similarity:</strong> case-insensitive edit distance, calculated as 100 × (1 − edits ÷ the longer username length). One edit is a character insertion, deletion or substitution. Display names are not scored.</p>
-        <p><strong>Social links:</strong> only account IDs actually returned by a readable friend, follower or following list create links. Follow direction is preserved. Partial-list shared friends are a minimum observed count.</p>
+        <p><strong>Social links:</strong> only exact account IDs in a readable API list or a documented website observation create links. Website observations and API access checks remain separately attributed. The graph shows a bounded view of direct neighbors, prioritizing ledger accounts and shared connectors; the searchable list retains all observed direct friends. External friends open their Roblox profiles and do not become avatar-comparison candidates. Follow direction is preserved. Partial-list shared friends are a minimum observed count, and an observation describes when a link was seen.</p>
         <p>Matching assets and similar names describe public account features. They do not establish common ownership or misconduct.</p>
       </div></details>
     </div>
