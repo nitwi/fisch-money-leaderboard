@@ -1,9 +1,9 @@
 (function (root, factory) {
   "use strict";
-  const api = factory();
+  const api = factory(typeof module === "object" && module.exports ? require("./username-patterns.js") : root.FischUsernamePatterns);
   if (typeof module === "object" && module.exports) module.exports = api;
   else root.FischNetworker = api;
-})(typeof globalThis !== "undefined" ? globalThis : this, function () {
+})(typeof globalThis !== "undefined" ? globalThis : this, function (usernamePatterns) {
   "use strict";
 
   const BODY_TYPES = new Set([17, 18, 27, 28, 29, 30, 31, 79]);
@@ -309,6 +309,7 @@
   function compareAccounts(target, candidate) {
     return {account: candidate, avatar: compareAvatars(target?.avatar, candidate?.avatar),
       name: usernameSimilarity(target?.username, candidate?.username),
+      namePattern: usernamePatterns.compare(target?.username, candidate?.username),
       social: directRelations(target, candidate), sharedFriends: sharedFriends(target, candidate),
       review: reviewAvatar(candidate?.avatar)};
   }
@@ -330,7 +331,7 @@
           compareNumber(a.review.fullMatches.length, b.review.fullMatches.length) ||
           compareNumber(a.review.matchedAssetCount, b.review.matchedAssetCount);
       }
-      else if (sort === "name") order = compareNumber(a.name.similarity, b.name.similarity);
+      else if (sort === "name") order = compareNumber(a.namePattern.rank, b.namePattern.rank) || compareNumber(a.namePattern.score, b.namePattern.score);
       else if (sort === "social") order = compareNumber(a.social.observedCount, b.social.observedCount) || compareNumber(a.sharedFriends.count, b.sharedFriends.count);
       else order = compareNumber(a.avatar.groups.cosmetic?.sharedCount, b.avatar.groups.cosmetic?.sharedCount) || compareNumber(a.avatar.groups.cosmetic?.jaccard, b.avatar.groups.cosmetic?.jaccard);
       return order || a.account.username.localeCompare(b.account.username, "en", {sensitivity: "base"}) || String(a.account.id).localeCompare(String(b.account.id));

@@ -151,6 +151,53 @@ class ObservationTests(unittest.TestCase):
         item = merged["accounts"][0]["friends"]["items"][0]
         self.assertEqual((item["method"], item["source_label"]), ("roblox_website", "Roblox website"))
 
+    def test_external_visual_records_survive_social_rebuild_with_original_provenance(self):
+        original = snapshot()
+        visual = {
+            "avatar": {"status": "ok", "assets": [{"id": "617605556", "name": "GreenBean"}],
+                       "fetched_at": "2026-11-24T07:00:00Z", "source_url": "https://avatar.roblox.com/v1/users/3/avatar"},
+            "avatar_thumbnail": "https://tr.rbxcdn.com/external-avatar.png",
+            "headshot": "https://tr.rbxcdn.com/external-headshot.png",
+            "thumbnail": {"status": "ok", "fetched_at": "2026-11-24T07:01:00Z", "source_url": "https://thumbnails.roblox.com/v1/users/avatar?userIds=3", "http_status": 200},
+        }
+        original["network_nodes"] = [{"id": "3", "username": "OldName", "ledger": True, "target": True,
+                                       "external": False, "friends": {"status": "complete", "items": [{"id": "9"}]}, **visual}]
+        before = copy.deepcopy(original)
+        observations = [obs.normalize_observation(record(targets=("3", "4")))]
+        merged, _ = obs.merge_snapshot(original, observations)
+        nodes = {node["id"]: node for node in merged["network_nodes"]}
+        self.assertEqual({key: nodes["3"][key] for key in visual}, visual)
+        self.assertEqual((nodes["3"]["username"], nodes["3"]["ledger"], nodes["3"]["target"], nodes["3"]["external"]), ("Friend3", False, False, True))
+        self.assertNotIn("friends", nodes["3"])
+        self.assertNotIn("9", nodes)
+        self.assertTrue(all(key not in nodes["4"] for key in visual))
+        self.assertEqual(len(merged["accounts"]), 2)
+        self.assertEqual(original, before)
+        twice, _ = obs.merge_snapshot(merged, observations)
+        repeated = next(node for node in twice["network_nodes"] if node["id"] == "3")
+        self.assertEqual({key: repeated[key] for key in visual}, visual)
+
+    def test_external_visual_metadata_matches_only_exact_ids_and_does_not_resurrect_nodes(self):
+        original = snapshot()
+        original["accounts"][0]["avatar"] = {"status": "unavailable", "fetched_at": "2026-11-24T08:00:00Z"}
+        original["network_nodes"] = [
+            {"id": "1", "username": "User1", "avatar": {"status": "ok", "assets": [{"id": "617605556"}]}},
+            {"id": "003", "username": "Renamed", "avatar": {"status": "unavailable", "fetched_at": "2026-11-24T07:00:00Z"}},
+            {"id": "9", "username": "Friend4", "avatar": {"status": "ok", "assets": [{"id": "617605556"}]}},
+        ]
+        merged, _ = obs.merge_snapshot(original, [obs.normalize_observation(record(targets=("3", "4")))])
+        nodes = {node["id"]: node for node in merged["network_nodes"]}
+        self.assertEqual(nodes["3"]["avatar"], original["network_nodes"][1]["avatar"])
+        self.assertNotIn("avatar", nodes["4"])
+        self.assertNotIn("9", nodes)
+        self.assertNotIn("avatar", nodes["1"])
+        self.assertEqual(merged["accounts"][0]["avatar"], original["accounts"][0]["avatar"])
+
+    def test_external_visual_preservation_rejects_ambiguous_or_invalid_snapshot_ids(self):
+        for nodes in ([{"id": "3"}, {"id": "003"}], [{"id": True}], [None]):
+            with self.subTest(nodes=nodes), self.assertRaises(ValueError):
+                obs.merge_snapshot({**snapshot(), "network_nodes": nodes}, [])
+
     def test_latest_complete_replaces_older_partials_but_history_survives(self):
         records = [obs.normalize_observation(record(targets=("3",))), obs.normalize_observation(record(targets=("4",), at="2026-11-24T10:00:00Z", status="complete", total=1))]
         merged, events = obs.merge_snapshot(snapshot(), records)

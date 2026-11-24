@@ -74,6 +74,10 @@
 .nw-candidate-metrics strong{color:var(--text);font-weight:650}
 .nw-candidate-metrics .nw-wide{grid-column:1/-1}
 .nw-candidate-metrics .nw-observed{color:var(--green)}
+.nw-name-pattern{overflow-wrap:anywhere}
+.nw-name-pattern.is-strong strong,.nw-friend-name-pattern.is-strong{color:var(--cyan)}
+.nw-name-pattern.is-possible strong,.nw-friend-name-pattern.is-possible{color:var(--gold)}
+.nw-friend-name-pattern{font-size:.8rem;line-height:1.5;padding:8px 10px;border-left:2px solid currentColor;background:rgba(255,255,255,.025);margin:10px 0}
 .nw-empty{padding:22px 15px;border:1px dashed var(--border);border-radius:10px;color:var(--muted);font-size:.95rem}
 .nw-avatar-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .nw-avatar-card{min-width:0;text-align:center;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:rgba(0,0,0,.1)}

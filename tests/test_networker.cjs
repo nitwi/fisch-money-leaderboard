@@ -205,28 +205,34 @@ async function renderSnapshot(accounts, query = '', snapshotFields = {}) {
   const location = {href: `https://example.test/ledger/networker.html${query}`, search: query};
   const snapshot = {schema_version: 1, generated_at: CHECKED, ledger_latest_checkpoint: {day_key: '2026-11-23'}, accounts,
     capabilities: {friends: {status: 'unavailable', reason: 'Unauthenticated request denied', checked_at: CHECKED}}, notes: [], ...snapshotFields};
-  const window = {FischNetworker: network, FischTime: time, innerWidth: 1200};
+  const graphCalls = [];
+  const graph = {mount(_container, options) {
+    graphCalls.push(options);
+    return {update(next) { graphCalls.push(next); }, destroy() {}};
+  }};
+  const window = {FischNetworker: network, FischTime: time, FischUsernamePatterns: require('../site/username-patterns.js'), FischNetworkGraph: graph, innerWidth: 1200};
   const context = {window, document, location, history: {replaceState(_state, _unused, url) { location.href = String(url); location.search = new URL(url).search; }},
     URL, URLSearchParams, Intl, Date, Map, Set, console, navigator: {clipboard: {writeText: async () => {}}},
     fetch: async () => ({ok: true, json: async () => snapshot})};
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../site/networker.js'), 'utf8'), context);
   await new Promise(resolve => setImmediate(resolve));
-  return {elements, location, snapshot};
+  return {elements, location, snapshot, graphCalls};
 }
 
 test('page defaults to the neutral reference, exposes real shared assets, and renders unknown social coverage', async () => {
   const target = account('12013950464', {username: 'Lunary810', ledger: false, avatar: avatar([asset('500')]),
     avatar_thumbnail: 'https://tr.rbxcdn.com/current-avatar.png', headshot: 'https://tr.rbxcdn.com/old-headshot.png'});
   const candidate = account('2', {username: 'Candidate', latest_rank: 1, avatar: avatar([asset('500')])});
-  const {elements, location} = await renderSnapshot([candidate, target]);
+  const {elements, location, graphCalls} = await renderSnapshot([candidate, target]);
   assert.equal(elements.get('networker-app').hidden, false);
   assert.match(elements.get('reference-summary').textContent, /@Lunary810/);
   assert.equal(descendants(elements.get('reference-summary')).find(element => element.tagName === 'img').src, target.avatar_thumbnail);
   assert.match(elements.get('comparison-content').textContent, /Matching equipped assets/);
   assert.match(elements.get('comparison-content').textContent, /Shared friends: unknown/);
   assert.match(elements.get('comparison-content').textContent, /ID 500/);
-  assert.equal(elements.get('social-coverage').textContent, 'Unavailable');
-  assert.equal(elements.get('social-graph').children.length, 0);
+  assert.equal(elements.get('social-coverage').textContent, 'Coverage unknown');
+  assert.equal(graphCalls.at(-1).focusId, target.id);
+  assert.equal(graphCalls.at(-1).network.edges.length, 0);
   assert.match(elements.get('candidate-list').textContent, /Social links unknown/);
   assert.equal(new URL(location.href).searchParams.get('target'), '12013950464');
   const links = descendants(elements.get('comparison-content')).filter(element => element.tagName === 'a');
@@ -369,7 +375,7 @@ test('review UI exposes the complete library, present/missing IDs, filter contro
   assert.match(elements.get('comparison-content').textContent, /Missing/);
   assert.match(elements.get('comparison-content').textContent, /ID 144076760/);
   assert.match(elements.get('comparison-content').textContent, /Cosmetic asset overlap/);
-  assert.match(elements.get('comparison-content').textContent, /Username text similarity/);
+  assert.match(elements.get('comparison-content').textContent, /Username pattern/);
   elements.get('candidate-review-filter').listeners.change[0]({target: {value: 'partial'}});
   assert.equal(elements.get('candidate-count').textContent, '1 / 2');
   assert.match(elements.get('candidate-list').textContent, /Partial Oliver \(1\/8\)/);
@@ -455,17 +461,17 @@ test('shared external friends retain exact identity and evidence from both sourc
   assert.deepEqual(result.items[0].evidence.map(item => item.observed_at), ['2026-11-24T11:00:00.000Z', '2026-11-24T10:00:00.000Z']);
 });
 
-test('Lunary website observation renders Bergkap as an external profile without adding an avatar candidate', async () => {
+test('Lunary website observation retains an unchecked external friend separately from avatar candidates', async () => {
   const target = account('12013950464', {username: 'Lunary810', ledger: false,
     friends: websiteFriends('12013950464', [{id: '12019306184', username: 'Bergkap_99'}]),
     friend_evidence: {api: list('unavailable', [], {http_status: 403, checked_at: CHECKED, attempted: true})}});
   const candidate = account('2', {latest_rank: 1});
   const metadata = {network_nodes: [{id: '12019306184', username: 'Bergkap_99', external: true}],
     website_observations: {source_account_count: 1, ledger_source_count: 0, latest_observed_at: '2026-11-24T11:00:00.000Z'}};
-  const {elements, location} = await renderSnapshot([target, candidate], '', metadata);
+  const {elements, location, graphCalls} = await renderSnapshot([target, candidate], '', metadata);
   assert.equal(elements.get('networker-app').hidden, false, elements.get('network-status').textContent);
   assert.equal(elements.get('social-coverage').textContent, '1 observed link');
-  assert.match(elements.get('social-summary').textContent, /1 of 1 directly observed neighbors/);
+  assert.match(elements.get('social-summary').textContent, /expand saved connections to leaderboard accounts or verified RBI preset matches/);
   assert.match(elements.get('friend-list').textContent, /@Bergkap_99/);
   assert.match(elements.get('friend-list').textContent, /Roblox ID 12019306184 · External friend/);
   assert.match(elements.get('friend-list').textContent, /Roblox website observation/);
@@ -474,10 +480,10 @@ test('Lunary website observation renders Bergkap as an external profile without 
   assert.match(elements.get('website-coverage').textContent, /1 of 2 cached accounts/);
   assert.equal(elements.get('candidate-count').textContent, '1 / 1');
   assert.doesNotMatch(elements.get('candidate-list').textContent, /Bergkap_99/);
-  const external = descendants(elements.get('social-graph')).find(element => element.tagName === 'a' && element.attributes.href === 'https://www.roblox.com/users/12019306184/profile');
-  assert.ok(external);
-  assert.equal(external.attributes.role, 'link');
-  assert.equal(external.listeners.click, undefined);
+  const external = graphCalls.at(-1).network.nodes.get('12019306184');
+  assert.equal(external.cached, false);
+  assert.equal(network.reviewAvatar(external.avatar).status, 'unknown');
+  assert.equal(graphCalls.at(-1).focusId, target.id);
   assert.equal(new URL(location.href).searchParams.get('target'), '12013950464');
   const times = descendants(elements.get('friend-list')).filter(element => element.tagName === 'time');
   assert.ok(times.every(element => element.title.includes('2026-11-24T11:00:00.000Z')));
@@ -486,9 +492,9 @@ test('Lunary website observation renders Bergkap as an external profile without 
 test('observed friend search covers the full list beyond the bounded graph and displayed page', async () => {
   const friends = Array.from({length: 63}, (_, index) => ({id: String(1000 + index), username: `Friend${index}`}));
   const target = account('1', {friends: websiteFriends('1', friends)});
-  const {elements} = await renderSnapshot([target, account('2', {latest_rank: 1})], '?target=1');
+  const {elements, graphCalls} = await renderSnapshot([target, account('2', {latest_rank: 1})], '?target=1');
   assert.equal(elements.get('networker-app').hidden, false);
-  assert.match(elements.get('social-summary').textContent, /12 of 63/);
+  assert.equal(graphCalls.at(-1).network.adjacency.get('1').size, 63);
   assert.equal(elements.get('friend-list').children.length, 50);
   assert.equal(elements.get('friend-load-more').hidden, false);
   elements.get('friend-load-more').listeners.click[0]();
@@ -548,4 +554,39 @@ test('shared-friend UI exposes both sources and treats display names as text, ne
   assert.ok(times.some(element => element.title.includes('2026-11-24T11:00:00.000Z')));
   assert.ok(times.some(element => element.title.includes('2026-11-24T12:00:00.000Z')));
   assert.equal(descendants(content).some(element => element.tagName === 'img' && element.src === 'x'), false);
+});
+
+test('graph selection callbacks keep comparison separate and support external main accounts by exact ID', async () => {
+  const target = account('1', {username: 'MainBeacon', latest_rank: 1, friends: websiteFriends('1', ['2', '88'])});
+  const candidate = account('2', {username: 'OtherBeacon', latest_rank: 2});
+  const external = {id: '88', username: 'ExternalBeacon', avatar: avatar([asset('617605556')]), external: true};
+  const metadata = {network_nodes: [external]};
+  const {elements, location, graphCalls} = await renderSnapshot([target, candidate], '?target=1', metadata);
+  graphCalls.at(-1).onCompare('2');
+  assert.equal(new URL(location.href).searchParams.get('target'), '1');
+  assert.equal(new URL(location.href).searchParams.get('compare'), '2');
+  graphCalls.at(-1).onReference('88', graphCalls.at(-1).network.nodes.get('88'));
+  assert.equal(new URL(location.href).searchParams.get('target'), '88');
+  assert.equal(graphCalls.at(-1).focusId, '88');
+  assert.match(elements.get('reference-summary').textContent, /@ExternalBeacon/);
+  assert.match(elements.get('reference-summary').textContent, /Full GreenBean preset/);
+  assert.match(elements.get('capability-details').textContent, /no list collected for this account/);
+  assert.equal(elements.get('candidate-count').textContent, '2 / 2');
+  elements.get('target-input').value = 'ExternalBeacon';
+  elements.get('target-form').listeners.submit[0]({preventDefault() {}});
+  assert.equal(elements.get('network-status').textContent, '');
+  const reloaded = await renderSnapshot([target, candidate], '?target=88&compare=2', metadata);
+  assert.equal(reloaded.elements.get('networker-app').hidden, false);
+  assert.match(reloaded.elements.get('reference-summary').textContent, /@ExternalBeacon/);
+});
+
+test('pattern explanations appear in candidate, comparison and observed-friend review without numeric name confidence', async () => {
+  const target = account('1', {username: 'Lunary810', latest_rank: 1, friends: websiteFriends('1', [{id:'88', username:'Lunary812'}])});
+  const candidate = account('2', {username: 'Lunary811', latest_rank: 2});
+  const {elements} = await renderSnapshot([target, candidate], '?target=1&compare=2&sort=name');
+  assert.match(elements.get('candidate-list').textContent, /Strong name pattern/);
+  assert.match(elements.get('comparison-content').textContent, /Username patternStrong name pattern/);
+  assert.match(elements.get('friend-list').textContent, /Strong name pattern/);
+  assert.doesNotMatch(elements.get('candidate-list').textContent, /Username: \d/);
+  assert.doesNotMatch(elements.get('comparison-content').textContent, /Username text similarity|characters in the longer username/);
 });

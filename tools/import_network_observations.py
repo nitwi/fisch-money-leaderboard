@@ -29,6 +29,7 @@ JOURNAL = ROOT / "data/network/website-observations.jsonl"
 WEBSITE = "roblox_website"
 LABELS = {WEBSITE: "Roblox website", "roblox_api": "Roblox public API"}
 TERMINATIONS = {"more_available", "end_of_list", "not_scrolled", "access_unavailable", "unknown"}
+EXTERNAL_VISUAL_FIELDS = ("avatar", "avatar_thumbnail", "headshot", "thumbnail")
 
 
 def canonical(value):
@@ -325,6 +326,14 @@ def merge_snapshot(snapshot, records):
     accounts = {exact_id(account["id"]): account for account in merged.get("accounts", [])}
     if len(accounts) != len(merged.get("accounts", [])):
         raise ValueError("Snapshot contains duplicate account IDs")
+    prior_nodes = {}
+    for node in merged.get("network_nodes", []):
+        if not isinstance(node, dict):
+            raise ValueError("Snapshot network nodes must be objects with exact IDs")
+        node_id = exact_id(node.get("id"))
+        if node_id in prior_nodes:
+            raise ValueError("Snapshot contains duplicate network node IDs")
+        prior_nodes[node_id] = node
     supplied_ids = {record["observation_id"] for record in records}
     required_ids = {observation_id for account in accounts.values()
                     for observation_id in account.get("friend_evidence", {}).get("website_observation_ids", [])}
@@ -371,6 +380,13 @@ def merge_snapshot(snapshot, records):
                     node["username"] = item["username"]
             if node["external"] and item.get("display_name"):
                 node["display_name"] = item["display_name"]
+    # Rebuilding social observations must not discard separately collected avatar
+    # evidence or refresh its source time. Match only exact IDs, retain only the
+    # existing visual record fields, and derive identities/edges from sources above.
+    for node_id, node in nodes.items():
+        if node["external"]:
+            prior = prior_nodes.get(node_id, {})
+            node.update({key: copy.deepcopy(prior[key]) for key in EXTERNAL_VISUAL_FIELDS if key in prior})
     merged["network_nodes"] = sorted(nodes.values(), key=lambda node: int(node["id"]))
     merged.setdefault("api_generated_at", snapshot.get("api_generated_at", snapshot.get("generated_at")))
     merged["generated_at"] = utc_now()

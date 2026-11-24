@@ -1,6 +1,7 @@
 (function () {
   "use strict";
-  const core = window.FischNetworker, time = window.FischTime;
+  const core = window.FischNetworker, time = window.FischTime, patterns = window.FischUsernamePatterns;
+  let graphView = null;
   const byId = id => document.getElementById(id);
   const state = {data: null, accounts: [], byId: new Map(), assetCatalog: new Map(), network: null, targetId: null, compareId: null, scope: "latest", sort: "review", reviewFilter: "all", filter: "", friendFilter: "", friendLimit: 50, assetFilter: "all"};
   const viewerZone = time.viewerTimeZone();
@@ -53,23 +54,29 @@
     byId("network-status").hidden = !text;
     byId("network-status").classList.toggle("is-error", error);
   }
+  function referenceAccount() {
+    return state.byId.get(state.targetId) || state.network?.nodes.get(state.targetId);
+  }
   function accountFromInput(value) {
     const query = value.trim().replace(/^@/, "").toLowerCase();
-    return state.byId.get(core.normalizeId(query)) || state.accounts.find(account => account.username.toLowerCase() === query);
+    const exactId = state.network?.nodes.get(core.normalizeId(query));
+    if (exactId) return exactId;
+    const matches = [...(state.network?.nodes.values() || [])].filter(account => query && String(account.username || "").toLowerCase() === query);
+    return matches.length === 1 ? matches[0] : null;
   }
   function allCandidates(filtered = true) {
     if (!state.targetId) return [];
-    return core.candidates(state.accounts, state.byId.get(state.targetId), state.scope, state.sort, filtered ? state.reviewFilter : "all");
+    return core.candidates(state.accounts, referenceAccount(), state.scope, state.sort, filtered ? state.reviewFilter : "all");
   }
   function ensureComparison() {
     const choices = allCandidates();
     if (!choices.some(item => item.account.id === state.compareId)) state.compareId = choices[0]?.account.id || null;
   }
   function chooseTarget(account) {
-    if (!account) { setStatus("Choose a username or Roblox ID that appears in this cached snapshot.", true); return; }
+    if (!account) { setStatus("Enter an exact Roblox ID or a unique username saved in this snapshot.", true); return; }
     state.targetId = account.id;
     state.friendFilter = ""; state.friendLimit = 50; byId("friend-search").value = "";
-    byId("target-input").value = account.username;
+    byId("target-input").value = account.username || account.id;
     ensureComparison(); state.assetFilter = "all";
     setStatus(""); updateUrl(); renderReference(); renderReviewOverview(); renderSocialGraph(); renderCandidates(); renderComparison();
   }
@@ -88,15 +95,15 @@
   }
 
   function renderReference() {
-    const account = state.byId.get(state.targetId), wrapper = byId("reference-summary");
+    const account = referenceAccount(), wrapper = byId("reference-summary");
     if (!account) {
       wrapper.replaceChildren(node("p", "nw-empty", "Choose a cached reference account above to begin a comparison."));
       return;
     }
     wrapper.replaceChildren(accountImage(account));
     const detail = node("div");
-    detail.append(node("p", "nw-kicker", "REFERENCE ACCOUNT"), node("h2", "", `@${account.username}`));
-    const place = account.latest_rank ? `Latest board rank #${account.latest_rank}` : account.ledger ? `Previously photographed · last seen ${account.last_seen_day || "date unavailable"}` : "Reference account · outside the photographed ledger";
+    detail.append(node("p", "nw-kicker", "MAIN ACCOUNT"), node("h2", "", personLabel(account)));
+    const place = account.latest_rank ? `Latest board rank #${account.latest_rank}` : account.ledger ? `Previously photographed · last seen ${account.last_seen_day || "date unavailable"}` : account.external ? "Observed external account · outside the photographed ledger" : "Reference account · outside the photographed ledger";
     detail.append(node("p", "", `Roblox ID ${account.id} · ${place}`));
     detail.append(reviewBadge(core.reviewAvatar(account.avatar)));
     wrapper.append(detail);
@@ -192,6 +199,7 @@
   }
 
   function coverageText(record) {
+    if (!record) return "Unknown · no list collected for this account";
     if (record?.status === "complete") return `Complete ${methodLabel(record)} · ${Array.isArray(record.items) ? record.items.length : "unknown"} records`;
     if (record?.status === "partial") return `Partial ${methodLabel(record)} · ${Array.isArray(record.items) ? record.items.length : "unknown"} observed records`;
     if (record?.attempted === false) return "Unknown · not individually requested after source access failed";
@@ -240,7 +248,7 @@
     wrapper.replaceChildren();
     if (!info) { wrapper.append("No website observations are included in this snapshot. API source availability is shown separately below."); return; }
     wrapper.append(`Website inspections recorded for ${info.source_account_count} of ${state.accounts.length} cached accounts (${info.ledger_source_count} ledger accounts). Latest website observation: `,
-      checkedTime(info.latest_observed_at), ". Collection covers direct friends only; external neighbors are not additional avatar candidates.");
+      checkedTime(info.latest_observed_at), ". Collection covers direct friends only. External avatars qualify for branches only when an equipped-asset record verifies a preset match.");
     if (Number.isSafeInteger(info.complete_source_count)) wrapper.append(` Latest inspections: ${info.complete_source_count} complete, ${info.partial_source_count} partial, ${info.unavailable_source_count} unavailable.`);
   }
 
@@ -265,7 +273,7 @@
   }
 
   function renderObservedFriends(view) {
-    const target = state.byId.get(state.targetId), list = byId("friend-list"); list.replaceChildren();
+    const target = referenceAccount(), list = byId("friend-list"); list.replaceChildren();
     const more = byId("friend-load-more"); more.hidden = true;
     if (!target || !view) {
       byId("friend-list-count").textContent = "No reference selected";
@@ -296,6 +304,10 @@
         const button = node("button", "nw-quiet", "Compare"); button.type = "button"; button.addEventListener("click", () => chooseCandidate(person.id, true)); heading.append(button);
       }
       row.append(heading);
+      const namePattern = patterns.compare(target.username, person.username);
+      if (namePattern.tier === "strong" || namePattern.tier === "possible") {
+        row.append(node("p", `nw-friend-name-pattern is-${namePattern.tier}`, `${namePattern.label}: ${namePattern.reasons.join(" ")}`));
+      }
       if (entry.cachedFriendIds.length) {
         const linked = node("p", "nw-help", "Also observed with ");
         entry.cachedFriendIds.slice(0, 4).forEach((id, index) => { if (index) linked.append(", "); linked.append(externalLink(personLabel(state.byId.get(id)), core.profileUrl(id))); });
@@ -316,64 +328,26 @@
   }
 
   function renderSocialGraph() {
-    const target = state.byId.get(state.targetId);
+    const target = referenceAccount();
     renderWebsiteCoverage();
     renderCensusCoverage();
     if (!target) {
-      byId("social-coverage").textContent = "No reference selected";
-      byId("social-summary").textContent = "Choose a cached account to inspect its available social records.";
+      byId("social-coverage").textContent = "No main account selected";
+      byId("social-summary").textContent = "Choose an account to explore its saved social connections.";
+      if (graphView) { graphView.destroy(); graphView = null; }
       byId("social-graph").replaceChildren(); byId("capability-details").replaceChildren(); renderObservedFriends(null); return;
     }
     const view = core.oneHopNetwork(state.network, target.id, 12);
-    const readable = ["friends", "followers", "following"].filter(kind => core.socialList(target, kind).readable);
-    const wrapper = byId("social-graph"); wrapper.replaceChildren();
+    const readable = ["friends", "followers", "following"].some(kind => core.socialList(target, kind).readable);
     const badge = byId("social-coverage"); badge.classList.toggle("is-known", view.totalEdges > 0);
+    badge.textContent = view.totalEdges ? `${view.totalEdges} observed link${view.totalEdges === 1 ? "" : "s"}` : readable ? "No links observed" : "Coverage unknown";
+    byId("social-summary").textContent = `Start at ${personLabel(target)} and expand saved connections to leaderboard accounts or verified RBI preset matches. Select a node to inspect its evidence. The main account stays fixed until you choose Use as main account.`;
+    const options = {network: state.network, accounts: state.accounts, focusId: target.id, core, usernamePatterns: patterns,
+      onCompare: id => chooseCandidate(id, true),
+      onReference: (id, person) => chooseTarget(person || state.network.nodes.get(id))};
+    if (graphView) graphView.update(options);
+    else graphView = window.FischNetworkGraph.mount(byId("social-graph"), options);
     renderObservedFriends(view);
-    if (!view.totalEdges) {
-      badge.textContent = readable.length ? "No links observed" : "Unavailable";
-      byId("social-summary").textContent = readable.length ?
-        "No direct links appear in the readable source records for this reference. Partial and unavailable lists remain unknown." :
-        "No readable friend or follow observations are available for this reference. No social graph can be established from these records. Avatar and username comparisons remain available below.";
-      renderCapabilityDetails(target); return;
-    }
-    badge.textContent = `${view.totalEdges} observed link${view.totalEdges === 1 ? "" : "s"}`;
-    const shown = view.nodes.filter(item => item.id !== target.id);
-    byId("social-summary").textContent = `Showing ${shown.length} of ${view.totalNeighbors} directly observed neighbors for @${target.username}. Ledger accounts and shared connectors appear first.${view.truncated ? " The graph is limited to 12 neighbors; all observed direct friends remain searchable below." : ""} Solid links are friendships; arrows preserve follow direction. External nodes open Roblox profiles. Each edge describes its recorded observation time.`;
-    const svgNS = "http://www.w3.org/2000/svg";
-    const svgNode = (tag, attrs = {}, text) => { const el = document.createElementNS(svgNS, tag); for (const [key, value] of Object.entries(attrs)) el.setAttribute(key, String(value)); if (text !== undefined) el.textContent = text; return el; };
-    const svg = svgNode("svg", {viewBox: "0 0 760 440", class: "nw-graph", role: "group", "aria-label": `Observed direct friend and follow links for ${target.username}`});
-    const defs = svgNode("defs"), marker = svgNode("marker", {id: "nw-follow-arrow", viewBox: "0 0 10 10", refX: 8, refY: 5, markerWidth: 5, markerHeight: 5, orient: "auto-start-reverse"});
-    marker.append(svgNode("path", {d: "M 0 0 L 10 5 L 0 10 z", fill: "#ffd166"})); defs.append(marker); svg.append(defs);
-    const positions = new Map([[target.id, {x: 380, y: 220}]]);
-    shown.forEach((person, index) => { const angle = -Math.PI / 2 + index * Math.PI * 2 / shown.length; positions.set(person.id, {x: 380 + Math.cos(angle) * 285, y: 220 + Math.sin(angle) * 150}); });
-    for (const edge of view.edges) {
-      const a = positions.get(edge.from), b = positions.get(edge.to), angle = Math.atan2(b.y - a.y, b.x - a.x);
-      const x1 = a.x + Math.cos(angle) * 29, y1 = a.y + Math.sin(angle) * 29;
-      const x2 = b.x - Math.cos(angle) * 32, y2 = b.y - Math.sin(angle) * 32;
-      const path = svgNode("path", {d: edge.kind === "friend" ? `M ${x1} ${y1} L ${x2} ${y2}` : `M ${x1} ${y1} Q ${(x1 + x2) / 2 - Math.sin(angle) * 19} ${(y1 + y2) / 2 + Math.cos(angle) * 19} ${x2} ${y2}`, class: `nw-edge-${edge.kind}`});
-      if (edge.kind === "follow") path.setAttribute("marker-end", "url(#nw-follow-arrow)");
-      const from = personLabel(state.network.nodes.get(edge.from)), to = personLabel(state.network.nodes.get(edge.to));
-      const provenance = edge.evidence.map(item => `${methodLabel(item)} ${item.observed_at || item.fetched_at || "time unknown"}`).join("; ");
-      path.append(svgNode("title", {}, `${edge.kind === "friend" ? `${from} and ${to}: observed friendship` : `${from} follows ${to}`} · ${provenance}`)); svg.append(path);
-    }
-    for (const [id, point] of positions) {
-      const person = state.network.nodes.get(id), isTarget = id === target.id, isExternal = !person.cached;
-      const action = isTarget ? `Reference: ${personLabel(person)}` : isExternal ? `Open Roblox profile for ${personLabel(person)}` : `Compare ${personLabel(person)}`;
-      const group = svgNode(isExternal ? "a" : "g", {class: `nw-node${isExternal ? " nw-node-external" : ""}`, transform: `translate(${point.x}, ${point.y})`, role: isExternal ? "link" : isTarget ? "group" : "button", tabindex: isTarget ? "-1" : "0", "aria-label": action});
-      if (isExternal) { group.setAttribute("href", core.profileUrl(id)); group.setAttribute("target", "_blank"); group.setAttribute("rel", "noopener noreferrer"); }
-      group.append(svgNode("circle", {r: 27, fill: "#102d44", stroke: isTarget ? "#29f8ff" : isExternal ? "#9cbdcc" : "#61e5b3", "stroke-width": isTarget ? 2.5 : 1.5, ...(isExternal ? {"stroke-dasharray": "4 3"} : {})}));
-      const name = person.username || person.display_name || id;
-      group.append(svgNode("text", {y: 5, "font-weight": "700"}, name.slice(0, 2).toUpperCase()));
-      group.append(svgNode("text", {y: 46}, name.length > 17 ? name.slice(0, 15) + "…" : name));
-      group.append(svgNode("title", {}, `${personLabel(person)} · Roblox ID ${id} · ${isExternal ? "external profile" : "cached account"}`));
-      if (!isExternal && !isTarget) {
-        group.addEventListener("click", () => chooseCandidate(id, true));
-        group.addEventListener("keydown", event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); chooseCandidate(id, true); } });
-      }
-      svg.append(group);
-    }
-    wrapper.append(svg);
-    const legend = node("p", "nw-graph-legend"); legend.append(node("span", "", "Cyan lines: friendship"), node("span", "", "Gold arrows: following direction"), node("span", "", "Dashed circles: external profiles")); wrapper.append(legend);
     renderCapabilityDetails(target);
   }
 
@@ -390,7 +364,7 @@
     const wrapper = byId("candidate-list"); wrapper.replaceChildren();
     byId("candidate-count").textContent = `${filtered.length} / ${allCandidates(false).length}`;
     const scopeLabel = state.scope === "latest" ? `latest photographed Top 50 (${state.data.ledger_latest_checkpoint?.day_key || "date unavailable"})` : "all cached historical and reference accounts";
-    byId("candidate-description").textContent = state.targetId ? `Comparing ${scopeLabel}. The reference account is excluded. Shared cosmetics and username text are separate comparisons.` : "Select a cached reference account to load comparisons.";
+    byId("candidate-description").textContent = state.targetId ? `Comparing ${scopeLabel}. The reference account is excluded. Username patterns, avatar matches and observed social links are separate review signals.` : "Select a cached reference account to load comparisons.";
     if (!state.targetId) { wrapper.append(node("p", "nw-empty", "The requested reference is not available in this snapshot. No comparison has been calculated.")); return; }
     if (!filtered.length) { wrapper.append(node("p", "nw-empty", "No accounts match these filters. Try another username, choose All accounts, or include all history.")); return; }
     for (const comparison of filtered) {
@@ -402,9 +376,12 @@
       head.append(accountImage(account), name, node("span", "nw-rank", account.latest_rank ? `#${account.latest_rank}` : account.ledger ? "History" : "Reference"));
       const metrics = node("span", "nw-candidate-metrics");
       const assets = node("span"); assets.append("Cosmetics: ", node("strong", "", cosmetics ? `${cosmetics.sharedCount} shared · ${percentage(cosmetics.jaccard)}` : "unavailable"));
-      const names = node("span"); names.append("Username: ", node("strong", "", percentage(comparison.name.similarity)));
+      const names = node("span", `nw-name-pattern is-${comparison.namePattern.tier}`); names.append("Username: ", node("strong", "", comparison.namePattern.label));
+      if (comparison.namePattern.reasons.length) names.title = comparison.namePattern.reasons.join(" ");
       const social = node("span", `nw-wide${comparison.social.observedCount ? " nw-observed" : ""}`, compactSocial(comparison));
-      metrics.append(assets, names, social); button.append(head, reviewBadge(comparison.review), metrics);
+      metrics.append(assets, names);
+      if (["strong", "possible"].includes(comparison.namePattern.tier)) metrics.append(node("span", "nw-wide nw-name-reason", comparison.namePattern.reasons[0]));
+      metrics.append(social); button.append(head, reviewBadge(comparison.review), metrics);
       button.addEventListener("click", () => chooseCandidate(account.id, true)); wrapper.append(button);
     }
   }
@@ -474,16 +451,16 @@
 
   function renderComparison() {
     const wrapper = byId("comparison-content"); wrapper.replaceChildren(); byId("share-status").textContent = "";
-    const target = state.byId.get(state.targetId), candidate = state.byId.get(state.compareId);
+    const target = referenceAccount(), candidate = state.byId.get(state.compareId);
     byId("share-comparison").disabled = !candidate;
-    if (!candidate) { wrapper.append(node("p", "nw-empty", "Choose another account to inspect its public data beside the reference.")); return; }
-    const comparison = core.compareAccounts(target, candidate), avatar = comparison.avatar, names = comparison.name;
+    if (!target || !candidate) { wrapper.append(node("p", "nw-empty", "Choose another account to inspect its public data beside the reference.")); return; }
+    const comparison = core.compareAccounts(target, candidate), avatar = comparison.avatar, namePattern = comparison.namePattern;
     const pair = node("div", "nw-avatar-pair"); pair.append(avatarCard(target, "REFERENCE"), avatarCard(candidate, "COMPARISON")); wrapper.append(pair);
     const reviewSection = node("section", "nw-detail-section nw-preset-review"); reviewSection.append(node("h3", "", "Avatar preset review"));
     const reviewPair = node("div", "nw-review-pair"); reviewPair.append(avatarReviewCard(target, "REFERENCE"), avatarReviewCard(candidate, "COMPARISON")); reviewSection.append(reviewPair); wrapper.append(reviewSection);
     const metrics = node("div", "nw-metrics"), cosmetics = avatar.groups.cosmetic;
     metrics.append(metric("Cosmetic asset overlap", cosmetics ? cosmetics.unionCount ? `${cosmetics.sharedCount} shared` : "No cosmetics" : "Unavailable", cosmetics ? `${percentage(cosmetics.jaccard)} Jaccard · ${cosmetics.sharedCount} shared IDs / ${cosmetics.unionCount} unique IDs across both accounts` : "Both equipped-asset records are needed."));
-    metrics.append(metric("Username text similarity", percentage(names.similarity), names.available ? `${names.distance} edit${names.distance === 1 ? "" : "s"} / ${names.maxLength} characters in the longer username. Display names are excluded.` : "Both usernames are needed."));
+    metrics.append(metric("Username pattern", namePattern.label, namePattern.reasons.join(" ")));
     wrapper.append(metrics);
     if (avatar.available) wrapper.append(node("p", "nw-help", `Compared separately: ${avatar.groups.body.sharedCount} shared body/face assets; ${avatar.groups.animation.sharedCount} shared animations; ${avatar.groups.other.sharedCount} other shared assets.`));
     if (avatar.exactAssetSet) wrapper.append(node("p", "nw-match-note", avatar.configurationMatch === true ? "Matching equipped assets and recorded avatar settings." : avatar.configurationMatch === false ? "Matching equipped assets; recorded body colors, scales or rig settings differ." : "Matching equipped assets. Full appearance settings are not available to verify an identical avatar configuration."));
@@ -536,14 +513,14 @@
       const params = new URLSearchParams(location.search), requestedTarget = core.normalizeId(params.get("target")), requestedCompare = core.normalizeId(params.get("compare"));
       if (["avatar", "name", "social", "review"].includes(params.get("sort"))) state.sort = params.get("sort");
       if (["full", "partial", "none", "unknown"].includes(params.get("review"))) state.reviewFilter = params.get("review");
-      state.targetId = params.has("target") ? state.byId.has(requestedTarget) ? requestedTarget : null : state.byId.has("12013950464") ? "12013950464" : state.accounts[0].id;
+      state.targetId = params.has("target") ? state.network.nodes.has(requestedTarget) ? requestedTarget : null : state.byId.has("12013950464") ? "12013950464" : state.accounts[0].id;
       state.compareId = state.targetId && state.byId.has(requestedCompare) && requestedCompare !== state.targetId ? requestedCompare : null;
       if (state.compareId && !core.matchesReviewFilter(core.reviewAvatar(state.byId.get(state.compareId).avatar), state.reviewFilter)) state.reviewFilter = "all";
       if (params.get("scope") === "all" || state.compareId && (!state.byId.get(state.compareId).ledger || !state.byId.get(state.compareId).latest_rank)) state.scope = "all";
       byId("candidate-scope").value = state.scope;
       byId("candidate-sort").value = state.sort;
       byId("candidate-review-filter").value = state.reviewFilter;
-      ensureComparison(); byId("target-input").value = state.byId.get(state.targetId)?.username || requestedTarget || "";
+      ensureComparison(); byId("target-input").value = referenceAccount()?.username || requestedTarget || "";
       byId("networker-app").hidden = false; setStatus("");
       if (params.has("target") && !state.targetId) setStatus(requestedTarget ? `Roblox account ID ${requestedTarget} is not in this snapshot. Select another cached reference account, or return after the snapshot is refreshed.` : "The requested reference ID is invalid. Select a cached account to begin.", true);
       updateUrl(); renderPresetLibrary(); renderReference(); renderReviewOverview(); renderSocialGraph(); renderCandidates(); renderComparison();

@@ -7,10 +7,13 @@
   <title>Networker · Fisch Money Ledger</title>
   <link rel="stylesheet" href="styles.css?v=b796ed7e2670">
   <link rel="stylesheet" href="standouts.css?v=a5e0cf38dd14">
-  <link rel="stylesheet" href="networker.css?v=78b8acad99b3">
+  <link rel="stylesheet" href="networker.css?v=3ce0ce0700e9">
+  <link rel="stylesheet" href="network-graph.css?v=c2fbb83f81d9">
   <script defer src="time-utils.js?v=b2a56747d852"></script>
-  <script defer src="networker-core.js?v=68582c3d3b1d"></script>
-  <script defer src="networker.js?v=50aa231867ad"></script>
+  <script defer src="username-patterns.js?v=29ca08b622f9"></script>
+  <script defer src="networker-core.js?v=8685cad81797"></script>
+  <script defer src="network-graph.js?v=2b3af75fd033"></script>
+  <script defer src="networker.js?v=db2e3c939ad5"></script>
 </head>
 <body class="networker-page">
   <header class="site-head">
@@ -25,12 +28,12 @@
     <p id="network-status" class="nw-status" role="status" aria-live="polite">Loading the latest collected account data…</p>
     <noscript><p class="nw-status">Enable JavaScript to compare the cached accounts.</p></noscript>
     <div id="networker-app" hidden>
-      <form id="target-form" class="nw-controls" aria-label="Choose comparison accounts">
-        <div class="nw-target-control"><label for="target-input">Reference account</label><div class="nw-input-action"><input id="target-input" type="search" list="target-options" autocomplete="off" spellcheck="false" placeholder="Search a username or Roblox ID" aria-describedby="target-help"><button type="submit" class="nw-primary">Set reference</button></div><datalist id="target-options"></datalist><p id="target-help">Choose any account in this public-data snapshot.</p></div>
+      <form id="target-form" class="nw-controls" aria-label="Choose main account and comparisons">
+        <div class="nw-target-control"><label for="target-input">Main account</label><div class="nw-input-action"><input id="target-input" type="search" list="target-options" autocomplete="off" spellcheck="false" placeholder="Search a username or Roblox ID" aria-describedby="target-help"><button type="submit" class="nw-primary">Set main account</button></div><datalist id="target-options"></datalist><p id="target-help">Choose a saved username or an exact ID from the observed network.</p></div>
         <div><label for="candidate-scope">Compare against</label><select id="candidate-scope"><option value="latest">Latest Top 50</option><option value="all">All history + references</option></select></div>
-        <div><label for="candidate-sort">Sort by</label><select id="candidate-sort"><option value="review">Avatar review flags</option><option value="avatar">Shared cosmetic assets</option><option value="name">Username similarity</option><option value="social">Observed social links</option></select></div>
+        <div><label for="candidate-sort">Sort by</label><select id="candidate-sort"><option value="review">Avatar review flags</option><option value="avatar">Shared cosmetic assets</option><option value="name">Username patterns</option><option value="social">Observed social links</option></select></div>
       </form>
-      <section id="reference-summary" class="nw-reference" aria-label="Selected reference account"></section>
+      <section id="reference-summary" class="nw-reference" aria-label="Selected main account"></section>
       <section class="nw-review-overview" aria-labelledby="review-title">
         <div class="nw-section-head"><div><p class="nw-kicker">AVATAR REVIEW</p><h2 id="review-title">RBI outfit presets</h2></div><span id="review-rule-count" class="nw-pill"></span></div>
         <p>Check equipped item IDs against RBI's outfit presets. A <strong>full preset</strong> contains every required item, even with extra accessories. A <strong>partial match</strong> contains only some preset items.</p>
@@ -39,7 +42,7 @@
         <details class="nw-source-details"><summary>Preset library &amp; verified source</summary><div id="review-presets" class="nw-preset-library"></div><p id="review-rule-source"></p></details>
       </section>
       <section class="nw-network" aria-labelledby="social-title">
-        <div class="nw-section-head"><div><p class="nw-kicker">FRIENDS &amp; FOLLOWS</p><h2 id="social-title">Recorded social links</h2></div><span id="social-coverage" class="nw-pill">Checking coverage</span></div>
+        <div class="nw-section-head"><div><p class="nw-kicker">FRIENDS &amp; FOLLOWS</p><h2 id="social-title">Explore account connections</h2></div><span id="social-coverage" class="nw-pill">Checking coverage</span></div>
         <p id="social-summary"></p><p id="website-coverage" class="nw-help"></p>
         <details class="nw-source-details"><summary>Inspection coverage for all accounts</summary><div id="census-coverage-table" class="nw-census-table"></div><p class="nw-help">A displayed friend count is preserved separately from the exact IDs saved. Partial lists, unavailable cards and accounts without a saved inspection leave missing identities unknown.</p></details>
         <p class="nw-data-downloads"><a href="network-database.sqlite.gz" download>Download SQLite database (.gz)</a><span aria-hidden="true"> · </span><a href="network-data.json" download>Download network JSON</a><span aria-hidden="true"> · </span><a href="https://github.com/nitwi/fisch-money-leaderboard/tree/main/data/network" target="_blank" rel="noopener noreferrer">Observation journal &amp; method</a></p>
@@ -70,8 +73,8 @@
       <details class="nw-method"><summary>How these comparisons work</summary><div>
         <p><strong>RBI avatar review:</strong> each preset is a specific set of asset IDs from the linked published RBI release. Full means every preset ID is equipped; partial means at least one, but not every, ID is equipped. A one-item preset can produce a full 1/1 match. Review order puts full matches first, then partial matches by the number of distinct preset IDs observed. Results describe the avatar observation time, independently of the historical leaderboard photo.</p>
         <p><strong>Avatar overlap:</strong> shared asset IDs ÷ the union of both equipped asset sets. Clothing and accessories are compared separately from body parts and animations so common defaults do not dominate the cosmetic comparison. An empty or unavailable avatar is never a 100% match.</p>
-        <p><strong>Username similarity:</strong> case-insensitive edit distance, calculated as 100 × (1 − edits ÷ the longer username length). One edit is a character insertion, deletion or substitution. Display names are not scored.</p>
-        <p><strong>Social links:</strong> only exact account IDs in a readable API list or a documented website observation create links. Website observations and API access checks remain separately attributed. The graph shows a bounded view of direct neighbors, prioritizing ledger accounts and shared connectors; the searchable list retains all observed direct friends. External friends open their Roblox profiles and do not become avatar-comparison candidates. Follow direction is preserved. Partial-list shared friends are a minimum observed count, and an observation describes when a link was seen.</p>
+        <p><strong>Username patterns:</strong> explained rules compare distinctive name stems, numbered variants, separators, meaningful tokens, and common character substitutions. Generic words, short fragments, digit-only overlap, and weak similarities in random-looking strings are suppressed. Strong and possible labels describe the detected text pattern. They are review hints, with no ownership probability. Display names are excluded. The comparison runs locally in your browser and does not call an AI service.</p>
+        <p><strong>Social links:</strong> only exact account IDs in a readable API list or a documented website observation create links. Start from the selected main account and expand connected nodes using saved observations. Branches include photographed leaderboard accounts from all history, or external accounts with a full match to one of the 22 RBI presets. Partial preset matches are optional; unchecked avatars remain unknown. Username or outfit resemblance alone never creates an edge. Follow direction and source times are preserved. The searchable list below the graph retains all observed direct friends. Partial-list shared friends are a minimum observed count.</p>
         <p>Matching assets and similar names describe public account features. They do not establish common ownership or misconduct.</p>
       </div></details>
     </div>
