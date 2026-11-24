@@ -724,6 +724,37 @@ try:
         assert analysis.locator('.standout-layout').evaluate('el=>el.children[1].getBoundingClientRect().top>el.children[0].getBoundingClientRect().top')
         analysis.screenshot(path=str(ROOT/'preview-standouts-mobile.png'),full_page=True)
         analysis.close()
+        for zone,photo_time,rolled_time,patch_time in (
+            ('America/New_York','Nov 22, 2026, 11:13 PM EST','Nov 20, 2026, 1:08 AM EST','Oct 31, 2026, 12:00 PM EDT'),
+            ('America/Los_Angeles','Nov 22, 2026, 8:13 PM PST','Nov 19, 2026, 10:08 PM PST','Oct 31, 2026, 9:00 AM PDT'),
+        ):
+            context=browser.new_context(timezone_id=zone,locale='en-US',viewport={'width':390 if zone.endswith('Angeles') else 1300,'height':840})
+            viewer=context.new_page()
+            viewer.on('pageerror',lambda error: errors.append(str(error)))
+            viewer.goto(f'http://127.0.0.1:{server.server_address[1]}/',wait_until='domcontentloaded')
+            viewer.locator('#capture-date').get_by_text('Nov 22, 2026').wait_for(timeout=20000)
+            assert zone in viewer.locator('#viewer-timezone').inner_text()
+            assert photo_time in viewer.locator('#capture-index').inner_text()
+            assert photo_time in viewer.locator('#evidence-subtitle').inner_text()
+            assert patch_time in viewer.locator('.event-card[data-event="venue-encore"]').inner_text()
+            viewer.locator('#chart.js-plotly-plot').wait_for(timeout=20000)
+            assert viewer.locator('#chart').evaluate("(el,expected)=>{const trace=el.data.find(t=>t.meta?.key==='id:1316700350'),slot=trace.x.indexOf('2026-11-22');return slot>=0 && trace.customdata[slot][3]===expected && el.layout.xaxis.tickvals.includes('2026-11-22')}",photo_time)
+            viewer.goto(f'http://127.0.0.1:{server.server_address[1]}/?day=2026-11-19',wait_until='domcontentloaded')
+            viewer.locator('#capture-date').get_by_text('Nov 19, 2026').wait_for(timeout=20000)
+            assert rolled_time in viewer.locator('#capture-index').inner_text()
+            assert 'early AM, counted for preceding day' in viewer.locator('#evidence-subtitle').inner_text()
+            viewer.goto(f'http://127.0.0.1:{server.server_address[1]}/?day=2026-11-17&player=id%3A8144154137',wait_until='domcontentloaded')
+            viewer.locator('#profile-title').get_by_text('75percent3r').wait_for(timeout=20000)
+            assert viewer.locator('.profile-history a').filter(has_text='Nov 17, 2026').first.inner_text().find('Nov 18, 2026, 12:50 AM EST' if zone.endswith('New_York') else 'photo 9:50 PM PST')>=0
+            viewer.goto(f'http://127.0.0.1:{server.server_address[1]}/standouts.html?day=2026-11-21&player=id%3A1316700350',wait_until='domcontentloaded')
+            weekend_flag=viewer.locator('.highlight-card[data-highlight-day="2026-11-21"][data-highlight-player="id:1316700350"]')
+            weekend_flag.wait_for(timeout=20000)
+            assert zone in viewer.locator('#viewer-timezone').inner_text()
+            assert ('Nov 20, 2026, 11:56 PM EST' if zone.endswith('New_York') else 'Nov 20, 2026, 8:56 PM PST') in weekend_flag.inner_text()
+            assert ('Nov 21, 2026, 11:14 PM EST' if zone.endswith('New_York') else 'Nov 21, 2026, 8:14 PM PST') in weekend_flag.inner_text()
+            assert 'Nov 21, 2026' in viewer.locator('#overview-content').inner_text()
+            assert viewer.evaluate('document.documentElement.scrollWidth <= window.innerWidth + 4')
+            context.close()
         page.goto(f'http://127.0.0.1:{server.server_address[1]}/?day=2026-11-10&player={cerulean["key"].replace(":","%3A")}',wait_until='domcontentloaded')
         page.locator('#capture-date').get_by_text('Nov 10, 2026').wait_for(timeout=20000)
         assert page.locator('#profile-title').inner_text()=='Ceruleanflare2'

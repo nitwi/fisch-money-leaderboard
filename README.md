@@ -24,6 +24,10 @@ The selected balance uses its stored `row.at`; a snapshot without a player uses 
 
 Use **Adjust date / time** to open `timestamp.html` with the selected instant already loaded. The standalone generator supports calendar input, 12-/24-hour time, IANA timezone selection, strict ISO decoding, and explicit choices for repeated daylight saving times. Both timezone and display-format preferences stay in the browser. All conversions run client-side without new dependencies.
 
+The command panel shows the photo time in the viewer's device timezone, with its IANA zone and UTC offset labeled. Display formatting never changes the stored observation, leaderboard day, elapsed-time calculations, or copied UTC command. The adjustment link carries the exact instant and the panel's display zone; importing that link does not overwrite the standalone generator's saved preferences.
+
+For a ledger timezone selector, pass its validated preference as `displayTimeZone` (and optionally `hour12`) to `FischTimestampPanel.render(container, context)` and rerender when the display settings change. Omitting the zone follows the device; invalid or unavailable detection safely falls back to UTC. This interface does not replace the ledger's date formatters, chart click handling, day grouping, or deployment workflow. Generator preferences use only `fisch-timestamp-zone` and `fisch-timestamp-format`.
+
 Run `node --test tests/test_timestamp.cjs tests/test_ledger_timestamp.cjs` for conversion and real-ledger source-selection checks. The timestamp workflow runs these checks on relevant pull requests and main-branch pushes.
 
 ## Capture sessions
@@ -62,6 +66,7 @@ Run `node --test tests/test_timestamp.cjs tests/test_ledger_timestamp.cjs` for c
 
 ## Data interpretation
 
+- Both site pages display actual screenshot, profile-proof, patch-event and standout photo timestamps in the viewer's browser timezone with the local time-zone abbreviation; the displayed IANA timezone is shown above the board/analysis. The *leaderboard-day labels*, chart-day slots, Saturday settlement assignment, and shareable `day`/`from`/`to` dates remain America/Chicago leaderboard cycles, so visitors do not see different daily histories. When a local photo date differs from its leaderboard-day label (for example, an early-AM rollover or a Chicago late-night photo viewed in Eastern time), the player history prints the full local photo date and time. Elapsed-time calculations continue to use the original UTC instants, independent of the viewer's timezone.
 - All C$ amounts are exact decimal integers. A blank is unknown, never zero.
 - Outside Saturday settlements, no-multiplier net rate = observed balance difference / elapsed UTC hours. For a multi-photo window crossing a Saturday settlement, the **weekly-normalized net change** = the same exact endpoint difference ÷ (actual elapsed UTC hours / 168), with a `C$/week` label and the explicit observed photo span; a short range extrapolates to a seven-day equivalent, not actual weekly earnings. Approximate timestamps and skipped checkpoints are labeled; a single settlement jump has no hourly rate.
 - Rainbow 1.5× base-equivalent = a positive observed net delta ÷ 1.5, displayed as a hypothetical **window total** and, for multi-photo ranges, a `C$/week` normalized base-equivalent when Saturday settlement is included or `/hr` otherwise. The unadjusted no-multiplier average is always labeled separately. This is a *counterfactual*, not proof of sales or gross earnings; declines and spending are not divided by 1.5.

@@ -50,6 +50,7 @@ function renderOverviewTimestamp(item) {
   container.setAttribute("aria-label", "Command timestamp for the selected standout");
   $("overview-content").querySelector(".overview-range").before(container);
   FischTimestampPanel.render(container, {
+    displayTimeZone: viewerTimeZone,
     checkpoint: item.cp,
     row: item.row,
     selectedKey: item.row.key,

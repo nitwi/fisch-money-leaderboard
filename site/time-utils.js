@@ -65,6 +65,15 @@
     catch { return false; }
   }
 
+  function viewerTimeZone(preferredZone) {
+    if (isValidTimeZone(preferredZone)) return preferredZone;
+    try {
+      const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (isValidTimeZone(detected)) return detected;
+    } catch { /* Device timezone detection is optional. */ }
+    return "UTC";
+  }
+
   function zoneFormatter(zone) {
     if (!formatters.has(zone)) {
       formatters.set(zone, new Intl.DateTimeFormat("en-GB-u-ca-gregory-nu-latn", {
@@ -95,7 +104,7 @@
       pad(Math.floor(seconds / 60) % 60) + (seconds % 60 ? ":" + pad(seconds % 60) : "");
   }
 
-  function formatLocal(value, zone = "America/Chicago", hour12 = true) {
+  function formatLocal(value, zone = viewerTimeZone(), hour12 = true) {
     const epoch = instant(value);
     if (epoch === null || !isValidTimeZone(zone)) return "";
     const part = partsAt(epoch, zone);
@@ -128,5 +137,5 @@
     return {kind: "unique", candidates, message: ""};
   }
 
-  return Object.freeze({parseISO, toUTC, formatLocal, isValidTimeZone, partsAt, resolveLocal});
+  return Object.freeze({parseISO, toUTC, formatLocal, isValidTimeZone, viewerTimeZone, partsAt, resolveLocal});
 });

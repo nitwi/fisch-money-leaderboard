@@ -11,11 +11,10 @@
   const copyTimers = new WeakMap();
   let currentEpoch = null, decodedEpoch = null, chosenOccurrence = "", occurrenceSignature = "";
   let hour12 = preference.get("fisch-timestamp-format") !== "24";
-  const detected = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
   const saved = preference.get("fisch-timestamp-zone");
   const params = new URLSearchParams(location.search);
   const requestedZone = params.get("zone");
-  zoneInput.value = time.isValidTimeZone(requestedZone) ? requestedZone : time.isValidTimeZone(saved) ? saved : time.isValidTimeZone(detected) ? detected : "UTC";
+  zoneInput.value = time.viewerTimeZone(time.isValidTimeZone(requestedZone) ? requestedZone : saved);
   formatInput.value = hour12 ? "12" : "24";
 
   const commonZones = {

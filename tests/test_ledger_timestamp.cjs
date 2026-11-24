@@ -106,3 +106,88 @@ test("source precision is preserved for an approximate capture", () => {
   assert.equal(result.choices[0].iso, "2026-11-05T03:00:00.000Z");
   assert.match(result.choices[0].precision, /approximate/);
 });
+
+// Exercise the actual render/updateOutput path under real per-process device timezones.
+// These minimal elements model only the DOM operations that the panel uses.
+function renderPanelFixture(options) {
+  const {render} = require("./site/ledger-timestamp.js");
+  const fields = new Map();
+  const node = {id: "fixture-stamp", dataset: {}, querySelector: selector => fields.get(selector)};
+  const selectors = [".stamp-source", ".stamp-source-label", ".stamp-selection", ".stamp-feedback", ".stamp-copy", ".stamp-copy-raw", ".stamp-command", ".stamp-raw", ".stamp-local", ".stamp-description", ".stamp-precision", ".stamp-adjust", ".stamp-proofs"];
+  for (const selector of selectors) fields.set(selector, {
+    value: "", textContent: "", hidden: false, disabled: false, children: [],
+    replaceChildren() { this.children = []; this.value = ""; },
+    add(option) { this.children.push(option); if (this.children.length === 1) this.value = option.value; },
+    append(child) { this.children.push(child); }
+  });
+  globalThis.Option = function (label, value) { this.label = label; this.value = value; };
+  globalThis.document = {createElement: () => ({})};
+  const iso = "2026-09-29T02:25:52.123Z";
+  const context = {
+    checkpoint: {id: "selected", day_key: "2026-09-28", at: iso},
+    row: {key: "id:fixture", username: "fixture-player", rank: 2, at: iso, evidence: []},
+    selectedKey: "id:fixture",
+    ...options
+  };
+  render(node, context);
+  const link = new URL(fields.get(".stamp-adjust").href, "https://example.test/");
+  process.stdout.write(JSON.stringify({
+    local: fields.get(".stamp-local").textContent,
+    command: fields.get(".stamp-command").value,
+    raw: fields.get(".stamp-raw").textContent,
+    linkInstant: link.searchParams.get("instant"),
+    linkZone: link.searchParams.get("zone"),
+    disabled: fields.get(".stamp-copy").disabled,
+    iso: node.dataset.iso
+  }));
+}
+
+function renderedInDeviceZone(zone, options = {}) {
+  const {spawnSync} = require("node:child_process");
+  const result = spawnSync(process.execPath, ["-e", `(${renderPanelFixture.toString()})(${JSON.stringify(options)})`], {
+    cwd: path.join(__dirname, ".."), env: {...process.env, TZ: zone}, encoding: "utf8"
+  });
+  assert.equal(result.status, 0, result.stderr);
+  return JSON.parse(result.stdout);
+}
+
+function assertUnchangedInstant(rendered) {
+  const iso = "2026-09-29T02:25:52.123Z";
+  assert.equal(rendered.command, `latest:${iso}`);
+  assert.equal(rendered.raw, iso);
+  assert.equal(rendered.iso, iso);
+  assert.equal(rendered.linkInstant, iso);
+  assert.equal(rendered.disabled, false);
+}
+
+test("panel follows each viewer's local clock and calendar while UTC commands stay identical", () => {
+  const scenarios = [
+    ["America/Los_Angeles", "September 28, 2026 at 7:25:52.123 PM", "UTC−07:00"],
+    ["Asia/Kathmandu", "September 29, 2026 at 8:10:52.123 AM", "UTC+05:45"],
+    ["UTC", "September 29, 2026 at 2:25:52.123 AM", "UTC+00:00"]
+  ];
+  for (const [zone, clock, offset] of scenarios) {
+    const rendered = renderedInDeviceZone(zone);
+    assert.ok(rendered.local.startsWith(clock), rendered.local);
+    assert.ok(rendered.local.includes(offset), rendered.local);
+    // Some runtimes use the legacy Katmandu spelling for the same IANA zone.
+    assert.ok(rendered.local.endsWith(rendered.linkZone), rendered.local);
+    if (zone === "Asia/Kathmandu") assert.match(rendered.linkZone, /^Asia\/Kat[h]?mandu$/);
+    else assert.equal(rendered.linkZone, zone);
+    assertUnchangedInstant(rendered);
+  }
+});
+
+test("panel uses the caller's explicit display zone and 24-hour preference in its adjustment link", () => {
+  const rendered = renderedInDeviceZone("America/Los_Angeles", {displayTimeZone: "Europe/London", hour12: false});
+  assert.equal(rendered.local, "September 29, 2026 at 03:25:52.123 · UTC+01:00 · Europe/London");
+  assert.equal(rendered.linkZone, "Europe/London");
+  assertUnchangedInstant(rendered);
+});
+
+test("invalid panel zone overrides fall back to the viewer without changing the observation", () => {
+  const rendered = renderedInDeviceZone("Asia/Tokyo", {displayTimeZone: "Mars/Olympus"});
+  assert.equal(rendered.local, "September 29, 2026 at 11:25:52.123 AM · UTC+09:00 · Asia/Tokyo");
+  assert.equal(rendered.linkZone, "Asia/Tokyo");
+  assertUnchangedInstant(rendered);
+});

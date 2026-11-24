@@ -89,6 +89,8 @@
   function updateOutput(node) {
     const choice = node.stampChoices.find(item => item.id === node.querySelector(".stamp-source").value);
     const context = node.stampContext;
+    const displayTimeZone = time.viewerTimeZone(context.displayTimeZone);
+    const hour12 = typeof context.hour12 === "boolean" ? context.hour12 : true;
     node.querySelector(".stamp-feedback").textContent = "";
     node.querySelector(".stamp-copy").textContent = "Copy latest: timestamp";
     node.querySelector(".stamp-copy-raw").textContent = "Copy UTC only";
@@ -97,7 +99,7 @@
     node.querySelector(".stamp-command").value = choice ? `latest:${choice.iso}` : "";
     node.querySelector(".stamp-command").placeholder = "Select a photographed point";
     node.querySelector(".stamp-raw").textContent = choice?.iso || "—";
-    node.querySelector(".stamp-local").textContent = choice ? time.formatLocal(choice.iso, "America/Chicago", true) : "No timestamp available";
+    node.querySelector(".stamp-local").textContent = choice ? time.formatLocal(choice.iso, displayTimeZone, hour12) : "No timestamp available";
     node.querySelector(".stamp-description").textContent = choice?.description || node.stampMessage;
     const precision = choice?.precision || "";
     const precisionText = /approximate|contextual/i.test(precision) ? "Source time is approximate; the command preserves the recorded time." :
@@ -107,7 +109,7 @@
     precisionNode.textContent = precisionText;
     precisionNode.hidden = !precisionText;
     const adjust = node.querySelector(".stamp-adjust");
-    adjust.href = choice ? `timestamp.html?${new URLSearchParams({ instant: choice.iso, zone: "America/Chicago" })}` : "timestamp.html";
+    adjust.href = choice ? `timestamp.html?${new URLSearchParams({ instant: choice.iso, zone: displayTimeZone })}` : "timestamp.html";
     adjust.textContent = choice ? "Adjust date / time" : "Choose another time";
     const proofNode = node.querySelector(".stamp-proofs");
     proofNode.replaceChildren();
