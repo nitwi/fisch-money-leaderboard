@@ -232,7 +232,20 @@ function renderChart() {
     annotations:[...visibleEvents.map(event=>({x:event.day,xref:"x",y:1,yref:"paper",yanchor:"bottom",showarrow:false,text:event.version,font:{color:event.color,size:10},bgcolor:"#071927",bordercolor:event.color,borderwidth:1,borderpad:3})),...saturdaySlots.map(slot=>({x:slot.id,xref:"x",y:.90,yref:"paper",yanchor:"bottom",showarrow:false,captureevents:true,text:"WEEKEND",font:{color:"#61e5b3",size:9},bgcolor:"#071927",bordercolor:"#61e5b3",borderwidth:1,borderpad:2}))],uirevision:"money-ledger"};
   Plotly.react(node,plot,layout,{displayModeBar:false,responsive:true,scrollZoom:false});
   if (!state.chartBound) {
-    node.on("plotly_click",(event)=>{const marker=event.points?.[0],key=marker?.data?.meta?.key,id=marker?.customdata?.[7];const index=state.data.checkpoints.findIndex(cp=>cp.id===id);if(index>=0)moveTo(index);if(key)setSelected(key);if(index>=0){const u=new URL(location.href);u.searchParams.set("day",state.data.checkpoints[index].day_key);u.searchParams.set("snapshot",id);history.replaceState(null,"",u);}});
+    node.on("plotly_click", (event) => {
+      const marker = event.points?.[0], key = marker?.data?.meta?.key, id = marker?.customdata?.[7];
+      const index = state.data.checkpoints.findIndex(cp => cp.id === id);
+      if (index < 0 || !key) return;
+      // Apply the player and photo together so the copy panel cannot momentarily
+      // combine one point's player with another point's date.
+      state.index = index;
+      $("capture-slider").value = String(index);
+      const u = new URL(location.href);
+      u.searchParams.set("day", state.data.checkpoints[index].day_key);
+      u.searchParams.set("snapshot", id);
+      history.replaceState(null, "", u);
+      setSelected(key);
+    });
     node.on("plotly_clickannotation",(event)=>{
       const slot=chartSlots(state.data.checkpoints,state.data.checkpoints[0].day_key,state.data.checkpoints.at(-1).day_key).find(item=>item.id===event.annotation?.x&&item.cp);
       if(!slot)return;
@@ -450,7 +463,18 @@ function renderEvidence() {
   }));
   if(state.selected){const row=point(cp,state.selected);if(row)spotlight((row.balance_evidence||row.evidence)[0]);}
 }
-function render(){renderControls();renderStandoutTeaser();renderChart();renderMovement();renderProfile();renderEvidence();}
+function renderCommandTimestamp() {
+  const cp = state.data.checkpoints[state.index];
+  FischTimestampPanel.render($("point-timestamp"), {
+    checkpoint: cp,
+    row: state.selected ? point(cp, state.selected) : null,
+    selectedKey: state.selected,
+    playerName: state.selected ? player(state.selected).name : null,
+    captures: state.data.captures,
+    proofs: state.proofs
+  });
+}
+function render(){renderControls();renderStandoutTeaser();renderChart();renderMovement();renderProfile();renderEvidence();renderCommandTimestamp();}
 async function init(){
   try{
     const response=await fetch("data.json",{cache:"no-cache"});if(!response.ok)throw new Error(`HTTP ${response.status}`);
@@ -491,6 +515,7 @@ async function init(){
     document.querySelectorAll("[data-view]").forEach(el=>el.addEventListener("click",()=>{state.view=el.dataset.view;document.querySelectorAll("[data-view]").forEach(btn=>btn.classList.toggle("active",btn===el));renderMovement();}));
     $("lightbox").addEventListener("click",(ev)=>{if(ev.target===$("lightbox"))$("lightbox").close();});
     render();
+    if (location.hash === "#point-timestamp") $("point-timestamp").scrollIntoView({block:"start",behavior:"instant"});
   }catch(error){$("notice").hidden=false;$("notice").textContent=`Could not load the evidence ledger: ${error.message}`;$("capture-date").textContent="Data unavailable";}
 }
 if($("chart"))init();
