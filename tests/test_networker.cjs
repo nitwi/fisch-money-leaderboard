@@ -280,3 +280,115 @@ test('committed public snapshot renders real cached accounts and the expected la
   assert.ok(expected.every(item => item.account.latest_rank >= 1 && item.account.latest_rank <= 50));
   assert.match(elements.get('comparison-content').textContent, /Cosmetic asset overlap/);
 });
+
+test('RBI rules preserve all 22 audited release sets, three categories, and exact provenance', () => {
+  const {createHash} = require('node:crypto');
+  const rules = network.RBI_AVATAR_RULES;
+  assert.equal(rules.presets.length, 22);
+  assert.deepEqual(Object.fromEntries(['defaultcombos', 'xboxcombos', 'freeoutfitcombos'].map(category => [category, rules.presets.filter(preset => preset.category === category).length])), {defaultcombos: 3, xboxcombos: 6, freeoutfitcombos: 13});
+  assert.equal(rules.commit, '3b3f4e40a9ce3a258f3dac6584add47959a9a980');
+  assert.equal(rules.sourceUrl, `https://github.com/nitwi/Roblox-Bot-Investigator/blob/${rules.commit}/RBI_Bot.py`);
+  const canonical = rules.presets.map(preset => ({id: preset.id, category: preset.category, assetIds: [...preset.assetIds].sort()})).sort((a, b) => a.id.localeCompare(b.id));
+  const digest = createHash('sha256').update(JSON.stringify(canonical)).digest('hex');
+  assert.equal(digest, 'abb730a1bdaeb82b31bee699ed81cf27ebb93469908a93d1741e93d3b7f3de87');
+});
+
+test('every audited preset uses full containment with extras; duplicate equipped IDs do not inflate matches', () => {
+  for (const preset of network.RBI_AVATAR_RULES.presets) {
+    const equipped = [...preset.assetIds, preset.assetIds[0], '999999999'].map(id => asset(id));
+    const review = network.reviewAvatar(avatar(equipped));
+    const matched = review.presets.find(item => item.id === preset.id);
+    assert.equal(matched.status, 'full', preset.id);
+    assert.equal(matched.matchedCount, preset.assetIds.length, preset.id);
+    assert.equal(matched.requiredCount, preset.assetIds.length, preset.id);
+    assert.deepEqual(matched.missingIds, [], preset.id);
+  }
+});
+
+test('preset sizes remain generic: GreenBean is full at 1/1, while Summer and Oliver share independent partials', () => {
+  const green = network.reviewAvatar(avatar([asset('617605556')]));
+  assert.equal(green.status, 'full');
+  assert.equal(green.fullMatches[0].id, 'greenbean');
+  assert.equal(green.fullMatches[0].requiredCount, 1);
+  assert.equal(green.partialMatches.length, 0);
+  const partial = network.reviewAvatar(avatar([asset('3670737444'), asset('3670737444')]));
+  assert.equal(partial.status, 'partial');
+  assert.equal(partial.matchedAssetCount, 1);
+  assert.deepEqual(partial.partialMatches.map(item => [item.id, item.matchedCount, item.requiredCount]), [['oliver', 1, 8], ['summer', 1, 2]]);
+  assert.equal(partial.partialMatches[0].missingIds.length, 7);
+  assert.equal(partial.partialMatches[1].missingIds.length, 1);
+  const synthetic = network.reviewAvatar(avatar([asset('1')]), [{id: 'empty', assetIds: []}, {id: 'invalid', assetIds: ['javascript:bad']}, {id: 'duplicate', name: 'Duplicate', assetIds: ['01', '1', '2']}]);
+  assert.equal(synthetic.presets.length, 1);
+  assert.equal(synthetic.presets[0].requiredCount, 2);
+  assert.equal(synthetic.presets[0].matchedCount, 1);
+  assert.equal(synthetic.status, 'partial');
+});
+
+test('readable empty avatars have no preset overlap; unavailable and malformed records remain unknown', () => {
+  assert.equal(network.reviewAvatar(avatar([])).status, 'none');
+  assert.equal(network.reviewAvatar(avatar([asset('999999999')])).status, 'none');
+  for (const value of [null, {}, {status: 'ok'}, {status: 'unavailable', assets: [asset('617605556')]}]) {
+    const review = network.reviewAvatar(value);
+    assert.equal(review.available, false);
+    assert.equal(review.status, 'unknown');
+    assert.equal(review.matchedAssetCount, null);
+  }
+  const target = account('1', {username: 'same', display_name: 'same', friends: list('unavailable')});
+  const candidate = account('2', {username: 'same', display_name: 'same', avatar: avatar([asset('617605556')])});
+  assert.equal(network.compareAccounts(target, candidate).review.status, 'full');
+  candidate.username = 'completelydifferent'; candidate.friends = list('complete', ['1']);
+  assert.equal(network.compareAccounts(target, candidate).review.status, 'full');
+});
+
+test('avatar review queue filters exact states and orders full matches before partial overlap without a probability score', () => {
+  const target = account('1', {latest_rank: 1});
+  const full = account('2', {latest_rank: 2, avatar: avatar([asset('617605556')])});
+  const partialTwo = account('3', {latest_rank: 3, avatar: avatar([asset('144076760'), asset('63690008')])});
+  const partialOne = account('4', {latest_rank: 4, avatar: avatar([asset('63690008')])});
+  const none = account('5', {latest_rank: 5});
+  const unknown = account('6', {latest_rank: 6, avatar: {status: 'unavailable'}});
+  const accounts = [unknown, none, partialOne, target, full, partialTwo];
+  assert.deepEqual(network.candidates(accounts, target, 'latest', 'review').map(item => item.account.id), ['2', '3', '4', '5', '6']);
+  for (const [filter, ids] of [['full', ['2']], ['partial', ['3', '4']], ['none', ['5']], ['unknown', ['6']]]) {
+    assert.deepEqual(network.candidates(accounts, target, 'latest', 'review', filter).map(item => item.account.id), ids);
+  }
+});
+
+test('review UI exposes the complete library, present/missing IDs, filter controls and independent comparison metrics', async () => {
+  const target = account('1', {username: 'Reference', avatar: avatar([asset('63690008')])});
+  const full = account('2', {username: 'FullPreset', latest_rank: 1, avatar: avatar([asset('617605556')])});
+  const partial = account('3', {username: 'PartialPreset', latest_rank: 2, avatar: avatar([asset('3670737444')])});
+  const {elements, location} = await renderSnapshot([target, full, partial], '?target=1');
+  assert.equal(elements.get('networker-app').hidden, false, elements.get('network-status').textContent);
+  assert.equal(elements.get('candidate-sort').value, 'review');
+  assert.equal(elements.get('review-rule-count').textContent, '22 verified presets');
+  assert.match(elements.get('review-presets').textContent, /Default outfits · 3/);
+  assert.match(elements.get('review-presets').textContent, /Xbox outfits · 6/);
+  assert.match(elements.get('review-presets').textContent, /Other outfit presets · 13/);
+  assert.match(elements.get('comparison-content').textContent, /Full GreenBean preset \(1\/1\)/);
+  assert.match(elements.get('comparison-content').textContent, /Missing/);
+  assert.match(elements.get('comparison-content').textContent, /ID 144076760/);
+  assert.match(elements.get('comparison-content').textContent, /Cosmetic asset overlap/);
+  assert.match(elements.get('comparison-content').textContent, /Username text similarity/);
+  elements.get('candidate-review-filter').listeners.change[0]({target: {value: 'partial'}});
+  assert.equal(elements.get('candidate-count').textContent, '1 / 2');
+  assert.match(elements.get('candidate-list').textContent, /Partial Oliver \(1\/8\)/);
+  assert.doesNotMatch(elements.get('candidate-list').textContent, /FullPreset/);
+  assert.equal(new URL(location.href).searchParams.get('review'), 'partial');
+  assert.equal(new URL(location.href).searchParams.get('compare'), '3');
+});
+
+test('published avatar observations reproduce independently audited all-history and latest-board review counts', t => {
+  const snapshot = JSON.parse(fs.readFileSync(path.join(__dirname, '../site/network-data.json'), 'utf8'));
+  // Lock the verified result only for this evidence snapshot; later refreshes legitimately change outfits.
+  if (snapshot.generated_at !== '2026-11-24T08:41:51Z') return t.skip('Avatar snapshot was refreshed; historical count fixture no longer applies.');
+  const summarize = accounts => accounts.reduce((counts, item) => {
+    counts[network.reviewAvatar(item.avatar).status] += 1; return counts;
+  }, {full: 0, partial: 0, none: 0, unknown: 0});
+  assert.deepEqual(summarize(snapshot.accounts), {full: 1, partial: 6, none: 63, unknown: 0});
+  const latest = snapshot.accounts.filter(item => item.ledger && item.latest_rank >= 1 && item.latest_rank <= 50);
+  assert.deepEqual(summarize(latest), {full: 1, partial: 3, none: 46, unknown: 0});
+  const full = snapshot.accounts.find(item => network.reviewAvatar(item.avatar).status === 'full');
+  assert.equal(full.username, 'BloxHeroj8');
+  assert.equal(network.reviewAvatar(full.avatar).fullMatches[0].id, 'beanie');
+});

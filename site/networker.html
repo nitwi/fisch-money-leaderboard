@@ -7,10 +7,10 @@
   <title>Networker · Fisch Money Ledger</title>
   <link rel="stylesheet" href="styles.css?v=b796ed7e2670">
   <link rel="stylesheet" href="standouts.css?v=a5e0cf38dd14">
-  <link rel="stylesheet" href="networker.css?v=ea8d898f07fb">
+  <link rel="stylesheet" href="networker.css?v=cd3bb25d78a2">
   <script defer src="time-utils.js?v=b2a56747d852"></script>
-  <script defer src="networker-core.js?v=9aeae1aa343b"></script>
-  <script defer src="networker.js?v=99eac1530dca"></script>
+  <script defer src="networker-core.js?v=4267aee297f9"></script>
+  <script defer src="networker.js?v=d6b9de8a1b46"></script>
 </head>
 <body class="networker-page">
   <header class="site-head">
@@ -28,9 +28,16 @@
       <form id="target-form" class="nw-controls" aria-label="Choose comparison accounts">
         <div class="nw-target-control"><label for="target-input">Reference account</label><div class="nw-input-action"><input id="target-input" type="search" list="target-options" autocomplete="off" spellcheck="false" placeholder="Search a username or Roblox ID" aria-describedby="target-help"><button type="submit" class="nw-primary">Set reference</button></div><datalist id="target-options"></datalist><p id="target-help">Choose any account in this public-data snapshot.</p></div>
         <div><label for="candidate-scope">Compare against</label><select id="candidate-scope"><option value="latest">Latest Top 50</option><option value="all">All history + references</option></select></div>
-        <div><label for="candidate-sort">Sort by</label><select id="candidate-sort"><option value="avatar">Shared cosmetic assets</option><option value="name">Username similarity</option><option value="social">Observed social links</option></select></div>
+        <div><label for="candidate-sort">Sort by</label><select id="candidate-sort"><option value="review">Avatar review flags</option><option value="avatar">Shared cosmetic assets</option><option value="name">Username similarity</option><option value="social">Observed social links</option></select></div>
       </form>
       <section id="reference-summary" class="nw-reference" aria-label="Selected reference account"></section>
+      <section class="nw-review-overview" aria-labelledby="review-title">
+        <div class="nw-section-head"><div><p class="nw-kicker">AVATAR REVIEW</p><h2 id="review-title">RBI outfit presets</h2></div><span id="review-rule-count" class="nw-pill"></span></div>
+        <p>Check equipped item IDs against RBI's outfit presets. A <strong>full preset</strong> contains every required item, even with extra accessories. A <strong>partial match</strong> contains only some preset items.</p>
+        <p class="nw-help">Ordinary accounts may use these outfits or individual items. A match describes clothing and body assets; it does not establish automation, misconduct or shared ownership.</p>
+        <div id="review-totals" class="nw-review-totals" aria-label="Avatar review counts"></div><p id="review-scope-summary" class="nw-help"></p>
+        <details class="nw-source-details"><summary>Preset library &amp; verified source</summary><div id="review-presets" class="nw-preset-library"></div><p id="review-rule-source"></p></details>
+      </section>
       <section class="nw-network" aria-labelledby="social-title">
         <div class="nw-section-head"><div><p class="nw-kicker">FRIENDS &amp; FOLLOWS</p><h2 id="social-title">Recorded social links</h2></div><span id="social-coverage" class="nw-pill">Checking coverage</span></div>
         <p id="social-summary"></p><div id="social-graph"></div>
@@ -40,6 +47,7 @@
         <section class="nw-candidates" aria-labelledby="candidates-title">
           <div class="nw-section-head"><div><p class="nw-kicker">FIND A COMPARISON</p><h2 id="candidates-title">Accounts</h2></div><span id="candidate-count" class="nw-pill"></span></div>
           <label class="nw-search-label" for="candidate-search">Filter candidates</label><input id="candidate-search" type="search" placeholder="Username or Roblox ID" autocomplete="off" spellcheck="false">
+          <label class="nw-search-label nw-review-filter-label" for="candidate-review-filter">Avatar review filter</label><select id="candidate-review-filter"><option value="all">All accounts</option><option value="full">Full preset matches</option><option value="partial">Partial matches only</option><option value="none">No preset items observed</option><option value="unknown">Avatar unavailable</option></select>
           <p id="candidate-description" class="nw-help"></p>
           <div id="candidate-list" class="nw-candidate-list" aria-label="Comparison candidates"></div>
         </section>
@@ -50,6 +58,7 @@
         </aside>
       </div>
       <details class="nw-method"><summary>How these comparisons work</summary><div>
+        <p><strong>RBI avatar review:</strong> each preset is a specific set of asset IDs from the linked published RBI release. Full means every preset ID is equipped; partial means at least one, but not every, ID is equipped. A one-item preset can produce a full 1/1 match. Review order puts full matches first, then partial matches by the number of distinct preset IDs observed. Results describe the avatar observation time, independently of the historical leaderboard photo.</p>
         <p><strong>Avatar overlap:</strong> shared asset IDs ÷ the union of both equipped asset sets. Clothing and accessories are compared separately from body parts and animations so common defaults do not dominate the cosmetic comparison. An empty or unavailable avatar is never a 100% match.</p>
         <p><strong>Username similarity:</strong> case-insensitive edit distance, calculated as 100 × (1 − edits ÷ the longer username length). One edit is a character insertion, deletion or substitution. Display names are not scored.</p>
         <p><strong>Social links:</strong> only account IDs actually returned by a readable friend, follower or following list create links. Follow direction is preserved. Partial-list shared friends are a minimum observed count.</p>

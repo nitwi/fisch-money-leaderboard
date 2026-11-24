@@ -2,10 +2,11 @@
   "use strict";
   const core = window.FischNetworker, time = window.FischTime;
   const byId = id => document.getElementById(id);
-  const state = {data: null, accounts: [], byId: new Map(), targetId: null, compareId: null, scope: "latest", sort: "avatar", filter: "", assetFilter: "all"};
+  const state = {data: null, accounts: [], byId: new Map(), assetCatalog: new Map(), targetId: null, compareId: null, scope: "latest", sort: "review", reviewFilter: "all", filter: "", assetFilter: "all"};
   const viewerZone = time.viewerTimeZone();
   const GROUP_LABELS = {cosmetic: "Clothing & accessories", body: "Body parts & faces", animation: "Animations", other: "Other assets"};
   const SOCIAL_LABELS = {friends: "Friends", followers: "Followers", following: "Following"};
+  const PRESET_CATEGORIES = {defaultcombos: "Default outfits", xboxcombos: "Xbox outfits", freeoutfitcombos: "Other outfit presets"};
 
   function node(tag, className, text) {
     const element = document.createElement(tag);
@@ -42,6 +43,8 @@
     url.searchParams.set("target", state.targetId);
     if (state.compareId) url.searchParams.set("compare", state.compareId); else url.searchParams.delete("compare");
     if (state.scope === "all") url.searchParams.set("scope", "all"); else url.searchParams.delete("scope");
+    if (state.reviewFilter !== "all") url.searchParams.set("review", state.reviewFilter); else url.searchParams.delete("review");
+    if (state.sort !== "review") url.searchParams.set("sort", state.sort); else url.searchParams.delete("sort");
     history.replaceState(null, "", url);
   }
   function setStatus(text, error = false) {
@@ -53,9 +56,9 @@
     const query = value.trim().replace(/^@/, "").toLowerCase();
     return state.byId.get(core.normalizeId(query)) || state.accounts.find(account => account.username.toLowerCase() === query);
   }
-  function allCandidates() {
+  function allCandidates(filtered = true) {
     if (!state.targetId) return [];
-    return core.candidates(state.accounts, state.byId.get(state.targetId), state.scope, state.sort);
+    return core.candidates(state.accounts, state.byId.get(state.targetId), state.scope, state.sort, filtered ? state.reviewFilter : "all");
   }
   function ensureComparison() {
     const choices = allCandidates();
@@ -66,7 +69,7 @@
     state.targetId = account.id;
     byId("target-input").value = account.username;
     ensureComparison(); state.assetFilter = "all";
-    setStatus(""); updateUrl(); renderReference(); renderSocialGraph(); renderCandidates(); renderComparison();
+    setStatus(""); updateUrl(); renderReference(); renderReviewOverview(); renderSocialGraph(); renderCandidates(); renderComparison();
   }
   function chooseCandidate(id, scroll = false) {
     if (!state.targetId || !state.byId.has(id) || id === state.targetId) return;
@@ -75,7 +78,10 @@
       state.scope = "all"; byId("candidate-scope").value = "all";
     }
     state.compareId = id; state.assetFilter = "all";
-    updateUrl(); renderCandidates(); renderComparison();
+    if (!core.matchesReviewFilter(core.reviewAvatar(candidate.avatar), state.reviewFilter)) {
+      state.reviewFilter = "all"; byId("candidate-review-filter").value = "all";
+    }
+    updateUrl(); renderReviewOverview(); renderCandidates(); renderComparison();
     if (scroll && window.innerWidth <= 850) byId("comparison-panel").scrollIntoView({behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start"});
   }
 
@@ -90,6 +96,7 @@
     detail.append(node("p", "nw-kicker", "REFERENCE ACCOUNT"), node("h2", "", `@${account.username}`));
     const place = account.latest_rank ? `Latest board rank #${account.latest_rank}` : account.ledger ? `Previously photographed · last seen ${account.last_seen_day || "date unavailable"}` : "Reference account · outside the photographed ledger";
     detail.append(node("p", "", `Roblox ID ${account.id} · ${place}`));
+    detail.append(reviewBadge(core.reviewAvatar(account.avatar)));
     wrapper.append(detail);
     const links = node("div", "nw-ref-links");
     links.append(externalLink("Roblox profile", core.profileUrl(account.id)));
@@ -100,6 +107,75 @@
       const link = node("a", "", "Inspect on ledger"); link.href = url.href; links.append(link);
     }
     wrapper.append(links);
+  }
+
+  function reviewBadge(review) {
+    let label = review.status === "unknown" ? "Avatar review unknown" : "No RBI preset items observed";
+    if (review.status === "full") label = review.fullMatches.map(preset => `Full ${preset.name} preset (${preset.matchedCount}/${preset.requiredCount})`).join(" · ");
+    if (review.status === "partial") label = review.partialMatches.map(preset => `Partial ${preset.name} (${preset.matchedCount}/${preset.requiredCount})`).join(" · ");
+    return node("span", `nw-review-badge is-${review.status}`, label);
+  }
+
+  function applyReviewFilter(value) {
+    state.reviewFilter = value;
+    byId("candidate-review-filter").value = value;
+    ensureComparison(); updateUrl(); renderReviewOverview(); renderCandidates(); renderComparison();
+  }
+
+  function renderReviewOverview() {
+    const choices = allCandidates(false), wrapper = byId("review-totals");
+    wrapper.replaceChildren();
+    const labels = {full: "Full preset matches", partial: "Partial matches only", none: "No preset items", unknown: "Avatar unavailable"};
+    for (const [kind, label] of Object.entries(labels)) {
+      const button = node("button", `nw-review-total is-${kind}`); button.type = "button";
+      button.setAttribute("aria-pressed", String(state.reviewFilter === kind));
+      button.append(node("strong", "", choices.filter(item => item.review.status === kind).length), node("span", "", label));
+      button.addEventListener("click", () => applyReviewFilter(state.reviewFilter === kind ? "all" : kind));
+      wrapper.append(button);
+    }
+    byId("review-scope-summary").textContent = state.targetId ? `Counts cover ${choices.length} ${state.scope === "latest" ? "latest-board" : "historical and reference"} candidates, excluding the reference account. Select a count to filter the review queue.` : "Select a cached reference account to load the review queue.";
+  }
+
+  function renderPresetLibrary() {
+    byId("review-rule-count").textContent = `${core.RBI_AVATAR_RULES.presets.length} verified presets`;
+    const wrapper = byId("review-presets"); wrapper.replaceChildren();
+    for (const [category, label] of Object.entries(PRESET_CATEGORIES)) {
+      const presets = core.RBI_AVATAR_RULES.presets.filter(preset => preset.category === category);
+      const group = node("section"); group.append(node("h3", "", `${label} · ${presets.length}`));
+      for (const preset of presets) {
+        const details = node("details", "nw-preset-definition");
+        details.append(node("summary", "", `${preset.name} · ${preset.assetIds.length} item${preset.assetIds.length === 1 ? "" : "s"}`));
+        const list = node("ul", "nw-preset-items");
+        for (const id of preset.assetIds) {
+          const item = node("li"); item.append(externalLink(state.assetCatalog.get(id)?.name || `Asset ${id}`, core.assetUrl(id)), node("small", "", `ID ${id}`)); list.append(item);
+        }
+        details.append(list); group.append(details);
+      }
+      wrapper.append(group);
+    }
+    const source = byId("review-rule-source"); source.replaceChildren("Preset IDs and subset-matching rule: ", externalLink(`Roblox Bot Investigator ${core.RBI_AVATAR_RULES.version}`, core.RBI_AVATAR_RULES.sourceUrl), ". The source's free-outfit category is shown as Other outfit presets; current catalog prices and availability are not checked.");
+  }
+
+  function avatarReviewCard(account, label) {
+    const review = core.reviewAvatar(account.avatar), card = node("article", "nw-account-review");
+    card.append(node("p", "nw-kicker", label), node("h4", "", `@${account.username}`), reviewBadge(review));
+    const observed = node("p", "nw-help"); observed.append("Avatar observed ", checkedTime(account.avatar?.fetched_at, "time unavailable"));
+    const source = core.sourceUrl(account.avatar?.source_url);
+    if (source) observed.append(" · ", externalLink("Source", source));
+    card.append(observed);
+    if (!review.available) { card.append(node("p", "", "The equipped-asset record is unavailable. Preset matching is unknown.")); return card; }
+    if (review.status === "none") { card.append(node("p", "", "No required preset IDs were observed in this readable avatar record.")); return card; }
+    for (const preset of review.presets.filter(item => item.matchedCount > 0)) {
+      const details = node("details", "nw-preset-match"); details.open = true;
+      details.append(node("summary", "", `${preset.name} · ${preset.matchedCount}/${preset.requiredCount} required items · ${preset.status === "full" ? "full preset" : "partial"}`));
+      const list = node("ul", "nw-preset-items");
+      for (const [ids, present] of [[preset.matchedIds, true], [preset.missingIds, false]]) for (const id of ids) {
+        const item = node("li", present ? "is-present" : "is-missing");
+        item.append(node("span", "nw-item-state", present ? "Present" : "Missing"), externalLink(state.assetCatalog.get(id)?.name || `Asset ${id}`, core.assetUrl(id)), node("small", "", `ID ${id}`)); list.append(item);
+      }
+      details.append(list); card.append(details);
+    }
+    return card;
   }
 
   function coverageText(record) {
@@ -194,11 +270,11 @@
     const term = state.filter.trim().replace(/^@/, "").toLowerCase();
     const filtered = all.filter(item => !term || item.account.username.toLowerCase().includes(term) || item.account.id.includes(term) || (item.account.aliases || []).some(alias => String(alias).toLowerCase().includes(term)));
     const wrapper = byId("candidate-list"); wrapper.replaceChildren();
-    byId("candidate-count").textContent = `${filtered.length} / ${all.length}`;
+    byId("candidate-count").textContent = `${filtered.length} / ${allCandidates(false).length}`;
     const scopeLabel = state.scope === "latest" ? `latest photographed Top 50 (${state.data.ledger_latest_checkpoint?.day_key || "date unavailable"})` : "all cached historical and reference accounts";
     byId("candidate-description").textContent = state.targetId ? `Comparing ${scopeLabel}. The reference account is excluded. Shared cosmetics and username text are separate comparisons.` : "Select a cached reference account to load comparisons.";
     if (!state.targetId) { wrapper.append(node("p", "nw-empty", "The requested reference is not available in this snapshot. No comparison has been calculated.")); return; }
-    if (!filtered.length) { wrapper.append(node("p", "nw-empty", "No accounts match this filter. Try another username or include all history.")); return; }
+    if (!filtered.length) { wrapper.append(node("p", "nw-empty", "No accounts match these filters. Try another username, choose All accounts, or include all history.")); return; }
     for (const comparison of filtered) {
       const account = comparison.account, cosmetics = comparison.avatar.groups.cosmetic;
       const button = node("button", "nw-candidate"); button.type = "button";
@@ -210,7 +286,7 @@
       const assets = node("span"); assets.append("Cosmetics: ", node("strong", "", cosmetics ? `${cosmetics.sharedCount} shared · ${percentage(cosmetics.jaccard)}` : "unavailable"));
       const names = node("span"); names.append("Username: ", node("strong", "", percentage(comparison.name.similarity)));
       const social = node("span", `nw-wide${comparison.social.observedCount ? " nw-observed" : ""}`, compactSocial(comparison));
-      metrics.append(assets, names, social); button.append(head, metrics);
+      metrics.append(assets, names, social); button.append(head, reviewBadge(comparison.review), metrics);
       button.addEventListener("click", () => chooseCandidate(account.id, true)); wrapper.append(button);
     }
   }
@@ -274,6 +350,8 @@
     if (!candidate) { wrapper.append(node("p", "nw-empty", "Choose another account to inspect its public data beside the reference.")); return; }
     const comparison = core.compareAccounts(target, candidate), avatar = comparison.avatar, names = comparison.name;
     const pair = node("div", "nw-avatar-pair"); pair.append(avatarCard(target, "REFERENCE"), avatarCard(candidate, "COMPARISON")); wrapper.append(pair);
+    const reviewSection = node("section", "nw-detail-section nw-preset-review"); reviewSection.append(node("h3", "", "Avatar preset review"));
+    const reviewPair = node("div", "nw-review-pair"); reviewPair.append(avatarReviewCard(target, "REFERENCE"), avatarReviewCard(candidate, "COMPARISON")); reviewSection.append(reviewPair); wrapper.append(reviewSection);
     const metrics = node("div", "nw-metrics"), cosmetics = avatar.groups.cosmetic;
     metrics.append(metric("Cosmetic asset overlap", cosmetics ? cosmetics.unionCount ? `${cosmetics.sharedCount} shared` : "No cosmetics" : "Unavailable", cosmetics ? `${percentage(cosmetics.jaccard)} Jaccard · ${cosmetics.sharedCount} shared IDs / ${cosmetics.unionCount} unique IDs across both accounts` : "Both equipped-asset records are needed."));
     metrics.append(metric("Username text similarity", percentage(names.similarity), names.available ? `${names.distance} edit${names.distance === 1 ? "" : "s"} / ${names.maxLength} characters in the longer username. Display names are excluded.` : "Both usernames are needed."));
@@ -312,6 +390,10 @@
         const id = core.normalizeId(account?.id);
         if (!id || typeof account.username !== "string" || !account.username.trim() || state.byId.has(id)) continue;
         const normalized = {...account, id}; state.accounts.push(normalized); state.byId.set(id, normalized);
+        if (account.avatar?.status === "ok" && Array.isArray(account.avatar.assets)) for (const asset of account.avatar.assets) {
+          const assetId = core.normalizeId(asset?.id);
+          if (assetId && !state.assetCatalog.has(assetId)) state.assetCatalog.set(assetId, {...asset, id: assetId});
+        }
       }
       if (!state.accounts.length) throw new Error("No cached accounts are available");
       const cache = byId("cache-time"); cache.replaceChildren(checkedTime(data.generated_at, "Snapshot time unavailable"));
@@ -320,19 +402,25 @@
         const option = node("option"); option.value = account.username; option.label = `ID ${account.id}${account.latest_rank ? ` · latest #${account.latest_rank}` : account.ledger ? " · ledger history" : " · reference"}`; byId("target-options").append(option);
       }
       const params = new URLSearchParams(location.search), requestedTarget = core.normalizeId(params.get("target")), requestedCompare = core.normalizeId(params.get("compare"));
+      if (["avatar", "name", "social", "review"].includes(params.get("sort"))) state.sort = params.get("sort");
+      if (["full", "partial", "none", "unknown"].includes(params.get("review"))) state.reviewFilter = params.get("review");
       state.targetId = params.has("target") ? state.byId.has(requestedTarget) ? requestedTarget : null : state.byId.has("12013950464") ? "12013950464" : state.accounts[0].id;
       state.compareId = state.targetId && state.byId.has(requestedCompare) && requestedCompare !== state.targetId ? requestedCompare : null;
+      if (state.compareId && !core.matchesReviewFilter(core.reviewAvatar(state.byId.get(state.compareId).avatar), state.reviewFilter)) state.reviewFilter = "all";
       if (params.get("scope") === "all" || state.compareId && (!state.byId.get(state.compareId).ledger || !state.byId.get(state.compareId).latest_rank)) state.scope = "all";
       byId("candidate-scope").value = state.scope;
+      byId("candidate-sort").value = state.sort;
+      byId("candidate-review-filter").value = state.reviewFilter;
       ensureComparison(); byId("target-input").value = state.byId.get(state.targetId)?.username || requestedTarget || "";
       byId("networker-app").hidden = false; setStatus("");
       if (params.has("target") && !state.targetId) setStatus(requestedTarget ? `Roblox account ID ${requestedTarget} is not in this snapshot. Select another cached reference account, or return after the snapshot is refreshed.` : "The requested reference ID is invalid. Select a cached account to begin.", true);
-      updateUrl(); renderReference(); renderSocialGraph(); renderCandidates(); renderComparison();
+      updateUrl(); renderPresetLibrary(); renderReference(); renderReviewOverview(); renderSocialGraph(); renderCandidates(); renderComparison();
 
       byId("target-form").addEventListener("submit", event => { event.preventDefault(); chooseTarget(accountFromInput(byId("target-input").value)); });
       byId("target-input").addEventListener("change", () => { const account = accountFromInput(byId("target-input").value); if (account) chooseTarget(account); });
-      byId("candidate-scope").addEventListener("change", event => { state.scope = event.target.value; ensureComparison(); updateUrl(); renderCandidates(); renderComparison(); });
-      byId("candidate-sort").addEventListener("change", event => { state.sort = event.target.value; renderCandidates(); });
+      byId("candidate-scope").addEventListener("change", event => { state.scope = event.target.value; ensureComparison(); updateUrl(); renderReviewOverview(); renderCandidates(); renderComparison(); });
+      byId("candidate-sort").addEventListener("change", event => { state.sort = event.target.value; updateUrl(); renderCandidates(); });
+      byId("candidate-review-filter").addEventListener("change", event => applyReviewFilter(event.target.value));
       byId("candidate-search").addEventListener("input", event => { state.filter = event.target.value; renderCandidates(); });
       byId("share-comparison").addEventListener("click", async () => {
         const url = location.href;

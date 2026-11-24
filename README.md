@@ -44,7 +44,15 @@ The social graph draws only API-observed friendship or directed following edges.
 
 Refresh the bounded public snapshot with `python tools/scan_networker.py --target Lunary810`; repeat `--target USERNAME` for additional exact reference accounts. No Roblox credentials or third-party proxy are used. The collector paces avatar requests, respects rate-limit waits, preserves endpoint/error/coverage metadata, and writes the completed snapshot atomically. `--output PATH` can create a review copy. The manual **Collect account comparison snapshot** workflow produces a downloadable artifact for review; it does not change the published site. To publish a reviewed refresh, commit the resulting `site/network-data.json` through the normal Pages workflow. Browser reloads load the saved snapshot rather than rescan Roblox.
 
-The implementation takes the stable asset-set comparison approach from the owner's historical RBI Investigator versions. Its old friend-list assumptions, unvalidated suspicion score, and error-as-empty behavior are not carried over. No RBI runtime data, credentials, Discord components, or private investigation records are included.
+### RBI avatar review flags
+
+The avatar rules come from the full [`nitwi/Roblox-Bot-Investigator` source, `RBI_Bot.py` from release `v0.18.1.1-beta` at revision `3b3f4e40a9ce3a258f3dac6584add47959a9a980`](https://github.com/nitwi/Roblox-Bot-Investigator/blob/3b3f4e40a9ce3a258f3dac6584add47959a9a980/RBI_Bot.py). This is the expanded investigator repository; the older `nitwi/rbi` repository has only the three original global presets.
+
+All **22 built-in presets** are represented: the original Bacon, Beanie and Acorn sets; the Xbox John, Oakley, Claire, Casey, Lin and Serena sets; and GreenBean, Junkbot, Knights of Redcliff, Dennis, Lindsey, Denny, Linlin, Kenneth, Oliver, Cindy, City Life Woman, Squad Ghouls: Drop Dead Tedd and Summer. The source groups the last thirteen under its free-outfit category; that grouping is a preset label, not a current catalog-price check.
+
+A full preset match means that every asset ID in that preset is equipped; additional assets are allowed. A partial match means that at least one but fewer than all preset IDs are equipped. Presets contain between one and eight IDs, so the viewer shows the actual matched/required count, the matched and missing item links, and the avatar observation time. Readable avatars without overlap and unavailable avatars remain distinct. These are item-based review flags, not validated automation, ownership or misconduct probabilities.
+
+The existing pairwise avatar overlap, username text similarity and observed social relationships remain independent. RBI's old friend-list assumptions, badge-derived suspicion score, and error-as-empty behavior are not carried over. No RBI credentials, Discord components, or private investigation records are included.
 
 Run `node --test tests/test_networker.cjs` and `python -m unittest discover -s tests` for the comparison, coverage, identity, pagination, and retry checks. The Pages job checks these before deployment.
 

@@ -10,6 +10,36 @@
   const ANIMATION_TYPES = new Set([24, 48, 49, 50, 51, 52, 53, 54, 55, 56, 61, 78]);
   const COSMETIC_TYPES = new Set([2, 8, 11, 12, 41, 42, 43, 44, 45, 46, 47, 64, 65, 66, 67, 68, 69, 70, 71, 72, 76, 77]);
   const GROUPS = ["cosmetic", "body", "animation", "other"];
+  // RBI's full rule is containment, not whole-avatar equality. Extra equipped items are allowed.
+  const RBI_AVATAR_RULES = Object.freeze({
+    sourceUrl: "https://github.com/nitwi/Roblox-Bot-Investigator/blob/3b3f4e40a9ce3a258f3dac6584add47959a9a980/RBI_Bot.py",
+    commit: "3b3f4e40a9ce3a258f3dac6584add47959a9a980",
+    version: "v0.18.1.1-beta",
+    presets: Object.freeze([
+      Object.freeze({id: "bacon", name: "Bacon", category: "defaultcombos", assetIds: Object.freeze(["144076760", "144076358", "63690008"])}),
+      Object.freeze({id: "beanie", name: "Beanie", category: "defaultcombos", assetIds: Object.freeze(["382537569", "4047884939", "1772336109"])}),
+      Object.freeze({id: "acorn", name: "Acorn", category: "defaultcombos", assetIds: Object.freeze(["62724852", "144076512", "144076436"])}),
+      Object.freeze({id: "john", name: "John", category: "xboxcombos", assetIds: Object.freeze(["301809996", "301811279", "301819845", "301820684"])}),
+      Object.freeze({id: "oakley", name: "Oakley", category: "xboxcombos", assetIds: Object.freeze(["301810204", "301811432", "301819935", "301820724"])}),
+      Object.freeze({id: "greenbean", name: "GreenBean", category: "freeoutfitcombos", assetIds: Object.freeze(["617605556"])}),
+      Object.freeze({id: "claire", name: "Claire", category: "xboxcombos", assetIds: Object.freeze(["301820599", "301819020"])}),
+      Object.freeze({id: "casey", name: "Casey", category: "xboxcombos", assetIds: Object.freeze(["301819154", "301820642", "301809497", "301811027"])}),
+      Object.freeze({id: "lin", name: "Lin", category: "xboxcombos", assetIds: Object.freeze(["301820310", "301818464", "301806786", "301810423"])}),
+      Object.freeze({id: "serena", name: "Serena", category: "xboxcombos", assetIds: Object.freeze(["301818806", "301820523", "301807898", "301810602"])}),
+      Object.freeze({id: "junkbot", name: "Junkbot", category: "freeoutfitcombos", assetIds: Object.freeze(["12724232885", "4381832739", "4381828509", "4381823417", "4381821661", "4381819685", "4381817635", "4381815211"])}),
+      Object.freeze({id: "knightsofredcliff", name: "Knights of Redcliff", category: "freeoutfitcombos", assetIds: Object.freeze(["2493559059", "2493559856", "2493586650", "2493590711", "2493776828", "2493786076", "137831860413813"])}),
+      Object.freeze({id: "dennis", name: "Dennis", category: "freeoutfitcombos", assetIds: Object.freeze(["11822635053", "4637596615", "4637601297", "4637254498"])}),
+      Object.freeze({id: "lindsey", name: "Lindsey", category: "freeoutfitcombos", assetIds: Object.freeze(["12945228337", "4637605284", "4637267557", "4637603462"])}),
+      Object.freeze({id: "denny", name: "Denny", category: "freeoutfitcombos", assetIds: Object.freeze(["128985581083096", "6445270994", "6445268819", "6445265102", "6445263379", "6445262286", "6445260402"])}),
+      Object.freeze({id: "linlin", name: "Linlin", category: "freeoutfitcombos", assetIds: Object.freeze(["85216210917123", "6494077172", "6494056892", "6494055897", "6494055013", "6494053789", "6494051962"])}),
+      Object.freeze({id: "kenneth", name: "Kenneth", category: "freeoutfitcombos", assetIds: Object.freeze(["15093144795", "4637618900", "4637617396", "4637431811"])}),
+      Object.freeze({id: "oliver", name: "Oliver", category: "freeoutfitcombos", assetIds: Object.freeze(["3963861732", "3963864909", "3963867514", "3963869770", "3963871432", "3963874672", "3670737444", "12778883791"])}),
+      Object.freeze({id: "cindy", name: "Cindy", category: "freeoutfitcombos", assetIds: Object.freeze(["13253943097", "4637612548", "4637611578", "4637156063"])}),
+      Object.freeze({id: "citylifewoman", name: "City Life Woman", category: "freeoutfitcombos", assetIds: Object.freeze(["15093243863", "2492675286", "2492674027", "2492670347", "2492669375", "2492671662", "2492667589"])}),
+      Object.freeze({id: "squadghoulstedd", name: "Squad Ghouls: Drop Dead Tedd", category: "freeoutfitcombos", assetIds: Object.freeze(["2499654059", "112187483939951", "2499646611", "2499646090", "2499645445", "2499644791", "2499643947"])}),
+      Object.freeze({id: "summer", name: "Summer", category: "freeoutfitcombos", assetIds: Object.freeze(["3963490791", "3670737444"])})
+    ])
+  });
 
   function normalizeId(value) {
     if (typeof value === "number" && (!Number.isSafeInteger(value) || value <= 0)) return null;
@@ -100,6 +130,30 @@
       configurationMatch};
   }
 
+  function reviewAvatar(avatar, rules = RBI_AVATAR_RULES.presets) {
+    const equipped = assetMap(avatar);
+    if (!equipped) return {available: false, status: "unknown", presets: [], fullMatches: [], partialMatches: [], matchedAssetCount: null};
+    const presets = rules.flatMap(preset => {
+      const required = [...new Set((preset.assetIds || []).map(normalizeId).filter(Boolean))];
+      if (!required.length) return [];
+      const matchedIds = required.filter(id => equipped.has(id));
+      const missingIds = required.filter(id => !equipped.has(id));
+      return [{id: preset.id, name: preset.name, category: preset.category, requiredCount: required.length,
+        matchedCount: matchedIds.length, matchedIds, missingIds,
+        matchedAssets: matchedIds.map(id => equipped.get(id)),
+        status: !matchedIds.length ? "none" : missingIds.length ? "partial" : "full"}];
+    });
+    const fullMatches = presets.filter(preset => preset.status === "full");
+    const partialMatches = presets.filter(preset => preset.status === "partial");
+    return {available: true, status: fullMatches.length ? "full" : partialMatches.length ? "partial" : "none",
+      presets, fullMatches, partialMatches,
+      matchedAssetCount: new Set(presets.flatMap(preset => preset.matchedIds)).size};
+  }
+
+  function matchesReviewFilter(review, filter = "all") {
+    return !["full", "partial", "none", "unknown"].includes(filter) || review.status === filter;
+  }
+
   function usernameSimilarity(first, second) {
     const normalize = value => typeof value === "string" ? value.trim().replace(/^@/, "").toLowerCase() : "";
     const a = normalize(first), b = normalize(second);
@@ -184,21 +238,28 @@
   function compareAccounts(target, candidate) {
     return {account: candidate, avatar: compareAvatars(target?.avatar, candidate?.avatar),
       name: usernameSimilarity(target?.username, candidate?.username),
-      social: directRelations(target, candidate), sharedFriends: sharedFriends(target, candidate)};
+      social: directRelations(target, candidate), sharedFriends: sharedFriends(target, candidate),
+      review: reviewAvatar(candidate?.avatar)};
   }
 
-  function candidates(accounts, target, scope = "latest", sort = "avatar") {
+  function candidates(accounts, target, scope = "latest", sort = "avatar", reviewFilter = "all") {
     const targetId = normalizeId(target?.id), seen = new Set();
     const result = accounts.filter(account => {
       const id = normalizeId(account?.id);
       if (!id || id === targetId || seen.has(id)) return false;
       seen.add(id);
       return scope !== "latest" || (account.ledger && Number.isInteger(account.latest_rank) && account.latest_rank > 0 && account.latest_rank <= 50);
-    }).map(account => compareAccounts(target, account));
+    }).map(account => compareAccounts(target, account)).filter(item => matchesReviewFilter(item.review, reviewFilter));
     const compareNumber = (a, b) => (b ?? -1) - (a ?? -1);
     return result.sort((a, b) => {
       let order;
-      if (sort === "name") order = compareNumber(a.name.similarity, b.name.similarity);
+      if (sort === "review") {
+        const rank = {full: 3, partial: 2, none: 1, unknown: 0};
+        order = compareNumber(rank[a.review.status], rank[b.review.status]) ||
+          compareNumber(a.review.fullMatches.length, b.review.fullMatches.length) ||
+          compareNumber(a.review.matchedAssetCount, b.review.matchedAssetCount);
+      }
+      else if (sort === "name") order = compareNumber(a.name.similarity, b.name.similarity);
       else if (sort === "social") order = compareNumber(a.social.observedCount, b.social.observedCount) || compareNumber(a.sharedFriends.count, b.sharedFriends.count);
       else order = compareNumber(a.avatar.groups.cosmetic?.sharedCount, b.avatar.groups.cosmetic?.sharedCount) || compareNumber(a.avatar.groups.cosmetic?.jaccard, b.avatar.groups.cosmetic?.jaccard);
       return order || a.account.username.localeCompare(b.account.username, "en", {sensitivity: "base"}) || String(a.account.id).localeCompare(String(b.account.id));
@@ -206,5 +267,6 @@
   }
 
   return Object.freeze({normalizeId, profileUrl, assetUrl, thumbnailUrl, sourceUrl, assetGroup, compareAvatars,
+    RBI_AVATAR_RULES, reviewAvatar, matchesReviewFilter,
     usernameSimilarity, socialList, directRelations, sharedFriends, knownEdges, compareAccounts, candidates});
 });
