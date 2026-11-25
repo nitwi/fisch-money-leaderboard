@@ -279,7 +279,7 @@
         historicalEdges: state.data.historical_friend_edges || [],
         avatarNodes: state.data.network_nodes || [],
         focusId: state.rootId, core, usernamePatterns: patterns,
-        includeConnectors: true, includeExternal: state.allExternal,
+        includeConnectors: true, includeExternal: state.allExternal, quadrant: true,
         onSelect: (id) => { state.selectedId = id; updateSticky(); },
         onReference: (id, person) => { chooseRoot(person || state.network.nodes.get(id)); }
       };
