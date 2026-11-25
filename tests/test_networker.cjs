@@ -248,14 +248,16 @@ test('Top 50 avatar list is ranked, searchable and synchronized with selected ma
   const history = account('3', {username: 'Historic', ledger: true, latest_rank: null});
   const {elements, location, graphCalls} = await renderSnapshot([top2, history, top1], '?target=2');
   const list = elements.get('top50-target');
-  assert.equal(elements.get('top50-count').textContent, '2 of 2');
+  assert.equal(elements.get('top50-count').textContent, '2 / 2');
   assert.deepEqual(list.children.map(child => child.textContent.match(/#\\d+/)[0]), ['#1', '#2']);
   assert.equal(list.children[1].attributes['aria-pressed'], 'true');
+  assert.equal(list.children[1].className, 'nw-candidate nw-main-account-card');
+  assert.match(list.children[1].textContent, /Friend list:/);
   assert.ok(descendants(list.children[1]).some(child => child.tagName === 'img' && child.src === top2.avatar_thumbnail));
   assert.ok(descendants(list.children[0]).some(child => child.tagName === 'img' && child.src === top1.headshot));
   elements.get('target-input').value = 'Fir';
   elements.get('target-input').listeners.input[0]({target: {value: 'Fir'}});
-  assert.equal(elements.get('top50-count').textContent, '1 of 2');
+  assert.equal(elements.get('top50-count').textContent, '1 / 2');
   assert.match(list.children[0].textContent, /@First/);
   list.children[0].listeners.click[0]();
   assert.equal(elements.get('target-input').value, 'First');
@@ -269,7 +271,7 @@ test('Top 50 avatar list is ranked, searchable and synchronized with selected ma
   assert.equal(new URL(location.href).searchParams.get('target'), '3');
   elements.get('target-input').value = 'ZZZ';
   elements.get('target-input').listeners.input[0]({target: {value: 'ZZZ'}});
-  assert.match(list.textContent, /No Top 50 matches/);
+  assert.match(list.textContent, /No Top 50 accounts match/);
 });
 
 test('missing target deep links show a clear empty state without substituting or rewriting the target', async () => {
