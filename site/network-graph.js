@@ -8,6 +8,8 @@
 
   const SVG_NS = "http://www.w3.org/2000/svg";
   const NODE_WIDTH = 224, NODE_HEIGHT = 72, MAX_NODES = 120;
+  const DEFAULT_LANE_LIMITS = Object.freeze({up: 4, right: 6, down: 4, left: 5});
+  const LANE_NAMES = Object.freeze({up: "↑ Following", right: "→ Leaderboard", down: "↓ Followers", left: "← External leads"});
   let instanceCount = 0;
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
   const name = node => node?.username ? `@${node.username}` : node?.display_name || `ID ${node?.id || "unknown"}`;
@@ -61,7 +63,7 @@
    * when their ID is in expandedIds. A collapsed subtree may remain reachable
    * through a different expanded branch, as real shared connections should.
    */
-  function buildBranches({network, historicalEdges = [], avatarNodes = [], accounts = [], focusId, core, expandedIds = [], includeConnectors = false, includeExternal = false, maxNodes = MAX_NODES}) {
+  function buildBranches({network, historicalEdges = [], avatarNodes = [], accounts = [], focusId, core, expandedIds = [], includeConnectors = false, includeExternal = false, quadrant = false, laneLimits = null, maxNodes = MAX_NODES}) {
     if (!core?.normalizeId || !core?.reviewAvatar) throw new TypeError("A FischNetworker core is required.");
     const nodesById = new Map();
     for (const node of network?.nodes?.values?.() || []) {
@@ -115,24 +117,69 @@
       });
     }
     const id = core.normalizeId(focusId), root = nodesById.get(id) || null;
+    // Classify each directly observed connection ONCE. Other relationship kinds
+    // remain represented by separate friend/follow edges and in the inspector.
+    // Priority: known ledger → right, external friendship → left, outgoing
+    // follow → up, incoming follow → down. No username/avatar similarity
+    // ever creates a relationship or direction.
+    const lanes = new Map(), laneCounts = {up: 0, down: 0, left: 0, right: 0};
+    const laneShown = {up: 0, down: 0, left: 0, right: 0};
+    const related = new Map();
+    for (const edge of edgeMap.values()) {
+      if (edge.from !== id && edge.to !== id) continue;
+      const other = edge.from === id ? edge.to : edge.from;
+      if (!related.has(other)) related.set(other, {friend: false, following: false, follower: false});
+      const state = related.get(other);
+      if (edge.kind === "friend") state.friend = true;
+      else if (edge.from === id) state.following = true;
+      else state.follower = true;
+    }
+    for (const [other, relation] of related) {
+      if (!eligibilityById.get(other)?.eligible) continue;
+      const lane = nodesById.get(other)?.ledger ? "right" :
+        relation.friend ? "left" : relation.following ? "up" : relation.follower ? "down" : "left";
+      lanes.set(other, lane);
+      laneCounts[lane]++;
+    }
+    const cap = name => laneLimits && Number.isFinite(laneLimits[name]) ?
+      Math.max(0, Math.floor(laneLimits[name])) : Infinity;
+    const priority = (a, b) => {
+      const ca = eligibilityById.get(a.id), cb = eligibilityById.get(b.id);
+      return Number(cb.category === "connector") - Number(ca.category === "connector") ||
+        (cb.ledgerConnections || 0) - (ca.ledgerConnections || 0) || compareNodes(a, b);
+    };
     const expanded = new Set([...expandedIds].map(core.normalizeId).filter(Boolean));
     if (id) expanded.add(id);
     const limit = Number.isFinite(maxNodes) ? clamp(Math.floor(maxNodes), 2, MAX_NODES) : MAX_NODES;
     const model = {focusId: id, root, nodesById, eligibility: eligibilityById, adjacency, expanded,
       nodes: [], edges: [], parents: new Map(), depths: new Map(), maxNodes: limit,
+      lanes, laneCounts, laneShown, quadrant: Boolean(quadrant),
       omittedEligibleIds: [], hidden: {unchecked: 0, partial: 0, noMatch: 0}};
     if (!root) return model;
     const included = new Set([id]), queue = [id], omitted = new Set(), hidden = new Set();
+    const directAllowed = new Set();
+    for (const lane of ["right", "left", "up", "down"]) {
+      const candidates = [...lanes].filter(([, side]) => side === lane)
+        .map(([nodeId]) => nodesById.get(nodeId)).sort(priority);
+      for (const person of candidates.slice(0, cap(lane))) directAllowed.add(person.id);
+      for (const person of candidates.slice(cap(lane))) omitted.add(person.id);
+    }
     model.depths.set(id, 0);
     for (let cursor = 0; cursor < queue.length; cursor++) {
       const ownerId = queue[cursor];
       if (!expanded.has(ownerId)) continue;
-      const neighbors = [...(adjacency.get(ownerId) || [])].map(otherId => nodesById.get(otherId)).sort(compareNodes);
+      const neighbors = [...(adjacency.get(ownerId) || [])].map(otherId => nodesById.get(otherId))
+        .sort(ownerId === id ? (a, b) => {
+          const order = {right: 0, left: 1, up: 2, down: 3};
+          return (order[lanes.get(a.id)] ?? 4) - (order[lanes.get(b.id)] ?? 4) || priority(a, b);
+        } : compareNodes);
       for (const node of neighbors) {
         if (!eligibilityById.get(node.id).eligible && node.id !== id) { hidden.add(node.id); continue; }
+        if (lanes.has(node.id) && !directAllowed.has(node.id)) { omitted.add(node.id); continue; }
         if (included.has(node.id)) continue;
         if (included.size >= limit) { omitted.add(node.id); continue; }
         included.add(node.id); queue.push(node.id);
+        if (ownerId === id) laneShown[lanes.get(node.id)]++;
         model.parents.set(node.id, ownerId); model.depths.set(node.id, model.depths.get(ownerId) + 1);
       }
     }
@@ -178,6 +225,51 @@
   function layout(model, manualPositions = new Map()) {
     const positions = new Map(), children = new Map();
     if (!model.root) return positions;
+    if (model.quadrant) {
+      // Stable 4-way radial rows, one lane per saved connection type. Unlike
+      // tree-fit, no lane can form a 55-node column that collapses to 11% zoom.
+      const buckets = new Map();
+      for (const person of model.nodes) {
+        if (person.id === model.focusId) continue;
+        let first = person.id;
+        while (model.parents.get(first) && model.parents.get(first) !== model.focusId) {
+          first = model.parents.get(first);
+        }
+        const lane = model.lanes.get(first) || "left", depth = model.depths.get(person.id) || 1;
+        const key = lane + ":" + depth;
+        if (!buckets.has(key)) buckets.set(key, []);
+        buckets.get(key).push(person.id);
+      }
+      // Reserve separate extents for the vertical/horizontal groups, including
+      // the number of currently expanded nodes. Avoid corners colliding when
+      // e.g. "following" and "leaderboard" both have multiple cards.
+      let horizontalHalfHeight = 0, verticalHalfWidth = 0;
+      for (const [key, ids] of buckets) {
+        const side = key.split(":")[0];
+        if (side === "left" || side === "right")
+          horizontalHalfHeight = Math.max(horizontalHalfHeight, (ids.length - 1) * 56);
+        else verticalHalfWidth = Math.max(verticalHalfWidth, (ids.length - 1) * 130);
+      }
+      const xRadius = Math.max(430, verticalHalfWidth + 160);
+      const yRadius = Math.max(440, horizontalHalfHeight + 160);
+      positions.set(model.focusId, {x: 0, y: 0});
+      for (const [key, ids] of buckets) {
+        const [lane, depthText] = key.split(":"), depth = Number(depthText);
+        ids.forEach((nodeId, index) => {
+          const offset = index - (ids.length - 1) / 2;
+          const position = lane === "right" ? {x: depth * xRadius, y: offset * 112} :
+            lane === "left" ? {x: -depth * xRadius, y: offset * 112} :
+            lane === "up" ? {x: offset * 260, y: -depth * yRadius} :
+            {x: offset * 260, y: depth * yRadius};
+          const manual = manualPositions.get(nodeId);
+          if (Number.isFinite(manual?.x) && Number.isFinite(manual?.y)) {
+            position.x = manual.x; position.y = manual.y;
+          }
+          positions.set(nodeId, position);
+        });
+      }
+      return positions;
+    }
     for (const node of model.nodes) children.set(node.id, []);
     for (const [child, parent] of model.parents) children.get(parent).push(child);
     let nextRow = 0;
@@ -254,6 +346,7 @@
     const uniqueId = `fng-${++instanceCount}`;
     let options = {...initialOptions}, model, positions = new Map(), manual = new Map();
     let expanded = new Set(), selectedId = null, focusId = options.focusId;
+    let laneLimits = options.quadrant ? {...DEFAULT_LANE_LIMITS, ...options.laneLimits} : options.laneLimits || null;
     let view = {x: 0, y: 0, scale: 1}, dimensions = {width: 900, height: 500};
     let destroyed = false, gesture = null, suppressClickUntil = 0;
     const pointers = new Map(), listeners = [], nodeElements = new Map(), edgeElements = [];
@@ -294,6 +387,19 @@
     heading.append(kicker, mainName);
     toolbar.append(heading);
     const summary = el("p", "fng-summary"); summary.setAttribute("aria-live", "polite");
+    const laneBar = el("div", "fng-lane-bar"), laneControls = new Map();
+    for (const [lane, title] of Object.entries(LANE_NAMES)) {
+      const area = el("div", "fng-lane fng-lane-" + lane), heading = el("strong", "", title);
+      const counts = el("span", "fng-lane-count", "0 shown");
+      const less = button("−", () => { laneLimits[lane] = DEFAULT_LANE_LIMITS[lane]; rebuild(false); });
+      less.setAttribute("aria-label", "Show fewer " + title);
+      const more = button("+", () => { laneLimits[lane] = Math.min(model.laneCounts[lane], laneLimits[lane] + 5); rebuild(false); });
+      more.setAttribute("aria-label", "Show more " + title);
+      const focus = button("View", () => centerLane(lane), "fng-lane-focus");
+      focus.setAttribute("aria-label", "Center graph on " + title);
+      area.append(heading, counts, focus, less, more); laneBar.append(area);
+      laneControls.set(lane, {area, counts, more, less, focus});
+    }
     const boundsNote = el("p", "fng-bounds"), workspace = el("div", "fng-workspace"), canvas = el("div", "fng-canvas");
     const controls = el("div", "fng-controls"), zoomLabel = el("output", "fng-zoom", "100%");
     zoomLabel.setAttribute("aria-label", "Graph zoom");
@@ -315,12 +421,12 @@
     const pickerRow = el("label", "fng-picker"), picker = el("select"); picker.setAttribute("aria-label", "Inspect a visible account");
     pickerRow.append(el("span", "", "Inspect visible account"), picker);
     const legend = el("div", "fng-legend");
-    legend.append(el("span", "fng-legend-friend", "Solid cyan: friendship"), el("span", "fng-legend-follow", "Gold arrow: follows"), el("span", "", "Green: leaderboard"), el("span", "", "Purple: shared external connector"), el("span", "", "Gold: RBI preset"), el("span", "", "Faded: not seen in later complete list"));
+    legend.append(el("span", "fng-legend-friend", "Cyan solid: recorded friends"), el("span", "fng-legend-follow", "Gold arrows: following direction"), el("span", "", "Green: ledger account"), el("span", "", "Purple: external account connected to ≥2 ledger accounts (not proof of bots)"), el("span", "", "Gold node: RBI preset match"), el("span", "", "Faded: older link not seen in later complete list"));
     const help = el("p", "fng-help", "Select a node to inspect it, then expand its saved connections. Drag nodes or empty space to arrange the view. Pinch or Ctrl + scroll to zoom; keyboard + / − and arrow keys work on the canvas.");
     help.id = `${uniqueId}-help`;
     const caution = el("p", "fng-help", "Every edge requires a saved friend/follow observation. External connectors link two or more ledger accounts through observed relationships; they are not proof of common ownership, automation or misconduct. Incomplete observations remain unknown.");
     const live = el("p", "fng-sr-only"); live.setAttribute("role", "status"); live.setAttribute("aria-live", "polite");
-    wrapper.append(toolbar, summary, boundsNote, workspace, pickerRow, legend, help, caution, live);
+    wrapper.append(toolbar, summary, laneBar, boundsNote, workspace, pickerRow, legend, help, caution, live);
     container.replaceChildren(wrapper);
 
     function announce(message) { live.textContent = message; }
@@ -337,6 +443,22 @@
       measure();
       const routePoints = model.edges.flatMap(edge => edgeGeometry(edge, positions, model.parents).points);
       view = fitTransform(positions, dimensions.width, dimensions.height, routePoints); transform();
+    }
+    function rootView() {
+      measure();
+      view = {scale: dimensions.width < 600 ? .53 : .60, x: dimensions.width / 2, y: dimensions.height / 2};
+      transform();
+    }
+    function centerLane(lane) {
+      const ids = [...model.lanes].filter(([id, side]) => side === lane && positions.has(id))
+        .map(([id]) => id);
+      if (!ids.length) return;
+      const x = ids.reduce((sum, id) => sum + positions.get(id).x, 0) / ids.length;
+      const y = ids.reduce((sum, id) => sum + positions.get(id).y, 0) / ids.length;
+      measure();
+      view = {...view, x: dimensions.width / 2 - x * view.scale, y: dimensions.height / 2 - y * view.scale};
+      transform();
+      announce("Centered graph on " + LANE_NAMES[lane] + ".");
     }
     function zoom(factor) { view = zoomTransform(view, factor, {x: dimensions.width / 2, y: dimensions.height / 2}); transform(); }
     function positionNodes() {
@@ -411,9 +533,13 @@
       mainName.textContent = model.root ? name(model.root) : "Choose an account";
       if (!model.root) { summary.textContent = "Choose a saved account to explore its observed connections."; boundsNote.hidden = true; return; }
       const stats = model.directStats, shown = Math.max(0, model.nodes.length - 1);
-      summary.textContent = `${shown} visible branch account${shown === 1 ? "" : "s"} · ${stats.eligible} eligible direct neighbor${stats.eligible === 1 ? "" : "s"} of ${stats.total} observed. ${hiddenText(model.hidden) ? `Hidden across open branches: ${hiddenText(model.hidden)}.` : ""}`;
+      summary.textContent = options.quadrant ?
+        `${shown} visible connected accounts · ${stats.eligible} qualifying direct neighbors out of ${stats.total} observed. Use the + controls to reveal more in each direction; drag to pan.` :
+        `${shown} visible branch account${shown === 1 ? "" : "s"} · ${stats.eligible} eligible direct neighbor${stats.eligible === 1 ? "" : "s"} of ${stats.total} observed. ${hiddenText(model.hidden) ? `Hidden across open branches: ${hiddenText(model.hidden)}.` : ""}`;
       boundsNote.hidden = !model.omittedEligibleIds.length;
-      boundsNote.textContent = `${model.omittedEligibleIds.length} more eligible account${model.omittedEligibleIds.length === 1 ? "" : "s"} cannot fit within this view's ${model.maxNodes}-account limit. Collapse another branch or use a connected account as main to inspect them.`;
+      boundsNote.textContent = options.quadrant ?
+        `${model.omittedEligibleIds.length} qualifying accounts are not drawn yet. Expand the relevant direction with +; selection limits only hide cards, never erase evidence.` :
+        `${model.omittedEligibleIds.length} more eligible account${model.omittedEligibleIds.length === 1 ? "" : "s"} cannot fit within this view's ${model.maxNodes}-account limit. Collapse another branch or use a connected account as main to inspect them.`;
       collapseButton.disabled = expanded.size === 0 && manual.size === 0;
       svg.setAttribute("aria-label", `Observed connections branching from ${name(model.root)}. ${shown} visible branch accounts.`);
     }
@@ -484,7 +610,7 @@
         const unseenCount = [...(model.adjacency.get(node.id) || [])].filter(id => !visible.has(id) && model.eligibility.get(id).eligible).length;
         const expand = button(isOpen ? "Collapse this branch" : `Expand saved neighbors (${unseenCount})`, () => {
           if (expanded.has(node.id)) expanded.delete(node.id); else expanded.add(node.id);
-          rebuild(true); announce(`${expanded.has(node.id) ? "Expanded" : "Collapsed"} ${name(node)}. Main account remains ${name(model.root)}.`);
+          rebuild(!options.quadrant); announce(`${expanded.has(node.id) ? "Expanded" : "Collapsed"} ${name(node)}. Main account remains ${name(model.root)}.`);
         }, "fng-action-primary");
         expand.disabled = !isOpen && !unseenCount;
         actions.append(expand);
@@ -540,7 +666,14 @@
     }
     function rebuild(shouldFit = false) {
       if (destroyed) return;
-      model = buildBranches({...options, focusId, expandedIds: expanded});
+      model = buildBranches({...options, focusId, expandedIds: expanded, laneLimits});
+      laneBar.hidden = !options.quadrant;
+      if (options.quadrant) for (const [lane, control] of laneControls) {
+        control.counts.textContent = `${model.laneShown[lane]} / ${model.laneCounts[lane]}`;
+        control.more.disabled = laneLimits[lane] >= model.laneCounts[lane];
+        control.less.disabled = laneLimits[lane] <= DEFAULT_LANE_LIMITS[lane];
+        control.focus.disabled = model.laneShown[lane] === 0;
+      }
       if (!model.nodes.some(node => node.id === selectedId)) selectedId = model.focusId;
       positions = layout(model, manual);
       picker.replaceChildren();
@@ -550,7 +683,7 @@
       }
       picker.value = selectedId || ""; draw(); renderSummary(); renderInspector();
       if (typeof options.onSelect === "function" && model.nodesById.has(selectedId)) options.onSelect(selectedId, model.nodesById.get(selectedId));
-      if (shouldFit) fit();
+      if (shouldFit) { if (options.quadrant) rootView(); else fit(); }
     }
     function point(event) {
       const rect = svg.getBoundingClientRect();
@@ -641,7 +774,8 @@
         const nextFocus = nextOptions.focusId === undefined ? focusId : nextOptions.focusId;
         const changed = options.core.normalizeId(nextFocus) !== options.core.normalizeId(focusId);
         options = {...options, ...nextOptions}; focusId = nextFocus;
-        if (changed) { expanded.clear(); manual.clear(); selectedId = focusId; pointers.clear(); gesture = null; }
+        if (changed) { expanded.clear(); manual.clear(); selectedId = focusId; pointers.clear(); gesture = null;
+          laneLimits = options.quadrant ? {...DEFAULT_LANE_LIMITS, ...options.laneLimits} : options.laneLimits || null; }
         rebuild(changed);
       },
       destroy() {
