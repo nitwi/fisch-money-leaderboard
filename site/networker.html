@@ -13,7 +13,8 @@
   <script defer src="username-patterns.js?v=91044023c885"></script>
   <script defer src="networker-core.js?v=b622899f63bf"></script>
   <script defer src="network-graph.js?v=3fbeabefc303"></script>
-  <script defer src="networker.js?v=197921c7032f"></script>
+  <script defer src="networker-focus.js?v=initial"></script>
+  <link rel="stylesheet" href="networker-focus.css?v=initial">
 </head>
 <body class="networker-page">
   <header class="site-head">
@@ -22,72 +23,82 @@
   </header>
   <main class="nw-main">
     <section class="nw-hero">
-      <div><p class="nw-kicker">ACCOUNT COMPARISON</p><h1>Networker<span>.</span></h1><p>Inspect public avatars, compare usernames, and trace social links when the source data is available.</p></div>
+      <div><p class="nw-kicker">LEADERBOARD CONNECTIONS</p><h1>Networker<span>.</span></h1><p>Trace saved friend and follow relationships through leaderboard players and external accounts. Inspect connections, not ungrounded ownership guesses.</p></div>
       <div class="nw-cache"><span>PUBLIC DATA SNAPSHOT</span><strong id="cache-time">Loading…</strong><small id="cache-coverage">Reading cached accounts</small></div>
     </section>
     <p id="network-status" class="nw-status" role="status" aria-live="polite">Loading the latest collected account data…</p>
     <noscript><p class="nw-status">Enable JavaScript to compare the cached accounts.</p></noscript>
     <div id="networker-app" hidden>
-      <nav id="inspection-bar" class="nw-inspection-bar" aria-label="Current Networker selections">
-        <button id="inspection-main" class="nw-inspection-person" type="button" aria-label="Jump to main account selector"><span class="nw-inspection-label">MAIN ACCOUNT</span><span id="inspection-main-person" class="nw-inspection-value">None selected</span></button>
-        <span class="nw-inspection-divider" aria-hidden="true">VS</span>
-        <button id="inspection-compare" class="nw-inspection-person" type="button" aria-label="Jump to comparison details"><span class="nw-inspection-label">COMPARING WITH</span><span id="inspection-compare-person" class="nw-inspection-value">None selected</span></button>
+      <nav class="nwf-sticky" aria-label="Current network investigation">
+        <button id="nwf-root-shortcut" class="nwf-sticky-person" type="button" aria-label="Change main account">
+          <span class="nwf-mini-label">NETWORK ROOT</span>
+          <span id="nwf-root-label" class="nwf-sticky-value">Selecting account…</span>
+        </button>
+        <span class="nwf-mini-divider" aria-hidden="true">→</span>
+        <button id="nwf-inspected-shortcut" class="nwf-sticky-person" type="button" aria-label="Return to inspected graph node">
+          <span class="nwf-mini-label">INSPECTING NODE</span>
+          <span id="nwf-inspected-label" class="nwf-sticky-value">No node selected</span>
+        </button>
+        <button id="nwf-picker-trigger" class="nwf-switch" type="button">Change root</button>
       </nav>
-      <form id="target-form" class="nw-controls" aria-label="Choose main account and comparisons">
-        <section class="nw-target-control nw-candidates" aria-labelledby="main-accounts-title"><div class="nw-section-head"><div><p class="nw-kicker">CHOOSE MAIN ACCOUNT</p><h2 id="main-accounts-title">Accounts</h2></div><span id="top50-count" class="nw-pill"></span></div><label class="nw-search-label" for="target-input">Find an account</label><div class="nw-input-action"><input id="target-input" type="search" list="target-options" autocomplete="off" spellcheck="false" placeholder="Search a username or Roblox ID" aria-describedby="target-help"><button type="submit" class="nw-primary">Set main account</button></div><datalist id="target-options"></datalist><p id="target-help" class="nw-help">Choose a profile below to set the graph root. The list contains the latest Top 50; search can also select any saved historical account by exact username or Roblox ID.</p><div id="top50-target" class="nw-candidate-list nw-main-account-list" role="group" aria-label="Choose a main account from the latest Top 50"></div><button id="top50-more" class="nw-quiet nw-top50-more" type="button" aria-controls="top50-target" aria-expanded="false">Show all 50 accounts</button></section>
-        <div><label for="candidate-scope">Compare against</label><select id="candidate-scope"><option value="latest">Latest Top 50</option><option value="all">All history + references</option></select></div>
-        <div><label for="candidate-sort">Sort by</label><select id="candidate-sort"><option value="review">Avatar review flags</option><option value="avatar">Shared cosmetic assets</option><option value="name">Username patterns</option><option value="social">Observed social links</option></select></div>
-      </form>
-      <section id="reference-summary" class="nw-reference" aria-label="Selected main account"></section>
-      <section class="nw-review-overview" aria-labelledby="review-title">
-        <div class="nw-section-head"><div><p class="nw-kicker">AVATAR REVIEW</p><h2 id="review-title">RBI outfit presets</h2></div><span id="review-rule-count" class="nw-pill"></span></div>
-        <p>Check equipped item IDs against RBI's outfit presets. A <strong>full preset</strong> contains every required item, even with extra accessories. A <strong>partial match</strong> contains only some preset items.</p>
-        <p class="nw-help">Ordinary accounts may use these outfits or individual items. A match describes clothing and body assets; it does not establish automation, misconduct or shared ownership.</p>
-        <div id="review-totals" class="nw-review-totals" aria-label="Avatar review counts"></div><p id="review-scope-summary" class="nw-help"></p>
-        <details class="nw-source-details"><summary>Preset library &amp; verified source</summary><div id="review-presets" class="nw-preset-library"></div><p id="review-rule-source"></p></details>
+
+      <details id="nwf-root-picker" class="nwf-picker">
+        <summary>Choose a leaderboard or external account to investigate</summary>
+        <div class="nwf-picker-content">
+          <form id="nwf-target-form" class="nwf-search-row" aria-label="Find a saved account">
+            <input id="nwf-target-search" type="search" autocomplete="off" spellcheck="false" placeholder="Search leaderboard, historical, or external Roblox username / ID" aria-label="Find a saved account">
+            <button type="submit" class="nw-primary">Set root</button>
+          </form>
+          <p class="nwf-help">Search all saved identities, or choose a ranked account below. Public relationships require recorded evidence; similar names alone do not create links.</p>
+          <div class="nwf-row-head"><strong id="nwf-picker-heading">Latest Top 50</strong><span id="nwf-picker-count"></span></div>
+          <div id="nwf-account-grid" class="nwf-account-grid" role="group" aria-label="Saved accounts"></div>
+          <button id="nwf-more-accounts" class="nw-quiet nwf-more" type="button">Show all Top 50</button>
+          <div id="nwf-reference-picks" class="nwf-reference-picks" aria-label="Saved external reference accounts"></div>
+        </div>
+      </details>
+
+      <section class="nwf-map" aria-labelledby="nwf-map-title">
+        <div class="nwf-section-heading">
+          <div><p class="nw-kicker">OBSERVED CONNECTIONS</p><h2 id="nwf-map-title">Relationship map</h2>
+            <p class="nwf-help">Follow documented friendships and directed follows between leaderboard accounts and external connectors. Select a node for timestamps and source evidence.</p></div>
+          <label class="nwf-external-toggle"><input id="nwf-show-external" type="checkbox"> Include unverified external neighbors</label>
+        </div>
+        <div id="nwf-network-counts" class="nwf-network-counts" aria-label="Saved direct connection counts"></div>
+        <div id="nwf-graph" class="nwf-graph"></div>
+        <p id="nwf-network-note" class="nwf-help" role="status" aria-live="polite"></p>
       </section>
-      <section class="nw-network" aria-labelledby="social-title">
-        <div class="nw-section-head"><div><p class="nw-kicker">FRIENDS &amp; FOLLOWS</p><h2 id="social-title">Explore account connections</h2></div><span id="social-coverage" class="nw-pill">Checking coverage</span></div>
-        <p id="social-summary"></p><p id="website-coverage" class="nw-help"></p>
-        <details class="nw-source-details"><summary>Inspection coverage for all accounts</summary><div id="census-coverage-table" class="nw-census-table"></div><p class="nw-help">A displayed friend count is preserved separately from the exact IDs saved. Partial lists, unavailable cards and accounts without a saved inspection leave missing identities unknown.</p></details>
-        <p class="nw-data-downloads"><a href="network-database.sqlite.gz" download>Download SQLite database (.gz)</a><span aria-hidden="true"> · </span><a href="network-data.json" download>Download network JSON</a><span aria-hidden="true"> · </span><a href="https://github.com/nitwi/fisch-money-leaderboard/tree/main/data/network" target="_blank" rel="noopener noreferrer">Observation journal &amp; method</a></p>
-        <div id="social-graph"></div>
-        <details class="nw-source-details nw-relationship-lens">
-          <summary>Relationship breakdown &amp; outfit scan coverage</summary>
-          <div id="relationship-lens" class="nw-lens-content"></div>
-        </details>
-        <section class="nw-observed-friends" aria-labelledby="observed-friends-title">
-          <div class="nw-section-head"><h3 id="observed-friends-title">Observed direct friends</h3><span id="friend-list-count" class="nw-pill"></span></div>
-          <p id="friend-list-coverage" class="nw-help"></p>
-          <label class="nw-search-label" for="friend-search">Search all observed friends</label><input id="friend-search" type="search" placeholder="Username, display name or Roblox ID" autocomplete="off" spellcheck="false">
-          <p id="friend-list-status" class="nw-help" role="status" aria-live="polite"></p>
-          <ul id="friend-list" class="nw-observed-friend-list"></ul><button id="friend-load-more" class="nw-quiet" type="button" hidden>Show more observed friends</button>
-        </section>
-        <details class="nw-source-details"><summary>Source availability</summary><div id="capability-details"></div><p>Unavailable lists are unknown. A partial list can establish a visible link; it cannot establish that another link is absent.</p></details>
+
+      <section class="nwf-signals" aria-label="Connection findings and review flags">
+        <article class="nwf-panel">
+          <div class="nwf-panel-title"><div><p class="nw-kicker">NETWORK EVIDENCE</p><h3>Connected accounts and paths</h3></div></div>
+          <div id="nwf-direct-links"></div>
+          <div id="nwf-connector-paths"></div>
+        </article>
+        <article class="nwf-panel">
+          <div class="nwf-panel-title"><div><p class="nw-kicker">MODERATOR REVIEW CLUES</p><h3>Names and avatar flags</h3></div></div>
+          <p class="nwf-help">Text patterns and RBI outfit matches are hints, not evidence of common ownership or misconduct. No risk score is assigned.</p>
+          <div id="nwf-pattern-flags"></div>
+          <div id="nwf-avatar-flags"></div>
+        </article>
       </section>
-      <div class="nw-workspace">
-        <section class="nw-candidates" aria-labelledby="candidates-title">
-          <div class="nw-section-head"><div><p class="nw-kicker">FIND A COMPARISON</p><h2 id="candidates-title">Accounts</h2></div><span id="candidate-count" class="nw-pill"></span></div>
-          <label class="nw-search-label" for="candidate-search">Filter candidates</label><input id="candidate-search" type="search" placeholder="Username or Roblox ID" autocomplete="off" spellcheck="false">
-          <label class="nw-search-label nw-review-filter-label" for="candidate-review-filter">Avatar review filter</label><select id="candidate-review-filter"><option value="all">All accounts</option><option value="full">Full preset matches</option><option value="partial">Partial matches only</option><option value="none">No preset items observed</option><option value="unknown">Avatar unavailable</option></select>
-          <p id="candidate-description" class="nw-help"></p>
-          <div id="candidate-list" class="nw-candidate-list" aria-label="Comparison candidates"></div>
-        </section>
-        <aside id="comparison-panel" class="nw-comparison" aria-labelledby="comparison-title">
-          <div class="nw-section-head"><div><p class="nw-kicker">SIDE BY SIDE</p><h2 id="comparison-title">Account details</h2></div><button id="share-comparison" type="button" class="nw-quiet" disabled>Copy link</button></div>
-          <div id="comparison-content"><p>Choose an account from the comparison list.</p></div>
-          <p id="share-status" class="nw-feedback" role="status" aria-live="polite"></p>
-        </aside>
-      </div>
-      <details class="nw-method"><summary>How these comparisons work</summary><div>
-        <p><strong>RBI avatar review:</strong> each preset is a specific set of asset IDs from the linked published RBI release. Full means every preset ID is equipped; partial means at least one, but not every, ID is equipped. A one-item preset can produce a full 1/1 match. Review order puts full matches first, then partial matches by the number of distinct preset IDs observed. Results describe the avatar observation time, independently of the historical leaderboard photo.</p>
-        <p><strong>Avatar overlap:</strong> shared asset IDs ÷ the union of both equipped asset sets. Clothing and accessories are compared separately from body parts and animations so common defaults do not dominate the cosmetic comparison. An empty or unavailable avatar is never a 100% match.</p>
-        <p><strong>Username patterns:</strong> explained rules compare distinctive name stems, numbered variants, separators, meaningful tokens, and common character substitutions. Generic words, short fragments, digit-only overlap, and weak similarities in random-looking strings are suppressed. Strong and possible labels describe the detected text pattern. They are review hints, with no ownership probability. Display names are excluded. The comparison runs locally in your browser and does not call an AI service.</p>
-        <p><strong>Social links:</strong> only exact account IDs in a readable API list or a documented website observation create links. Start from the selected main account and expand connected nodes using saved observations. Branches include photographed leaderboard accounts from all history, or external accounts with a full match to one of the 22 RBI presets. Near matches appear only in the separate relationship breakdown; unchecked avatars remain unknown. Username or outfit resemblance alone never creates an edge. Follow direction and source times are preserved. The searchable list below the graph retains all observed direct friends. Partial-list shared friends are a minimum observed count.</p>
-        <p>Matching assets and similar names describe public account features. They do not establish common ownership or misconduct.</p>
-      </div></details>
+
+      <details id="nwf-raw-evidence" class="nwf-raw">
+        <summary>Saved friends, followers, observation coverage and source records</summary>
+        <div class="nwf-raw-inner">
+          <p id="nwf-coverage-note" class="nwf-help"></p>
+          <label for="nwf-friend-filter">Search observed direct neighbors</label>
+          <input id="nwf-friend-filter" type="search" placeholder="Username or exact Roblox ID">
+          <div id="nwf-friend-results" class="nwf-friend-results"></div>
+          <div class="nwf-data-links">
+            <a href="network-database.sqlite.gz" download>SQLite evidence database</a>
+            <a href="network-data.json" download>Network JSON</a>
+            <a href="https://github.com/nitwi/fisch-money-leaderboard/tree/main/data/network" target="_blank" rel="noopener noreferrer">Census journal and method</a>
+          </div>
+          <p class="nwf-help">A partial observation confirms only the recorded positive links; unobserved identities remain unknown. Recorded relationships are not necessarily current.</p>
+        </div>
+      </details>
     </div>
-    <footer><span>FISCH MONEY LEDGER <span class="slash">/</span> public account comparison</span><span>Checked times display in your browser timezone; hover a time for UTC.</span></footer>
+    <footer><span>FISCH MONEY LEDGER <span class="slash">/</span> account relationship explorer</span><span>Checked times display in your browser timezone; hover a time for UTC.</span></footer>
   </main>
 </body>
 </html>
