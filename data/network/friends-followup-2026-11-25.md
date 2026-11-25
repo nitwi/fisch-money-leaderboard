@@ -170,3 +170,10 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 - Verified pages 1–5 from scroll position zero, including each first row. Saved 83/91 readable exact IDs, up from 53/91, with seven ID-less card positions on the inspected pages. Next did not advance to page 6. Coverage stays partial; no identities were inferred for the anonymous cards.
 - Appended one exact-ID observation with 30 new distinct friendships (232 in PR #5 since production); no new leaderboard cross-links, follows, or avatar findings. Exports contain 3,233 external nodes. All 142 focused tests, SQLite integrity and foreign keys passed. Both exports agree with the append-only journal SHA-256 `c91ed8bc0c4177f7465dfb5828e54f4f0af07bd58041f88d87820edcae46511b`.
 - Next highest-priority recheck: `YptSehjZiEs`, then the saved partial Friends queue before directional follow collection. Review-only; nothing deployed.
+
+### 22:46 UTC — aurunqwer Friends and YptSehjZiEs recheck
+
+- `YptSehjZiEs` (`7259361593`): the verified profile showed 104 Friends (previously 103). Its Friends page returned HTTP 200 but still showed a blank unnamed Friends (0) list after one standard reload. A screenshot confirmed no cards were rendered. Preserved the prior 71/103 partial evidence without recording a zero or inferring termination.
+- `aurunqwer` (`8102463207`): exact profile showed 43 Friends. One ordinary reload recovered the list. Verified all three exposed pages at scroll position zero with changed first rows on pages 2–3. Next was disabled on page 3. Coverage improved from 18/43 to 40/43; three cards on page 2 had no exact ID, so the list remains partial.
+- Added 22 distinct friendships (254 in PR #5 since production), no new leaderboard cross-links, follows, or avatar scans. Both exports match journal SHA-256 `94484cad1c70df1666cb5ab05b2460de9f21952c947aeb217a18781207a88dcc` with 3,255 external nodes. All 142 focused tests, SQLite integrity and foreign keys passed. Review-only; nothing deployed.
+- Next: EnderTitanKid and pflugerson, then the remaining actionable Friends gaps before separate directional collection.
