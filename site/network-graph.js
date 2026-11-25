@@ -240,15 +240,27 @@
         if (!buckets.has(key)) buckets.set(key, []);
         buckets.get(key).push(person.id);
       }
+      // Reserve separate extents for the vertical/horizontal groups, including
+      // the number of currently expanded nodes. Avoid corners colliding when
+      // e.g. "following" and "leaderboard" both have multiple cards.
+      let horizontalHalfHeight = 0, verticalHalfWidth = 0;
+      for (const [key, ids] of buckets) {
+        const side = key.split(":")[0];
+        if (side === "left" || side === "right")
+          horizontalHalfHeight = Math.max(horizontalHalfHeight, (ids.length - 1) * 56);
+        else verticalHalfWidth = Math.max(verticalHalfWidth, (ids.length - 1) * 130);
+      }
+      const xRadius = Math.max(430, verticalHalfWidth + 160);
+      const yRadius = Math.max(440, horizontalHalfHeight + 160);
       positions.set(model.focusId, {x: 0, y: 0});
       for (const [key, ids] of buckets) {
         const [lane, depthText] = key.split(":"), depth = Number(depthText);
         ids.forEach((nodeId, index) => {
           const offset = index - (ids.length - 1) / 2;
-          const position = lane === "right" ? {x: depth * 380, y: offset * 112} :
-            lane === "left" ? {x: -depth * 380, y: offset * 112} :
-            lane === "up" ? {x: offset * 260, y: -depth * 260} :
-            {x: offset * 260, y: depth * 260};
+          const position = lane === "right" ? {x: depth * xRadius, y: offset * 112} :
+            lane === "left" ? {x: -depth * xRadius, y: offset * 112} :
+            lane === "up" ? {x: offset * 260, y: -depth * yRadius} :
+            {x: offset * 260, y: depth * yRadius};
           const manual = manualPositions.get(nodeId);
           if (Number.isFinite(manual?.x) && Number.isFinite(manual?.y)) {
             position.x = manual.x; position.y = manual.y;
@@ -383,8 +395,10 @@
       less.setAttribute("aria-label", "Show fewer " + title);
       const more = button("+", () => { laneLimits[lane] = Math.min(model.laneCounts[lane], laneLimits[lane] + 5); rebuild(false); });
       more.setAttribute("aria-label", "Show more " + title);
-      area.append(heading, counts, less, more); laneBar.append(area);
-      laneControls.set(lane, {area, counts, more, less});
+      const focus = button("View", () => centerLane(lane), "fng-lane-focus");
+      focus.setAttribute("aria-label", "Center graph on " + title);
+      area.append(heading, counts, focus, less, more); laneBar.append(area);
+      laneControls.set(lane, {area, counts, more, less, focus});
     }
     const boundsNote = el("p", "fng-bounds"), workspace = el("div", "fng-workspace"), canvas = el("div", "fng-canvas");
     const controls = el("div", "fng-controls"), zoomLabel = el("output", "fng-zoom", "100%");
@@ -432,8 +446,19 @@
     }
     function rootView() {
       measure();
-      view = {scale: dimensions.width < 600 ? .64 : .72, x: dimensions.width / 2, y: dimensions.height / 2};
+      view = {scale: dimensions.width < 600 ? .53 : .60, x: dimensions.width / 2, y: dimensions.height / 2};
       transform();
+    }
+    function centerLane(lane) {
+      const ids = [...model.lanes].filter(([id, side]) => side === lane && positions.has(id))
+        .map(([id]) => id);
+      if (!ids.length) return;
+      const x = ids.reduce((sum, id) => sum + positions.get(id).x, 0) / ids.length;
+      const y = ids.reduce((sum, id) => sum + positions.get(id).y, 0) / ids.length;
+      measure();
+      view = {...view, x: dimensions.width / 2 - x * view.scale, y: dimensions.height / 2 - y * view.scale};
+      transform();
+      announce("Centered graph on " + LANE_NAMES[lane] + ".");
     }
     function zoom(factor) { view = zoomTransform(view, factor, {x: dimensions.width / 2, y: dimensions.height / 2}); transform(); }
     function positionNodes() {
@@ -647,6 +672,7 @@
         control.counts.textContent = `${model.laneShown[lane]} / ${model.laneCounts[lane]}`;
         control.more.disabled = laneLimits[lane] >= model.laneCounts[lane];
         control.less.disabled = laneLimits[lane] <= DEFAULT_LANE_LIMITS[lane];
+        control.focus.disabled = model.laneShown[lane] === 0;
       }
       if (!model.nodes.some(node => node.id === selectedId)) selectedId = model.focusId;
       positions = layout(model, manual);
