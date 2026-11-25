@@ -104,3 +104,9 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 - Verified first rows at the top of pages 1–2: 31 exact IDs and five anonymous positions (four Unavailable, one Account Deleted). Next did not advance to page 3. Coverage remains partial, improving 15 → 31/118. Page 2 adds 16 source IDs and 15 distinct new site friendships. The observed leaderboard edge Fischerwunk ↔ NoRoblox_Support was already documented from the other direction.
 - This review branch now has 185 new distinct site friendships since PR #4 and 3,189 external nodes. It does not add avatar scans or directional follows. Journal has 80 rows, digest `a3d71578b2c063d0ac6c80c282edeb3ffaa928350617027b5d7c8c4e9681724b`; both exports match, SQLite checks passed, and all 142 focused tests passed.
 - Next: zerealali, sanguifereum, then the remaining prioritized partial lists.
+
+### 20:01 UTC — zerealali and sanguifereum rechecks
+
+- zerealali (`3510772801`): People search ended at a Chrome internal error. The saved HTTPS profile then failed with `net::ERR_HTTP_RESPONSE_CODE_FAILURE` and remained on Chrome’s internal error page. No site-served denial or 404 was verified. Preserved the earlier 16/103 partial.
+- sanguifereum (`8804353958`): saved HTTPS profile verified the handle and 103 Friends. Verified all 18 exact IDs on page one from scroll position zero, including the first row; no anonymous cards. Next did not advance to page two, and all 18 IDs were already recorded. Preserved the earlier 18/103 partial.
+- No new IDs, journal or export changes. Next largest remaining documented page gaps: Zantrille (14/97), ForcePush_Sith (16/92), SelenaTatsukii (70/134), zNaN_Rot (34/90), then Canizan (88/140).
