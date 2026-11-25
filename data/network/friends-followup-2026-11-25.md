@@ -10,3 +10,11 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 - Exact People search for 75percent3r hit a Chrome navigation error; the saved canonical HTTPS profile in a fresh tab loaded and was verified. No site denial was observed.
 - No new distinct friendships, leaderboard cross-links, follows, or avatar observations. All 142 focused tests passed, and both exports match journal SHA-256 `8c3bb61c5f7b5786d2de5edcd9c8c1ad5185afc1a6a974b20fb56d5a227a1e5f`; SQLite integrity and foreign keys passed.
 - Next: jonnhy1835, ody_odinho, and Force_oNature; continue other partial sources before directional collection. Count coverage retained from best prior observations; blocked rechecks remain unresolved.
+
+## 2026-11-25 16:17–16:19 UTC
+
+- [jonnhy1835](https://www.roblox.com/users/67343676/friends#!/friends) at 16:17:03.171 UTC: 17 exact page-one IDs and one anonymous **Unavailable** card. Next stalled. Kept 21/22 prior partial coverage.
+- [ody_odinho](https://www.roblox.com/users/5118740924/friends#!/friends) at 16:17:43.107 UTC: one normal reload recovered the list from a blank zero-count shell. The real page had 17 exact IDs and one anonymous **Unavailable** card. Next stalled. Kept 39/40 prior partial coverage.
+- [Force_oNature](https://www.roblox.com/users/1295019815/friends#!/friends) at 16:18:19.747 UTC: profile showed 26, but the list still headed zero after reload while showing 18 exact page-one IDs. Next stalled. Kept 25/26 prior partial coverage.
+- Returned to the top of each readable page and verified the first row. Every verified ID was already in prior evidence for its source. No journal or export changes. Anonymous cards do not identify accounts or explain unavailability.
+- Sylilia’s HTTPS profile loaded a shell and then hit Chrome’s navigation error, not a verified Roblox 404. Next: Sylilia, shatter_yourselfgrgr, ewoofs, and tranquanghieu20. Continue rechecks before directional collection.
