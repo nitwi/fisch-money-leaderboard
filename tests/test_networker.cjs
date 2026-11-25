@@ -249,7 +249,7 @@ test('Top 50 avatar list is ranked, searchable and synchronized with selected ma
   const {elements, location, graphCalls} = await renderSnapshot([top2, history, top1], '?target=2');
   const list = elements.get('top50-target');
   assert.equal(elements.get('top50-count').textContent, '2 / 2');
-  assert.deepEqual(list.children.map(child => child.textContent.match(/#\\d+/)[0]), ['#1', '#2']);
+  assert.deepEqual(list.children.map(child => child.textContent.match(/#\d+/)[0]), ['#1', '#2']);
   assert.equal(list.children[1].attributes['aria-pressed'], 'true');
   assert.equal(list.children[1].className, 'nw-candidate nw-main-account-card');
   assert.match(list.children[1].textContent, /Friend list:/);
