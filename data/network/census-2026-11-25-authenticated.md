@@ -60,3 +60,7 @@ LasTnIghT2011: 65/471 across the first four pages. johncenagaming347v2: 18 exact
 - anyokc: 23/24 exact IDs across both exposed pages; the final missing ID stays unknown.
 
 Roblox briefly rendered zero-count shells; a normal reload recovered readable data. The batch added 71 distinct friendships, including Renvuz ↔ zerealali. First-pass progress: **34 of 70 attempted** (7 complete, 25 partial, 2 unavailable Roblox 404s flagged for possible termination review). No new follow or avatar rows. Next ranked source: sabbath553. The 49 focused Python and 92 Node tests passed.
+
+### Scheduled Friends batch: sabbath553
+
+sabbath553: 18/46 exact IDs on page one (partial); later pages were not verified. This adds 18 distinct friendships and no leaderboard, follow, or avatar rows. First pass: **35 of 70 attempted** (7 complete, 26 partial, two documented profile 404s). The Cloud Browser returned an internal Chrome error during navigation for the next source, heanmichrkke_3; it was not counted as a Roblox profile 404 or a completed attempt. Resume from heanmichrkke_3 through normal HTTPS People search when the browser is available. Both exports match the journal SHA-256; SQLite integrity/foreign key checks, 49 Python tests, and 92 Node tests passed.
