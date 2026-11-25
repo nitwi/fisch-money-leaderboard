@@ -8,7 +8,7 @@
 
   // These are explainable naming rules, not an AI model or an ownership score.
   // A name pattern must never establish an identity or a social connection.
-  const VERSION = "1.0.0";
+  const VERSION = "1.1.0";
   const METHOD = "Deterministic username patterns; scores order results and are not probabilities.";
   const PLACEHOLDERS = new Set(["unavailable", "unknown", "deleted", "deleteduser", "accountdeleted", "null", "undefined", "none"]);
   const COMMON = new Set([
@@ -19,6 +19,10 @@
   ]);
   const DECORATIONS = new Set(["x", "xx", "xxx", "xd", "yt", "ttv", "official", "real", "alt", "main", "backup", "the"]);
   const LONG_AFFIXES = ["official", "backup", "gaming", "plays", "main", "real", "alt", "ttv"];
+  // Common themes may carry information in a multi-part pattern but not when
+  // they are the only shared part.
+  const WEAK_EDGE_WORDS = new Set(["awesome", "champion", "darkness", "dragon", "fantasy", "goddess",
+    "legend", "legendary", "master", "phantom", "princess", "reaper", "shadow", "silver", "warrior", "youtube"]);
   const COMMON_ENDS = [...COMMON].filter(word => word.length >= 3).sort((a, b) => b.length - a.length || compareText(a, b));
   const LABELS = Object.freeze({strong: "Strong name pattern", possible: "Possible name pattern", none: "No name pattern", unknown: "Username unavailable"});
   const RANKS = Object.freeze({unknown: -1, none: 0, possible: 1, strong: 2});
@@ -102,9 +106,35 @@
     // Fragmented mixed-case strings and long consonant runs are not useful
     // word-family evidence. Exact text can still be reported literally.
     const opaque = cleanParts.length >= 3 && cleanParts.every(part => part.replace(/\d/g, "").length < 5);
-    return {available: true, original, username, lower, compact, stem: edge.stem,
+    return {available: true, original, username, lower, compact, stem: edge.stem, cleanParts,
       tokens, numbers: lower.match(/\d+/g) || [], prefixNumber: edge.prefixNumber,
       suffixNumber: edge.suffixNumber, version: edge.version, cores, generated, opaque};
+  }
+
+  function embeddedSeries(name) {
+    // Require a whole numeric run between two recognizable, substantial name
+    // parts. An ordinary internal leet digit does not have that boundary.
+    const match = name.username.match(/^([A-Za-z]{5,})_?(\d{1,4})(?:_([A-Za-z]{5,})|([A-Z][A-Za-z]{4,}))$/);
+    if (!match) return null;
+    const first = match[1].toLowerCase(), last = (match[3] || match[4]).toLowerCase();
+    if (!usableStem(first) || !usableStem(last) || first === last) return null;
+    return {first, last, number: match[2]};
+  }
+
+  function flattenedEdgeMatches(left, right) {
+    if (left.opaque || right.opaque || !/^[a-z]+$/.test(left.stem) || !/^[a-z]+$/.test(right.stem)) return [];
+    const matches = [];
+    for (const [marked, flat] of [[left, right], [right, left]]) {
+      if (marked.cleanParts.length < 2 || flat.cleanParts.length !== 1) continue;
+      for (const [edge, index, method] of [["prefix", 0, "startsWith"], ["suffix", marked.cleanParts.length - 1, "endsWith"]]) {
+        const stem = marked.cleanParts[index];
+        if (!usableStem(stem, 7) || WEAK_EDGE_WORDS.has(stem) || !marked.stem[method](stem) || !flat.stem[method](stem)) continue;
+        if ([marked.stem, flat.stem].every(value => value.length - stem.length >= 3 && stem.length / value.length >= 0.4)) {
+          matches.push({edge, stem});
+        }
+      }
+    }
+    return matches.sort((a, b) => b.stem.length - a.stem.length || compareText(a.stem, b.stem) || compareText(a.edge, b.edge));
   }
 
   function foldedVariants(value) {
@@ -165,6 +195,11 @@
     if (left.stem === right.stem && usableStem(left.stem) && !left.opaque && !right.opaque &&
         (left.prefixNumber !== right.prefixNumber || left.suffixNumber !== right.suffixNumber || left.version !== right.version)) {
       add("numbered_variant", "strong", 92, "Numbered name variants", `Both names use the distinctive stem “${left.stem}” with different numeric prefixes, suffixes, or version markers. The shared stem supplies the evidence; the numbers alone do not.`, {stem: left.stem});
+    }
+    const embeddedA = embeddedSeries(left), embeddedB = embeddedSeries(right);
+    if (embeddedA && embeddedB && embeddedA.first === embeddedB.first && embeddedA.last === embeddedB.last && embeddedA.number !== embeddedB.number) {
+      const tokens = [embeddedA.first, embeddedA.last];
+      add("embedded_number_variant", "possible", 68, "Number between shared name parts", `Both names put a different number between “${tokens[0]}” and “${tokens[1]}”. The shared name parts supply the evidence, not the numbers.`, {tokens});
     }
 
     const sharedCores = [];
@@ -232,15 +267,31 @@
         add("shared_tokens", "possible", 64, "Several shared name parts", `The names share these complete name parts: ${sharedTokens.map(token => `“${token}”`).join(", ")}. Other parts differ.`, {tokens: sharedTokens});
       }
     } else if (!left.opaque && !right.opaque && !signals.length) {
-      const token = [...sharedTokens].filter(token => token.length >= 6).sort((x, y) => y.length - x.length || compareText(x, y))[0];
+      const token = [...sharedTokens].filter(token => token.length >= 6 && !WEAK_EDGE_WORDS.has(token)).sort((x, y) => y.length - x.length || compareText(x, y))[0];
       if (token) add("shared_token", "possible", 44, "One shared name part", `The names share the complete part “${token}” at a separator or word boundary. A single shared part is weak evidence and can occur independently.`, {tokens: [token]});
     }
 
-    if (!signals.length && !left.opaque && !right.opaque && /^[a-z]+$/.test(left.stem) && /^[a-z]+$/.test(right.stem)) {
-      const foldA = left.stem.replace(/(.)\1+/g, "$1"), foldB = right.stem.replace(/(.)\1+/g, "$1");
-      const removedA = left.stem.length - foldA.length, removedB = right.stem.length - foldB.length;
-      if (foldA === foldB && left.stem !== right.stem && usableStem(foldA) && removedA + removedB <= 3 && Math.abs(removedA - removedB) <= 2) {
-        add("repeated_letter", "possible", 54, "Repeated-letter variant", `The complete stems become “${foldA}” when repeated letters are collapsed. This is a possible spelling pattern, not a general edit-distance match.`, {stem: foldA});
+    if (!signals.length && !left.opaque && !right.opaque) {
+      const matches = [];
+      for (const x of left.cores) for (const y of right.cores) {
+        if (!/^[a-z]+$/.test(x.value) || !/^[a-z]+$/.test(y.value) || x.value === y.value) continue;
+        const foldA = x.value.replace(/(.)\1+/g, "$1"), foldB = y.value.replace(/(.)\1+/g, "$1");
+        const removedA = x.value.length - foldA.length, removedB = y.value.length - foldB.length;
+        const changes = unique([...x.changes, ...y.changes]).sort(compareText);
+        if (foldA === foldB && usableStem(foldA, changes.length ? 6 : 5) && removedA + removedB <= 3 && Math.abs(removedA - removedB) <= 2) {
+          matches.push({stem: foldA, changes, removed: removedA + removedB});
+        }
+      }
+      matches.sort((a, b) => a.changes.length - b.changes.length || a.removed - b.removed || compareText(a.stem, b.stem) || compareText(a.changes.join(), b.changes.join()));
+      if (matches.length) {
+        const {stem, changes} = matches[0];
+        add("repeated_letter", "possible", changes.length ? 50 : 54, "Repeated-letter variant", `The complete stems become “${stem}” when repeated letters are collapsed.${changes.length ? ` This also requires removing account labels (${changes.join("; ")}).` : " This is a possible spelling pattern, not a general edit-distance match."}`, {stem, changes});
+      }
+    }
+    if (!signals.length) {
+      const best = flattenedEdgeMatches(left, right)[0];
+      if (best) {
+        add("shared_edge_stem", "possible", 46, `Distinctive shared ${best.edge}`, `Both names share the ${best.edge} “${best.stem}”. One name marks a word boundary; the other is written as one part. This is only a possible naming pattern.`, best);
       }
     }
     if (!signals.length) {

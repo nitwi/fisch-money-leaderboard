@@ -1,0 +1,144 @@
+# Roblox Networker checkpoint: authenticated continuation
+
+On 25 November 2026, the Cloud Browser confirmed `countycheck` was signed in and showed usable lists. The canonical journal was appended, not rewritten.
+
+- **Friend-list census:** 12 of 70 planned sources now have saved friend IDs (4 complete, 8 partial). The two new partial lists yielded 126 source-to-friend rows, representing 124 newly recorded undirected friendships. The saved total is 1,074 rows and 1,070 distinct friendships.
+- **Leaderboard:** One newly recorded friendship connects [untoldmemoria](https://www.roblox.com/users/128840304/profile) and [Erutobi](https://www.roblox.com/users/2464539843/profile), bringing the website-evidence total to 13 distinct leaderboard-to-leaderboard friendships. This records a link, not when it first formed.
+- **Follows:** Nine lists from five source accounts were saved (seven complete, two partial), yielding 45 distinct directed follow links. There were no new leaderboard-to-leaderboard follow links in this batch.
+- **Coverage:** 15 of 70 sources have any saved website relationship evidence; 58 still lack saved friend-list evidence. The 1,050 external nodes have no fresh exact-ID avatar review in this census workflow. Earlier public avatar scans and the original ten relationship records are retained.
+
+## Saved batch coverage
+
+| Source | Friends | Followers | Following |
+|---|---|---|---|
+| [ody_odinho](https://www.roblox.com/users/5118740924/profile) | 39/40, partial | 13/13, complete | 5/7, partial |
+| [xNnoel](https://www.roblox.com/users/2586153890/profile) | Not saved | Not saved | 0/0, complete |
+| [Ceruleanflare2](https://www.roblox.com/users/4785293082/profile) | Not saved | 0/0, complete | 1/1, complete |
+| [untoldmemoria](https://www.roblox.com/users/128840304/profile) | 87/134, partial | 18/52, partial | 2/2, complete |
+| [shatter_yourselfgrgr](https://www.roblox.com/users/8794906806/profile) | Not saved | 0/0, complete | 6/6, complete |
+| [Force_oNature](https://www.roblox.com/users/1295019815/profile) | Navigation blocked | Not inspected | Not inspected |
+
+The table gives **readable unique IDs / displayed count** where supported. A nonzero profile count with a zero/loading list shell was not accepted as an empty list. An unavailable identity card was not counted. The observer stopped at a Cloud Browser URL-policy denial while opening the `Force_oNature` list; no account ban, bot denial, or Roblox rate limit was confirmed. Resume the remaining friend lists from `xNnoel`, `Ceruleanflare2`, `shatter_yourselfgrgr`, and `Force_oNature`, and continue from the [census plan](census-plan.json) if normal access is restored.
+
+## Screenshot-assisted continuation
+
+The browser later allowed screenshots and direct reading of the existing xNnoel Friends tab. Screenshots confirmed the rendered cards; the exact IDs came from the corresponding public profile links, not from text guesses. xNnoel: 375/392 unique IDs after visiting all 21 exposed pages (partial). Ceruleanflare2: 15/15 (complete). Together they added 390 previously unrecorded friendships, including xNnoel ↔ Nnoelq, and no follow rows. Friend-list coverage is now **14 of 70** (5 complete, 9 partial). The older shatter_yourselfgrgr Friends URL again rendered an empty shell despite a nonzero profile count and was not recorded as empty. Continue there and at Force_oNature when normal list access allows.
+
+## Roblox People search continuation
+
+Using Roblox's own search bar, selecting People, and clicking the exact account result reached the canonical HTTPS Friends pages for both previously stalled profiles. Verify the target's exact ID and visible username before opening Friends, then wait for the expected list count and cards rather than accepting the initial zero. Use verified leaderboard profile links only as a fallback.
+
+- shatter_yourselfgrgr: 51/53 exact IDs across three exposed pages (partial).
+- Force_oNature: 25/26 exact IDs across two exposed pages (partial).
+
+The batch added 76 previously unrecorded friendships, including leaderboard connections shatter_yourselfgrgr ↔ 0egoistic and shatter_yourselfgrgr ↔ Canizan. Friend-list coverage is now **16 of 70** (5 complete, 11 partial), with no new follow or avatar rows.
+
+## Ranked continuation
+
+The same People search and HTTPS verification reached three additional ranked profiles: sebax4514 (69/69, complete), TheDanishPlays (89/381, partial; first five pages), and Sylilia (53/55, partial across all exposed pages). This batch added 211 distinct friendships, including sebax4514 ↔ Renvuz and sebax4514 ↔ LasTnIghT2011. Friend-list coverage is now **19 of 70** (6 complete, 13 partial). No new follow or avatar rows were recorded. The next uninspected ranked source is metbepol.
+
+## Friends-first census continuation
+
+People search did not return an exact metbepol result. The saved numeric Roblox profile link redirected to a Roblox 404 page. This is an attempted but unavailable source, not a verified empty list or proof the account was terminated.
+
+Three Friends lists advanced: YptSehjZiEs (71/103, partial, first four pages), Myvexxx (21/22, partial at the end of the list), and Erutobi (62/168, partial, first four pages). They added 151 previously unrecorded friendships. Coverage is now **22 of 70 lists with saved evidence** (6 complete, 16 partial), plus the one unavailable attempt. The next uninspected ranked source is Luwuma. Review partials and unavailable cards after the first pass. Treat an ID-less or unavailable card as unknown unless Roblox explicitly identifies the account status.
+
+The next batch reached Aumjung8267 (108/468 IDs, first six pages) and SelenaTatsukii (70/134 IDs, first four pages). It added 178 newly recorded friendships, including Aumjung8267 ↔ LasTnIghT2011. Luwuma's exact account did not appear in People search and the verified profile link returned a Roblox 404. Do not infer termination or save an empty list. Coverage is **24 of 70 with saved Friends lists** (6 complete, 18 partial) and two more with an unavailable first-pass attempt. Next uninspected ranked source: emitnick. Both exports contain the canonical website journal SHA-256, and SQLite passed integrity and foreign-key checks.
+
+### Next scheduled Friends batch
+
+emitnick (45/55, all four exposed pages) and Canizan (88/140, first five pages) remain partial; 0egoistic (10/10) is complete. This batch added 139 distinct friendships, including four new leaderboard links through Canizan. Coverage is **27 of 70 with saved Friends lists** (7 complete, 20 partial), with two additional unavailable attempts. Next uninspected ranked source: LasTnIghT2011. Both exports match the journal digest and SQLite passed its integrity and foreign-key checks.
+
+### Friends batch: LasTnIghT2011 and johncenagaming347v2
+
+LasTnIghT2011: 65/471 across the first four pages. johncenagaming347v2: 18 exact IDs on page one. People search returned no result, but the verified profile showed the correct handle and 135 Friends; the linked Friends page showed a conflicting 0 and real cards. Saved those exact IDs with the total unknown. This batch adds 80 distinct friendships, including LasTnIghT2011 ↔ Renvuz and LasTnIghT2011 ↔ zerealali. Coverage: **29 of 70 with saved Friends lists** (7 complete, 22 partial) plus two documented 404 attempts flagged for possible termination review, not confirmed. Next uninspected ranked source: injurylowk.
+
+### Friends batch: injurylowk, Renvuz and anyokc
+
+- injurylowk: 16/22 exact IDs on page one; no later page verified.
+- Renvuz: 35/317 exact IDs across the first two pages; further pages remain.
+- anyokc: 23/24 exact IDs across both exposed pages; the final missing ID stays unknown.
+
+Roblox briefly rendered zero-count shells; a normal reload recovered readable data. The batch added 71 distinct friendships, including Renvuz ↔ zerealali. First-pass progress: **34 of 70 attempted** (7 complete, 25 partial, 2 unavailable Roblox 404s flagged for possible termination review). No new follow or avatar rows. Next ranked source: sabbath553. The 49 focused Python and 92 Node tests passed.
+
+### Scheduled Friends batch: sabbath553
+
+sabbath553: 18/46 exact IDs on page one (partial); later pages were not verified. This adds 18 distinct friendships and no leaderboard, follow, or avatar rows. First pass: **35 of 70 attempted** (7 complete, 26 partial, two documented profile 404s). The Cloud Browser returned an internal Chrome error during navigation for the next source, heanmichrkke_3; it was not counted as a Roblox profile 404 or a completed attempt. Resume from heanmichrkke_3 through normal HTTPS People search when the browser is available. Both exports match the journal SHA-256; SQLite integrity/foreign key checks, 49 Python tests, and 92 Node tests passed.
+
+### Manual retry: heanmichrkke_3
+
+Normal HTTPS People search and an exact result click opened the expected profile. The linked list initially showed zero; a normal reload restored the displayed count of 76 and 33 exact IDs across pages one and two. The next-page control remained enabled but did not advance again, so the list is partial. Added 33 distinct friendships, no new leaderboard cross-links. First pass: **36 of 70 attempted** (7 complete, 27 partial, two documented profile 404s). Next source: hc2khunowpng43ntk1. The journal prefix and both export digests were verified; SQLite integrity and foreign-key checks, 49 Python tests, and 92 Node tests passed.
+
+### Friends continuation: hc2khunowpng43ntk1
+
+Verified 35 distinct IDs across all three exposed pages against the displayed count of 40, so the list remains partial. All 35 friendships are new; no new leaderboard cross-links. First pass: **37 of 70 attempted** (7 complete, 28 partial, 2 documented profile 404s). The exact Zipidy24 profile displayed 268 Friends, but the linked Friends page showed an empty zero-count shell even after a normal reload. It was not counted as a reliable first pass or as zero Friends; retry Zipidy24 next. Both export digests and SQLite integrity and foreign-key checks passed, along with 50 Python and 92 Node tests.
+
+### Scheduled retry: Zipidy24
+
+People search hit a Chrome internal navigation error, but the saved HTTPS profile URL loaded and its linked Friends page displayed 268. Verified 18 exact IDs on the first page; the enabled next-page control did not advance, so the list is partial. First pass: **38 of 70 attempted** (7 complete, 29 partial, two documented profile 404s). The next source, minmin8280, was not counted because the Cloud Browser failed before People search. Both exports match the journal digest. SQLite integrity and foreign-key checks, 50 Python tests, and 92 Node tests passed.
+
+### Friends continuation: minmin8280 and jonnhy1835
+
+minmin8280 (15/15) is complete. jonnhy1835 (21/22 across both exposed pages) remains partial. First pass: **40 of 70 attempted** (8 complete, 30 partial, two documented profile 404s). Next source: Nnoelq. The exports match the journal digest, and SQLite integrity and foreign-key checks, 50 Python tests, and 92 Node tests passed.
+
+### Friends continuation: Nnoelq
+
+Nnoelq (69/69 across all four exposed pages) is complete. 10ne17's exact profile showed 178 Friends, but the linked Friends list rendered an empty zero-count shell after one normal reload; it is not counted as empty or as a verified first pass. First pass: **41 of 70 attempted** (9 complete, 30 partial, two documented profile 404s). Leave 10ne17 pending for a later normal-browser retry if needed and continue through the rest of the queue. The two exports match the website journal digest, and SQLite integrity and foreign-key checks, 50 Python tests, and 92 Node tests passed.
+
+### Friends continuation: Hxtaroo and ewoofs
+
+Hxtaroo: 16/16 (complete). ewoofs: 16/19 exact IDs (partial); the pagination ended at page two but no exact linked IDs were readable on that page. First pass: **43 of 70 attempted** (10 complete, 31 partial, two documented profile 404s). Keep 10ne17 pending for a retry; continue from Tbpoqqq. Journal hashes, SQLite checks, 50 Python and 92 Node tests passed.
+
+### Scheduled Friends continuation: zNaN_Rot
+
+Verified 34 of 90 linked IDs across pages one and two. People search had no exact result; the saved HTTPS profile showed the exact handle and Friends count. A normal reload recovered the linked Friends list from an initial zero-count shell. Page three did not advance. This adds 34 distinct friendships. First pass: **44 of 70 attempted** (10 complete, 32 partial, two documented profile 404s). Tbpoqqq remains pending after a Cloud Browser error; AliceSekai remains pending because the exact-ID profile returned an incomplete shell without an account name or list link, even after one reload. Neither is counted as a 404 or zero Friends. Continue from pflugerson, then revisit pending sources. Both exports match the canonical journal digest; SQLite integrity and foreign-key checks, 50 Python tests, and 92 Node tests passed.
+
+### Scheduled Friends continuation: pflugerson
+
+Verified 17 of 39 linked IDs on page one, adding 17 distinct friendships and no leaderboard cross-links. People search loaded without a results body; the saved HTTPS profile rendered the exact handle and the linked list. The next-page control did not advance. m1_zm (249484397) was verified through the exact People result; the profile displayed 157 Friends as plain text with no publicly exposed Friends link. No list was read and no empty list, termination, or 404 was inferred. Keep that source pending for review without guessing or bypassing privacy controls. First pass: **45 of 70 attempted** (10 complete, 33 partial, two documented profile 404s). Continue with Minkib7661. The journal prefix, matching export digests, SQLite integrity and foreign-key checks, and all 142 focused tests passed.
+
+### Scheduled Friends continuation: Minkib7661 and NoRoblox_Support
+
+Minkib7661: 34 of 161 exact IDs, pages one and two; the saved HTTPS profile worked after a Cloud Browser error on People search. NoRoblox_Support: 16 of 158 on page one after the exact People result click. Neither pagination control advanced further. The batch added 50 distinct friendships, including NoRoblox_Support ↔ Fischerwunk. No follower or avatar observations were added. First pass: **47 of 70 attempted** (10 complete, 35 partial, two documented profile 404s). Next: sanguifereum, then the historical sources in the plan. Keep 10ne17, Tbpoqqq, AliceSekai and m1_zm pending as noted above. Both exports match the canonical journal digest; SQLite integrity and foreign-key checks and all 142 focused tests passed.
+
+### Friends continuation: sanguifereum and three historical sources
+
+Exact People results led to the verified HTTPS profiles and linked Friends pages. Saved sanguifereum (18/103), 1234mysterio (16/411), 75percent3r (12/13, end of list with one unreadable ID), and anthonqt13 (14/424). All four are partial. The batch added 58 distinct friendships with no leaderboard cross-links and no new follower or avatar observations. First pass: **51 of 70 attempted** (10 complete, 39 partial, two documented profile 404s). Next: aurunqwer. Both exports match the canonical journal digest; SQLite integrity and foreign-key checks and all 142 focused tests passed.
+
+### Scheduled Friends continuation: aurunqwer, BigBoyyChriss and casketdream
+
+Exact People results led to all three HTTPS profiles and public Friends pages. aurunqwer (18/43) and BigBoyyChriss (18/66) are partial because the next-page controls did not advance; casketdream (11/11) is complete. This batch added 47 distinct friendships, with no new leaderboard cross-links, directional follows, or avatar scans. First pass: **54 of 70 attempted** (11 complete, 41 partial, two documented profile 404s). Next: cekersetan. Both exports match the canonical journal digest; SQLite integrity and foreign-key checks and all 142 focused tests passed.
+
+### Top-row audit and cekersetan
+
+Rechecked casketdream at the top: all 11 saved linked IDs matched the rendered cards, including the first row. On cekersetan, explicitly returned to the top on pages 1 and 2, verified the first row before scrolling, and confirmed on page 2 that the complete ordered set of 18 linked IDs was identical before and after scrolling. Saved 36 exact IDs out of 211 (partial; later pages not checked during this audit), adding 36 distinct friendships, with no new leaderboard cross-links, directional follows, or avatar scans. For each future page, return to the top and verify the page number, refreshed first row, and full card set before moving on; when using screenshots, sweep top to bottom. Review missing cards and later pages for partial lists. First pass: **55 of 70 attempted** (11 complete, 42 partial, two documented profile 404s). Next: EnderTitanKid. Both exports match the journal digest; SQLite checks and all 142 focused tests passed.
+
+### Scheduled Friends continuation: EnderTitanKid and Fischerwunk
+
+Verified the first row at the top and all exact profile links on page one for EnderTitanKid (15/39) and Fischerwunk (15/118). Both remain partial because the next page did not advance in this run. Farniluque049 (8204267816) showed the exact handle and 35 Friends as plain text, with no exposed public list link, and remains pending without assuming privacy status, termination, or an empty list. Batch adds 30 distinct friendships. New leaderboard cross-links: none. No follower or avatar scans added. First pass: **57 of 70 attempted** (11 complete, 44 partial, two documented profile 404s). Next: ForcePush_Sith. The journal prefix and export digests match; SQLite integrity and foreign-key checks and all 142 focused tests passed.
+
+### Scheduled Friends continuation: ForcePush_Sith and Gamer3535356466
+
+Verified the first row at the top and all exact profile links on page one for ForcePush_Sith (16/92, saved HTTPS profile after no exact People result) and Gamer3535356466 (18/343, exact People result and one normal reload of the linked list after a zero-count shell). Both remain partial because page two did not verify. Batch adds 34 distinct friendships. New leaderboard cross-links: none. No follower or avatar scans added. First pass: **59 of 70 attempted** (11 complete, 46 partial, two documented profile 404s). Next: KNG_GBS. Journal prefix, export digests, SQLite integrity and foreign-key checks, and all 142 focused tests passed.
+
+### Scheduled Friends continuation: kvllrx and Ledino_rex
+
+kvllrx: 17/27, page one only, partial. Ledino_rex: **41/41 complete**, across all three pages. A normal reload restored the Ledino_rex list after it initially showed zero. Page two had already loaded at a nonzero scroll position; a fresh top observation confirmed the first row and all 18 links before going to page three. On subsequent pages, verify the new page number and scroll position separately so a brief scroll transition is not mistaken for stalled pagination. KNG_GBS (1445327370) displayed 34 Friends as plain text at 09:46:24 UTC, without a publicly exposed list link on the verified profile; keep pending, without inferring privacy status, termination, or an empty list. Added 58 distinct friendships; new leaderboard cross-links: none. No follower or avatar additions. First pass: **61 of 70 attempted** (12 complete, 47 partial, two documented Roblox profile 404s). Next: stoicc_xx. Both exports match the journal digest; SQLite integrity, foreign-key checks and all 142 focused tests passed.
+
+### Scheduled Friends continuation: stoicc_xx and tranquanghieu20
+
+Verified the first row and exact linked IDs on page one for stoicc_xx (17/57, saved HTTPS profile after a blank People results body) and tranquanghieu20 (18/22, exact People result; one normal reload restored the list). Later pages did not verify. Added 35 distinct friendships; new leaderboard cross-links: none. No follower or avatar additions.
+
+**Count correction:** 1234mysterio was observed both on Nov 24 and Nov 25. Both journal entries are retained, but count as one source. The preceding 61/70 checkpoint was really 60/70 unique sources. Current first pass: **62 of 70 unique sources attempted** (12 complete, 48 partial, two documented profile 404s). Remaining: 10ne17, Tbpoqqq, AliceSekai, m1_zm, Farniluque049, KNG_GBS, zackbourbon, Zantrille. Next: zackbourbon, then Zantrille and the pending sources. Both exports match the journal digest; SQLite checks and 142 focused tests passed.
+
+### Scheduled Friends continuation: zackbourbon and Zantrille
+
+Verified zackbourbon via the saved HTTPS profile after People search showed no exact match, then checked the first row at the top and all cards across pages 1–3 (52 exact IDs out of 169, partial). Verified Zantrille via the exact People result, then checked the first row at the top and all 18 visible cards on page one (14 exact IDs out of 97, partial; page two did not advance). Added 66 distinct friendships; no new leaderboard cross-links, directional follows, or avatar scans. First pass: **64 of 70 unique sources attempted** (12 complete, 50 partial, two documented profile 404s). Next: revisit 10ne17, Tbpoqqq, AliceSekai, m1_zm, Farniluque049, and KNG_GBS to distinguish a genuine unavailable list from browser failures. Both exports match the journal digest; SQLite integrity and foreign-key checks and all 142 focused tests passed.
+
+### Friends first pass completed: 70 of 70 unique planned sources attempted
+
+Exact People results and linked Friends pages were accessible on the retry for AliceSekai (53/91 exact IDs across pages 1–3, partial) and Tbpoqqq (9/55 exact IDs on page one, partial; next did not advance). Every saved page was returned to the top and its first row verified. Added 61 distinct friendships, including **Tbpoqqq ↔ Renvuz**. No new directional or avatar observations. External nodes in the exports: 2,922; this is not a count of completed avatar scans.
+
+Three verified HTTPS profiles again displayed a positive Friends count as disabled or plain text without any public Friends control: [m1_zm](https://www.roblox.com/users/249484397/profile) 157 at 10:24:49.230 UTC; [Farniluque049](https://www.roblox.com/users/8204267816/profile) 35 at 10:24:58.168 UTC; [KNG_GBS](https://www.roblox.com/users/1445327370/profile) 34 at 10:25:08.067 UTC. [10ne17](https://www.roblox.com/users/3382416559/profile) displayed a linked count of 178, but its own [Friends page](https://www.roblox.com/users/3382416559/friends#!/friends) again returned a named list with zero cards after a normal reload (10:25:34.791 UTC), contradicting the profile. These are unavailable first-pass attempts, not verified empty lists, confirmed privacy states, or termination. The two earlier generic Roblox profile 404s (metbepol and Luwuma) are possible termination candidates, not confirmations.
+
+Verified exact equality between the 70 planned IDs and the union of 64 unique Friends-journal source IDs (12 complete, 52 partial) and six disjoint documented unavailable IDs. No unattempted sources remain. Journal remains append-only; both exports match SHA-256 `f6152098fd2045a9eed198b8483d04ce07279efa99e6d9285f0adbe7bb860029`; SQLite integrity and foreign-key checks and all 142 focused tests passed. Next: review the PR and verify production deployment, then revisit partial Friends lists and collect Followers and Following separately.

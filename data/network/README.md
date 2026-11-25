@@ -114,3 +114,32 @@ Tests run entirely offline:
 ```bash
 python -m unittest discover -s tests -p test_network_observations.py -v
 ```
+
+## Import observed directional follows
+
+The same append-only website journal accepts `relation: "followers"` and `relation: "following"`. Use a list field with the same name as the relation and retain the exact observed Roblox list URL ending `#!/followers` or `#!/following`, including on per-item evidence. The observed account is the destination for `followers` and the origin for `following`. The SQLite `follow_evidence` table stores that direction explicitly, apart from friendships. The top-level friend coverage totals still count only sources whose friend lists have been recorded. Both follow types use the same conservative complete/partial/unavailable coverage rules as friends.
+
+## Import observed equipped avatar assets
+
+The optional `avatar-observations.jsonl` journal preserves equipped-asset observations independently of website relationship observations. Record only exact equipped asset IDs actually visible in a permitted interface; never infer an asset from a picture, name, similarity score, friend relationship, or inaccessible page.
+
+Pass `import-avatars --input scans.json` a JSON array of objects with `user_id`, `observed_at` (actual UTC time ending in Z), `source_url` (that exact user's public Roblox profile or public equipped-avatar endpoint), `status`, and `asset_ids` (positive decimal IDs as strings). For example, the following is a **fictional** format example, not a verified observation:
+
+```json
+[{"user_id":"12345","observed_at":"2026-11-24T05:10:00Z","source_url":"https://www.roblox.com/users/12345/profile","status":"partial","asset_ids":["617605556"]}]
+```
+
+```sh
+python tools/import_network_observations.py import-avatars --input scans.json
+python tools/import_network_observations.py build --output /tmp/network-review.json --sqlite /tmp/network-review.sqlite
+```
+
+Use `complete` only when the interface confirms the entire equipped list. Use `partial` for an incomplete view: visible IDs can prove an exact full preset match, but unobserved items remain unverified rather than absent. Use `unavailable` and an empty ID array when the interface exposes no usable equipped data. Only a complete scan can establish a nonmatch. This importer will not create new social links or add avatar-only identities to the network, and it never initiates a browser visit or an API request.
+
+`rbi-presets.json` pins all 22 presets from RBI v0.18.1.1-beta, including the corrected single-asset GreenBean rule. SQLite `avatar_observations` retains every observation and its required, matched, missing or unverified IDs for each preset. The site's node projection uses the latest observed avatar, independently of the relationship observation time; prior scans stay in the journal and database. A positive preset match describes equipped assets only and is not evidence of automation, shared ownership, or misconduct.
+
+### Relationship breakdown
+
+The relationship breakdown keeps direct leaderboard friends, direct friends whose outfits have known preset matches, incoming followers, and outgoing follows in four separate groups. A person can appear in more than one group, but only once in the direct-friend denominator. It uses observed positive links, not account names or outfits, to identify friends. Near means at least 80% of the exact required item IDs for a preset with at least three required IDs, on a complete avatar scan. A partial scan can establish a full match if every required item was observed; otherwise it remains unknown. The rate uses only fully scanned observed friends and reports that denominator and unknowns separately. Exact matches confirmed on partial scans remain visible but are excluded from both sides of the rate. No avatar query or inference about botting is made by this view.
+
+Workflow: finish the ranked Friends pass before starting a separate directional Followers and Following pass. A transient or incomplete Friends list remains a partial record with the next checkpoint; it does not establish an empty list. Save and push each verified batch without replacing the earlier journal.

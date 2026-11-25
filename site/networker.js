@@ -327,10 +327,56 @@
     more.hidden = shown.length >= matches.length;
   }
 
+  function renderRelationshipLens(target) {
+    const host = byId("relationship-lens");
+    if (!host) return;
+    host.replaceChildren();
+    if (!target) return;
+    const lens = core.relationshipLens(state.network, target.id, state.data.network_nodes || []);
+    const coverage = core.socialList(target, "friends");
+    const summary = node("p", "nw-lens-metric", lens.matchPercent === null
+      ? "Outfit match rate unavailable"
+      : `${percentage(lens.matchPercent)} of fully scanned friends matched a preset`);
+    const counts = node("p", "nw-help", `${lens.fullCount} exact · ${lens.nearCount} near · ${lens.classifiedCount}/${lens.observedFriendCount} observed friends fully scanned · ${lens.unknownCount} unknown`);
+    const note = node("p", "nw-help", "Near means at least 80% of a preset’s required item IDs, using a complete outfit scan. A full preset match contains every required ID. Exact matches found in partial scans are shown separately and excluded from the rate. Outfit matches, including defaults, do not establish botting, shared ownership, or farming.");
+    const listCoverage = node("p", "nw-help", coverage.complete
+      ? "A complete Friends list was recorded. Entries and outfits reflect saved observation times, not live status."
+      : "The Friends list is incomplete or unavailable. The rate describes only fully scanned observed friends, not the whole list.");
+    const grid = node("div", "nw-lens-grid");
+    function lane(key, title, entries, format = entry => ({person: entry}), empty = "No saved links in this group.") {
+      const article = node("section", `nw-lens-lane nw-lens-${key}`);
+      article.append(node("h3", "", `${title} · ${entries.length}`));
+      if (!entries.length) article.append(node("p", "nw-help", empty));
+      else {
+        const list = node("ul", "nw-lens-list");
+        for (const entry of entries) {
+          const {person, description, observedAt} = format(entry), row = node("li");
+          row.append(externalLink(personLabel(person), core.profileUrl(person.id)));
+          if (description) row.append(node("span", "nw-help", description));
+          if (observedAt) row.append(checkedTime(observedAt));
+          list.append(row);
+        }
+        article.append(list);
+      }
+      return article;
+    }
+    grid.append(
+      lane("followers", "Followers (they follow this account)", lens.followers, undefined, "No saved incoming follows; the list may be uninspected."),
+      lane("outfits", "Friends with preset matches", lens.outfitFriends, entry => ({
+        person: entry.node, description: entry.matches.map(m => `${entry.status === "full" ? entry.completeScan ? "Exact" : "Exact (partial scan)" : "Near"}: ${m.name} (${m.matchedCount}/${m.requiredCount})`).join(" · "),
+        observedAt: entry.observedAt,
+      }), "No exact or near matches in the available scans."),
+      lane("leaderboard", "Leaderboard friends", lens.leaderboardFriends),
+      lane("following", "Following (this account follows them)", lens.following, undefined, "No saved outgoing follows; the list may be uninspected.")
+    );
+    host.append(summary, counts, listCoverage, note, grid);
+  }
+
   function renderSocialGraph() {
     const target = referenceAccount();
     renderWebsiteCoverage();
     renderCensusCoverage();
+    renderRelationshipLens(target);
     if (!target) {
       byId("social-coverage").textContent = "No main account selected";
       byId("social-summary").textContent = "Choose an account to explore its saved social connections.";
@@ -342,7 +388,7 @@
     const badge = byId("social-coverage"); badge.classList.toggle("is-known", view.totalEdges > 0);
     badge.textContent = view.totalEdges ? `${view.totalEdges} observed link${view.totalEdges === 1 ? "" : "s"}` : readable ? "No links observed" : "Coverage unknown";
     byId("social-summary").textContent = `Start at ${personLabel(target)} and expand saved connections to leaderboard accounts or verified RBI preset matches. Select a node to inspect its evidence. The main account stays fixed until you choose Use as main account.`;
-    const options = {network: state.network, accounts: state.accounts, focusId: target.id, core, usernamePatterns: patterns,
+    const options = {network: state.network, historicalEdges: state.data.historical_friend_edges, avatarNodes: state.data.network_nodes, accounts: state.accounts, focusId: target.id, core, usernamePatterns: patterns,
       onCompare: id => chooseCandidate(id, true),
       onReference: (id, person) => chooseTarget(person || state.network.nodes.get(id))};
     if (graphView) graphView.update(options);

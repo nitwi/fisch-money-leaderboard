@@ -150,6 +150,54 @@
       matchedAssetCount: new Set(presets.flatMap(preset => preset.matchedIds)).size};
   }
 
+  function classifyPresetResemblance(avatar, rules = RBI_AVATAR_RULES.presets) {
+    if (!["ok", "partial"].includes(avatar?.status) || !Array.isArray(avatar.assets)) return {status: "unknown", matches: []};
+    const result = reviewAvatar({...avatar, status: "ok"}, rules);
+    if (result.fullMatches.length) return {status: "full", matches: result.fullMatches};
+    // A short/shared item list is not enough to call a near match. Only use a
+    // complete scan for a near match or a known non-match.
+    if (avatar.status !== "ok") return {status: "unknown", matches: []};
+    const near = result.partialMatches.filter(preset =>
+      preset.requiredCount >= 3 && preset.matchedCount >= 2 &&
+      preset.matchedCount * 5 >= preset.requiredCount * 4);
+    return {status: near.length ? "near" : "none", matches: near};
+  }
+
+  function relationshipLens(network, targetId, scans = []) {
+    const id = normalizeId(targetId);
+    const projected = new Map(scans.filter(node => normalizeId(node?.id) && node.avatar).map(node => [normalizeId(node.id), node.avatar]));
+    const friends = new Set(), followers = new Set(), following = new Set();
+    for (const edge of network?.edges || []) {
+      const from = normalizeId(edge.from), to = normalizeId(edge.to);
+      if (!id || !from || !to || from === to || (from !== id && to !== id)) continue;
+      if (edge.kind === "friend") friends.add(from === id ? to : from);
+      else if (edge.kind === "follow") (from === id ? following : followers).add(from === id ? to : from);
+    }
+    function person(other) {
+      return network?.nodes?.get(other) || {id: other};
+    }
+    const list = values => [...values].map(person).sort((a, b) =>
+      String(a.username || a.display_name || a.id).localeCompare(String(b.username || b.display_name || b.id), "en"));
+    const directFriends = list(friends);
+    const reviewed = directFriends.map(node => {
+      const baseline = node.avatar;
+      const latest = projected.get(node.id);
+      const date = avatar => avatar?.checked_at || avatar?.fetched_at || "";
+      const avatar = latest && (!baseline || date(latest) >= date(baseline)) ? latest : baseline;
+      return {node, ...classifyPresetResemblance(avatar), completeScan: avatar?.status === "ok" && Array.isArray(avatar.assets), observedAt: date(avatar) || null};
+    });
+    const classifiedCount = reviewed.filter(result => result.completeScan).length;
+    const outfitFriends = reviewed.filter(result => result.status === "full" || result.status === "near");
+    const partialExactCount = outfitFriends.filter(entry => !entry.completeScan).length;
+    return {observedFriendCount: directFriends.length, classifiedCount, partialExactCount,
+      unknownCount: directFriends.length - classifiedCount - partialExactCount,
+      fullCount: outfitFriends.filter(entry => entry.status === "full").length,
+      nearCount: outfitFriends.filter(entry => entry.status === "near").length,
+      matchPercent: classifiedCount ? 100 * (outfitFriends.length - partialExactCount) / classifiedCount : null,
+      leaderboardFriends: directFriends.filter(node => node.ledger === true),
+      outfitFriends, followers: list(followers), following: list(following)};
+  }
+
   function matchesReviewFilter(review, filter = "all") {
     return !["full", "partial", "none", "unknown"].includes(filter) || review.status === filter;
   }
@@ -339,7 +387,7 @@
   }
 
   return Object.freeze({normalizeId, profileUrl, assetUrl, thumbnailUrl, sourceUrl, assetGroup, compareAvatars,
-    RBI_AVATAR_RULES, reviewAvatar, matchesReviewFilter,
+    RBI_AVATAR_RULES, reviewAvatar, matchesReviewFilter, classifyPresetResemblance, relationshipLens,
     usernameSimilarity, socialList, socialEvidence, directRelations, sharedFriends, knownEdges, socialNetwork,
     oneHopNetwork, compareAccounts, candidates});
 });

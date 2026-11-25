@@ -14,17 +14,22 @@
   const rank = node => Number.isInteger(node?.latest_rank) && node.latest_rank > 0 ? node.latest_rank : null;
 
   // Eligibility filters nodes; it never creates a relationship between them.
-  function eligibility(node, core, includePartial = false) {
-    const review = core.reviewAvatar(node?.avatar);
+  function eligibility(node, core) {
+    const avatar = node?.avatar;
+    const incomplete = avatar?.status === "partial";
+    const unavailable = Boolean(avatar && !incomplete && avatar.status !== "ok");
+    // A partial scan can prove a positive if every required ID was observed,
+    // but missing IDs on an incomplete scan cannot establish a nonmatch.
+    const review = core.reviewAvatar(incomplete ? {...avatar, status: "ok"} : avatar);
     const ledger = node?.ledger === true;
     const full = review.available && review.fullMatches.length > 0;
     const partial = review.available && !full && review.partialMatches.length > 0;
-    return {eligible: Boolean(ledger || full || (includePartial && partial)), ledger,
-      category: ledger ? "ledger" : full ? "full" : partial ? "partial" : review.available ? "none" : "unknown",
-      review, matches: full ? review.fullMatches : partial ? review.partialMatches : [],
+    return {eligible: Boolean(ledger || full), ledger,
+      category: ledger ? "ledger" : full ? "full" : partial ? "partial" : review.available && !incomplete ? "none" : "unknown",
+      review, incomplete, unavailable, matches: full ? review.fullMatches : partial ? review.partialMatches : [],
       label: ledger ? rank(node) ? `Leaderboard #${rank(node)}` : "Leaderboard history" :
         full ? `Full preset · ${review.fullMatches[0].name}` : partial ? `Partial preset · ${review.partialMatches[0].name}` :
-          review.available ? "No preset match" : "Avatar unchecked"};
+          incomplete ? "Avatar scan incomplete" : review.available ? "No preset match" : unavailable ? "Avatar unavailable" : "Avatar unchecked"};
   }
 
   function compareNodes(a, b) {
@@ -54,7 +59,7 @@
    * when their ID is in expandedIds. A collapsed subtree may remain reachable
    * through a different expanded branch, as real shared connections should.
    */
-  function buildBranches({network, accounts = [], focusId, core, expandedIds = [], includePartial = false, maxNodes = MAX_NODES}) {
+  function buildBranches({network, historicalEdges = [], avatarNodes = [], accounts = [], focusId, core, expandedIds = [], maxNodes = MAX_NODES}) {
     if (!core?.normalizeId || !core?.reviewAvatar) throw new TypeError("A FischNetworker core is required.");
     const nodesById = new Map();
     for (const node of network?.nodes?.values?.() || []) {
@@ -65,10 +70,18 @@
       const id = core.normalizeId(node?.id);
       if (id) nodesById.set(id, {...nodesById.get(id), ...node, id, cached: true});
     }
-    const eligibilityById = new Map([...nodesById].map(([id, node]) => [id, eligibility(node, core, includePartial)]));
+    // Explicit website captures are projected separately from the cached API
+    // account record. The importer only projects a capture if it is not stale.
+    for (const scan of Array.isArray(avatarNodes) ? avatarNodes : []) {
+      const id = core.normalizeId(scan?.id);
+      if (id && nodesById.has(id) && scan.avatar && scan.avatar_preset_review) {
+        nodesById.set(id, {...nodesById.get(id), avatar: scan.avatar, avatar_preset_review: scan.avatar_preset_review});
+      }
+    }
+    const eligibilityById = new Map([...nodesById].map(([id, node]) => [id, eligibility(node, core)]));
     const edgeMap = new Map(), adjacency = new Map();
     const connect = (a, b) => { if (!adjacency.has(a)) adjacency.set(a, new Set()); adjacency.get(a).add(b); };
-    for (const edge of network?.edges || []) {
+    for (const edge of [...(network?.edges || []), ...(Array.isArray(historicalEdges) ? historicalEdges : [])]) {
       const from = core.normalizeId(edge?.from), to = core.normalizeId(edge?.to);
       // A bare pair or a similarity result is not an observed social edge.
       const evidence = Array.isArray(edge?.evidence) ? edge.evidence.filter(item => item && typeof item === "object") : [];
@@ -76,8 +89,10 @@
           !nodesById.has(from) || !nodesById.has(to) || !evidence.length) continue;
       const pair = edge.kind === "friend" ? [from, to].sort() : [from, to];
       const key = `${edge.kind}:${pair.join(":")}`;
-      if (!edgeMap.has(key)) edgeMap.set(key, {...edge, from: pair[0], to: pair[1], key, evidence: []});
-      edgeMap.get(key).evidence.push(...evidence);
+      if (!edgeMap.has(key)) edgeMap.set(key, {...edge, from: pair[0], to: pair[1], key, evidence: [], laterChecks: []});
+      const saved = edgeMap.get(key);
+      saved.evidence.push(...evidence);
+      if (Array.isArray(edge.laterChecks)) saved.laterChecks.push(...edge.laterChecks);
       connect(from, to); connect(to, from);
     }
     const id = core.normalizeId(focusId), root = nodesById.get(id) || null;
@@ -86,7 +101,7 @@
     const limit = Number.isFinite(maxNodes) ? clamp(Math.floor(maxNodes), 2, MAX_NODES) : MAX_NODES;
     const model = {focusId: id, root, nodesById, eligibility: eligibilityById, adjacency, expanded,
       nodes: [], edges: [], parents: new Map(), depths: new Map(), maxNodes: limit,
-      omittedEligibleIds: [], hidden: {unchecked: 0, partial: 0, noMatch: 0}, includePartial};
+      omittedEligibleIds: [], hidden: {unchecked: 0, partial: 0, noMatch: 0}};
     if (!root) return model;
     const included = new Set([id]), queue = [id], omitted = new Set(), hidden = new Set();
     model.depths.set(id, 0);
@@ -103,7 +118,11 @@
       }
     }
     model.nodes = queue.map(nodeId => nodesById.get(nodeId));
-    model.edges = [...edgeMap.values()].filter(edge => included.has(edge.from) && included.has(edge.to));
+    model.edges = [...edgeMap.values()].filter(edge => included.has(edge.from) && included.has(edge.to)).map(edge => ({
+      ...edge,
+      crossLink: model.parents.get(edge.from) !== edge.to && model.parents.get(edge.to) !== edge.from,
+      ...edgeObservation(edge, nodesById, core),
+    }));
     model.omittedEligibleIds = [...omitted].filter(nodeId => !included.has(nodeId));
     for (const nodeId of hidden) {
       const category = eligibilityById.get(nodeId).category;
@@ -111,6 +130,30 @@
     }
     model.directStats = neighborStats(id, model);
     return model;
+  }
+
+  const observationTime = item => Date.parse(item?.observed_at || item?.fetched_at || item?.checked_at || "");
+
+  function edgeObservation(edge, nodesById, core) {
+    const {from, to, kind, evidence} = edge;
+    const checks = kind === "friend" ? [[from, to, "friends"], [to, from, "friends"]] :
+      [[from, to, "following"], [to, from, "followers"]];
+    const times = evidence.map(observationTime).filter(Number.isFinite);
+    const latest = times.length ? Math.max(...times) : null;
+    const laterChecks = (edge.laterChecks || []).filter(check => latest !== null && observationTime(check) > latest &&
+      checks.some(([ownerId, , kind]) => check.ownerId === ownerId && check.kind === kind));
+    for (const [ownerId, neighborId, listKind] of checks) {
+      const node = nodesById.get(ownerId), list = core.socialList(node, listKind);
+      if (!list.complete || list.items.has(neighborId)) continue;
+      const checked = observationTime(list.record);
+      if (latest === null || !Number.isFinite(checked) || checked <= latest) continue;
+      laterChecks.push({ownerId, kind: listKind, observed_at: new Date(checked).toISOString(),
+        source_url: list.record.source_url, source_label: list.record.source_label || "Later complete Roblox list"});
+    }
+    const uniqueChecks = [...new Map(laterChecks.map(check => [
+      [check.ownerId, check.kind, observationTime(check)].join(":"), check
+    ])).values()];
+    return {latest, laterChecks: uniqueChecks, status: uniqueChecks.length ? "historical" : latest === null ? "undated" : "latest-saved"};
   }
 
   function layout(model, manualPositions = new Map()) {
@@ -191,7 +234,7 @@
     const doc = container.ownerDocument, win = doc.defaultView;
     const uniqueId = `fng-${++instanceCount}`;
     let options = {...initialOptions}, model, positions = new Map(), manual = new Map();
-    let expanded = new Set(), selectedId = null, focusId = options.focusId, includePartial = Boolean(options.includePartial);
+    let expanded = new Set(), selectedId = null, focusId = options.focusId;
     let view = {x: 0, y: 0, scale: 1}, dimensions = {width: 900, height: 500};
     let destroyed = false, gesture = null, suppressClickUntil = 0;
     const pointers = new Map(), listeners = [], nodeElements = new Map(), edgeElements = [];
@@ -230,10 +273,7 @@
     const wrapper = el("div", "fng"), toolbar = el("div", "fng-toolbar"), heading = el("div", "fng-heading");
     const kicker = el("p", "fng-kicker", "MAIN ACCOUNT"), mainName = el("strong", "fng-main-name");
     heading.append(kicker, mainName);
-    const filter = el("label", "fng-filter"), partialInput = el("input");
-    partialInput.type = "checkbox"; partialInput.checked = includePartial;
-    filter.append(partialInput, el("span", "", "Include partial preset matches"));
-    toolbar.append(heading, filter);
+    toolbar.append(heading);
     const summary = el("p", "fng-summary"); summary.setAttribute("aria-live", "polite");
     const boundsNote = el("p", "fng-bounds"), workspace = el("div", "fng-workspace"), canvas = el("div", "fng-canvas");
     const controls = el("div", "fng-controls"), zoomLabel = el("output", "fng-zoom", "100%");
@@ -256,10 +296,10 @@
     const pickerRow = el("label", "fng-picker"), picker = el("select"); picker.setAttribute("aria-label", "Inspect a visible account");
     pickerRow.append(el("span", "", "Inspect visible account"), picker);
     const legend = el("div", "fng-legend");
-    legend.append(el("span", "fng-legend-friend", "Solid cyan: friendship"), el("span", "fng-legend-follow", "Gold arrow: follows"), el("span", "", "Green: leaderboard"), el("span", "", "Gold: preset match"));
+    legend.append(el("span", "fng-legend-friend", "Solid cyan: friendship"), el("span", "fng-legend-follow", "Gold arrow: follows"), el("span", "", "Green: leaderboard"), el("span", "", "Gold node: full preset match"), el("span", "", "Faded: not seen in a later complete list"));
     const help = el("p", "fng-help", "Select a node to inspect it, then expand its saved connections. Drag nodes or empty space to arrange the view. Pinch or Ctrl + scroll to zoom; keyboard + / − and arrow keys work on the canvas.");
     help.id = `${uniqueId}-help`;
-    const caution = el("p", "fng-help", "Branches require a recorded friend or follow relationship. Avatars only control which connected accounts appear; a preset match does not establish ownership or misconduct.");
+    const caution = el("p", "fng-help", "Branches require a recorded friend or follow relationship. Only leaderboard accounts or full RBI preset matches qualify. A saved observation is not a live status check or evidence of ownership or misconduct.");
     const live = el("p", "fng-sr-only"); live.setAttribute("role", "status"); live.setAttribute("aria-live", "polite");
     wrapper.append(toolbar, summary, boundsNote, workspace, pickerRow, legend, help, caution, live);
     container.replaceChildren(wrapper);
@@ -293,7 +333,7 @@
     function draw() {
       nodeElements.clear(); edgeElements.length = 0; edgeLayer.replaceChildren(); nodeLayer.replaceChildren();
       for (const edge of model.edges) {
-        const path = svgEl("path", {class: `fng-edge fng-edge-${edge.kind}`, "vector-effect": "non-scaling-stroke"});
+        const path = svgEl("path", {class: `fng-edge fng-edge-${edge.kind} fng-edge-${edge.status}${edge.crossLink ? " fng-edge-cross" : ""}`, "vector-effect": "non-scaling-stroke"});
         if (edge.kind === "follow") path.setAttribute("marker-end", `url(#${uniqueId}-arrow)`);
         path.append(svgEl("title", {}, `${relationLabel(edge)}. ${edge.evidence.map(item => item.observed_at || item.fetched_at || "Observation time unknown").join("; ")}`));
         edgeElements.push({edge, path}); edgeLayer.append(path);
@@ -339,10 +379,10 @@
       if (!model.nodes.some(node => node.id === id)) return;
       selectedId = id; picker.value = id; highlight(); renderInspector(); announce(`Selected ${name(model.nodesById.get(id))}. Main account remains ${name(model.root)}.`);
     }
-    function hiddenText(stats, partialAllowed) {
+    function hiddenText(stats) {
       const parts = [];
-      if (stats.unchecked) parts.push(`${stats.unchecked} unchecked avatar${stats.unchecked === 1 ? "" : "s"}`);
-      if (!partialAllowed && stats.partial) parts.push(`${stats.partial} partial-only preset match${stats.partial === 1 ? "" : "es"}`);
+      if (stats.unchecked) parts.push(`${stats.unchecked} unchecked or incomplete avatar scan${stats.unchecked === 1 ? "" : "s"}`);
+      if (stats.partial) parts.push(`${stats.partial} partial-only preset match${stats.partial === 1 ? "" : "es"}`);
       if (stats.noMatch) parts.push(`${stats.noMatch} checked avatar${stats.noMatch === 1 ? "" : "s"} without a preset match`);
       return parts.join(" · ");
     }
@@ -350,13 +390,13 @@
       mainName.textContent = model.root ? name(model.root) : "Choose an account";
       if (!model.root) { summary.textContent = "Choose a saved account to explore its observed connections."; boundsNote.hidden = true; return; }
       const stats = model.directStats, shown = Math.max(0, model.nodes.length - 1);
-      summary.textContent = `${shown} visible branch account${shown === 1 ? "" : "s"} · ${stats.eligible} eligible direct neighbor${stats.eligible === 1 ? "" : "s"} of ${stats.total} observed. ${hiddenText(model.hidden, includePartial) ? `Hidden across open branches: ${hiddenText(model.hidden, includePartial)}.` : ""}`;
+      summary.textContent = `${shown} visible branch account${shown === 1 ? "" : "s"} · ${stats.eligible} eligible direct neighbor${stats.eligible === 1 ? "" : "s"} of ${stats.total} observed. ${hiddenText(model.hidden) ? `Hidden across open branches: ${hiddenText(model.hidden)}.` : ""}`;
       boundsNote.hidden = !model.omittedEligibleIds.length;
       boundsNote.textContent = `${model.omittedEligibleIds.length} more eligible account${model.omittedEligibleIds.length === 1 ? "" : "s"} cannot fit within this view's ${model.maxNodes}-account limit. Collapse another branch or use a connected account as main to inspect them.`;
       collapseButton.disabled = expanded.size === 0 && manual.size === 0;
       svg.setAttribute("aria-label", `Observed connections branching from ${name(model.root)}. ${shown} visible branch accounts.`);
     }
-    function appendEvidence(parent, evidence) {
+    function appendEvidence(parent, evidence, latest = null) {
       const list = el("ul", "fng-evidence");
       const unique = new Map();
       for (const item of evidence) {
@@ -366,6 +406,8 @@
       for (const item of unique.values()) {
         const row = el("li"), label = item.source_label || (item.method === "roblox_website" ? "Roblox website observation" : "Recorded source");
         row.append(safeLink(label, options.core.sourceUrl(item.source_url)), el("span", "", " · "), time(item.observed_at || item.fetched_at));
+        const observed = observationTime(item);
+        if (latest !== null && Number.isFinite(observed)) row.append(el("span", "", observed === latest ? " · latest saved positive" : " · earlier observation"));
         list.append(row);
       }
       parent.append(list);
@@ -381,15 +423,25 @@
       const fact = (label, value) => { facts.append(el("dt", "", label), el("dd", "", value)); };
       fact("Roblox ID", node.id);
       fact("Leaderboard", node.ledger ? rank(node) ? `Latest rank #${rank(node)}` : "Seen in ledger history" : "Not in saved leaderboard");
-      fact("Avatar", item.review.available ? item.review.status === "full" ? "Full preset match" : item.review.status === "partial" ? "Partial preset match" : "Checked · no preset match" : "Unchecked / unavailable");
+      fact("Avatar", item.review.status === "full" ? "Full preset match" + (item.incomplete ? " · from incomplete scan" : "") :
+        item.incomplete ? "Incomplete scan · full match not established" :
+        item.review.available ? item.review.status === "partial" ? "Partial preset match" : "Checked · no preset match" : item.unavailable ? "Unavailable at last check" : "Unchecked");
       inspector.append(facts);
       if (item.matches.length) {
         const matchList = el("ul", "fng-presets");
-        for (const preset of item.matches) matchList.append(el("li", "", `${preset.name} · ${preset.matchedCount}/${preset.requiredCount} required assets${preset.status === "partial" ? " (partial)" : ""}`));
+        for (const preset of item.matches) {
+          const row = el("li"), details = el("details");
+          details.append(el("summary", "", `${preset.name} · ${preset.matchedCount}/${preset.requiredCount} required assets${preset.status === "partial" ? " (partial)" : ""}`));
+          details.append(el("p", "fng-help", `Observed required IDs: ${preset.matchedIds.join(", ")}`));
+          if (preset.missingIds.length) details.append(el("p", "fng-help",
+            `${item.incomplete ? "Unverified" : "Missing"} required IDs: ${preset.missingIds.join(", ")}`));
+          row.append(details); matchList.append(row);
+        }
         inspector.append(matchList);
       }
-      if (item.review.available) {
-        const checked = el("p", "fng-source-time", "Avatar observed: "); checked.append(time(node.avatar?.fetched_at || node.avatar?.observed_at));
+      if (item.review.available || item.unavailable) {
+        const checked = el("p", "fng-source-time", item.unavailable ? "Avatar checked: " : "Avatar observed: ");
+        checked.append(time(node.avatar?.fetched_at || node.avatar?.observed_at || node.avatar?.checked_at));
         const url = options.core.sourceUrl(node.avatar?.source_url); if (url) checked.append(el("span", "", " · "), safeLink("source", url)); inspector.append(checked);
       }
       if (!isMain && typeof options.usernamePatterns?.compare === "function") {
@@ -426,7 +478,7 @@
         }
       } else inspector.append(el("p", "fng-help", "Direct eligible neighbors are open. Select a branch account to expand further. The main account stays fixed while you inspect."));
       actions.append(safeLink("Open Roblox profile ↗", options.core.profileUrl(node.id))); inspector.append(actions);
-      const neighborNote = el("p", "fng-help", `${stats.eligible} eligible of ${stats.total} observed neighbors. ${hiddenText(stats, includePartial) ? `Hidden: ${hiddenText(stats, includePartial)}.` : ""}`);
+      const neighborNote = el("p", "fng-help", `${stats.eligible} eligible of ${stats.total} observed neighbors. ${hiddenText(stats) ? `Hidden: ${hiddenText(stats)}.` : ""}`);
       inspector.append(neighborNote);
       const coverage = el("details", "fng-details"); coverage.open = true;
       coverage.append(el("summary", "", "Saved list coverage"));
@@ -449,13 +501,24 @@
       if (!incident.length) evidence.append(el("p", "fng-help", stats.total ? "No observed neighbor meets the current branch filter. Unchecked avatars remain unqualified." : "No friend or follow links are saved for this account. Unavailable lists do not establish that there are no connections."));
       for (const edge of incident) {
         const entry = el("details", "fng-link-evidence");
-        entry.append(el("summary", "", relationLabel(edge))); appendEvidence(entry, edge.evidence); evidence.append(entry);
+        const status = edge.status === "historical" ? "Historical; not seen in later complete list" :
+          edge.status === "undated" ? "Saved observation; date unknown" : "Latest saved positive; not checked live";
+        entry.append(el("summary", "", `${relationLabel(edge)}${edge.crossLink ? " · cross-link" : ""}`));
+        const dates = el("p", "fng-source-time", status);
+        if (edge.latest !== null) dates.append(el("span", "", " · "), time(edge.latest));
+        entry.append(dates);
+        appendEvidence(entry, edge.evidence, edge.latest);
+        if (edge.laterChecks.length) {
+          entry.append(el("p", "fng-help", "Later complete list(s) without this account:"));
+          appendEvidence(entry, edge.laterChecks);
+        }
+        evidence.append(entry);
       }
       inspector.append(evidence);
     }
     function rebuild(shouldFit = false) {
       if (destroyed) return;
-      model = buildBranches({...options, focusId, expandedIds: expanded, includePartial});
+      model = buildBranches({...options, focusId, expandedIds: expanded});
       if (!model.nodes.some(node => node.id === selectedId)) selectedId = model.focusId;
       positions = layout(model, manual);
       picker.replaceChildren();
@@ -539,7 +602,6 @@
       } else return;
       event.preventDefault();
     });
-    listen(partialInput, "change", () => { includePartial = partialInput.checked; rebuild(true); });
     listen(picker, "change", () => select(picker.value));
     let resizeObserver;
     if (win?.ResizeObserver) {
@@ -555,7 +617,6 @@
         const nextFocus = nextOptions.focusId === undefined ? focusId : nextOptions.focusId;
         const changed = options.core.normalizeId(nextFocus) !== options.core.normalizeId(focusId);
         options = {...options, ...nextOptions}; focusId = nextFocus;
-        if (typeof nextOptions.includePartial === "boolean") { includePartial = nextOptions.includePartial; partialInput.checked = includePartial; }
         if (changed) { expanded.clear(); manual.clear(); selectedId = focusId; pointers.clear(); gesture = null; }
         rebuild(changed);
       },
@@ -567,5 +628,5 @@
     });
   }
 
-  return Object.freeze({eligibility, neighborStats, buildBranches, layout, edgeGeometry, fitTransform, zoomTransform, mount});
+  return Object.freeze({eligibility, neighborStats, buildBranches, edgeObservation, layout, edgeGeometry, fitTransform, zoomTransform, mount});
 });

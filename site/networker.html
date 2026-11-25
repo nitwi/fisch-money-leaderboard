@@ -7,13 +7,13 @@
   <title>Networker · Fisch Money Ledger</title>
   <link rel="stylesheet" href="styles.css?v=b796ed7e2670">
   <link rel="stylesheet" href="standouts.css?v=a5e0cf38dd14">
-  <link rel="stylesheet" href="networker.css?v=3ce0ce0700e9">
-  <link rel="stylesheet" href="network-graph.css?v=c2fbb83f81d9">
+  <link rel="stylesheet" href="networker.css?v=b592038b18ba">
+  <link rel="stylesheet" href="network-graph.css?v=5970ad7d2cd0">
   <script defer src="time-utils.js?v=b2a56747d852"></script>
-  <script defer src="username-patterns.js?v=29ca08b622f9"></script>
-  <script defer src="networker-core.js?v=8685cad81797"></script>
-  <script defer src="network-graph.js?v=2b3af75fd033"></script>
-  <script defer src="networker.js?v=db2e3c939ad5"></script>
+  <script defer src="username-patterns.js?v=91044023c885"></script>
+  <script defer src="networker-core.js?v=b622899f63bf"></script>
+  <script defer src="network-graph.js?v=3fbeabefc303"></script>
+  <script defer src="networker.js?v=1993a7593c13"></script>
 </head>
 <body class="networker-page">
   <header class="site-head">
@@ -47,6 +47,10 @@
         <details class="nw-source-details"><summary>Inspection coverage for all accounts</summary><div id="census-coverage-table" class="nw-census-table"></div><p class="nw-help">A displayed friend count is preserved separately from the exact IDs saved. Partial lists, unavailable cards and accounts without a saved inspection leave missing identities unknown.</p></details>
         <p class="nw-data-downloads"><a href="network-database.sqlite.gz" download>Download SQLite database (.gz)</a><span aria-hidden="true"> · </span><a href="network-data.json" download>Download network JSON</a><span aria-hidden="true"> · </span><a href="https://github.com/nitwi/fisch-money-leaderboard/tree/main/data/network" target="_blank" rel="noopener noreferrer">Observation journal &amp; method</a></p>
         <div id="social-graph"></div>
+        <details class="nw-source-details nw-relationship-lens">
+          <summary>Relationship breakdown &amp; outfit scan coverage</summary>
+          <div id="relationship-lens" class="nw-lens-content"></div>
+        </details>
         <section class="nw-observed-friends" aria-labelledby="observed-friends-title">
           <div class="nw-section-head"><h3 id="observed-friends-title">Observed direct friends</h3><span id="friend-list-count" class="nw-pill"></span></div>
           <p id="friend-list-coverage" class="nw-help"></p>
@@ -74,7 +78,7 @@
         <p><strong>RBI avatar review:</strong> each preset is a specific set of asset IDs from the linked published RBI release. Full means every preset ID is equipped; partial means at least one, but not every, ID is equipped. A one-item preset can produce a full 1/1 match. Review order puts full matches first, then partial matches by the number of distinct preset IDs observed. Results describe the avatar observation time, independently of the historical leaderboard photo.</p>
         <p><strong>Avatar overlap:</strong> shared asset IDs ÷ the union of both equipped asset sets. Clothing and accessories are compared separately from body parts and animations so common defaults do not dominate the cosmetic comparison. An empty or unavailable avatar is never a 100% match.</p>
         <p><strong>Username patterns:</strong> explained rules compare distinctive name stems, numbered variants, separators, meaningful tokens, and common character substitutions. Generic words, short fragments, digit-only overlap, and weak similarities in random-looking strings are suppressed. Strong and possible labels describe the detected text pattern. They are review hints, with no ownership probability. Display names are excluded. The comparison runs locally in your browser and does not call an AI service.</p>
-        <p><strong>Social links:</strong> only exact account IDs in a readable API list or a documented website observation create links. Start from the selected main account and expand connected nodes using saved observations. Branches include photographed leaderboard accounts from all history, or external accounts with a full match to one of the 22 RBI presets. Partial preset matches are optional; unchecked avatars remain unknown. Username or outfit resemblance alone never creates an edge. Follow direction and source times are preserved. The searchable list below the graph retains all observed direct friends. Partial-list shared friends are a minimum observed count.</p>
+        <p><strong>Social links:</strong> only exact account IDs in a readable API list or a documented website observation create links. Start from the selected main account and expand connected nodes using saved observations. Branches include photographed leaderboard accounts from all history, or external accounts with a full match to one of the 22 RBI presets. Near matches appear only in the separate relationship breakdown; unchecked avatars remain unknown. Username or outfit resemblance alone never creates an edge. Follow direction and source times are preserved. The searchable list below the graph retains all observed direct friends. Partial-list shared friends are a minimum observed count.</p>
         <p>Matching assets and similar names describe public account features. They do not establish common ownership or misconduct.</p>
       </div></details>
     </div>
