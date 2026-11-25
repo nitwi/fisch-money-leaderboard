@@ -117,3 +117,9 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 - Checked the first rows from the top of pages 1–2. Found 31 exact IDs and five anonymous Unavailable positions. Next did not advance to page 3. Improved from 14 to 31/97, still partial, adding 17 distinct verified site friendships and no new ledger-to-ledger edges.
 - This branch now has 202 new distinct verified site friendships since PR #4 and 3,203 external nodes. Journal has 81 rows, digest `53a1b985d6157513f8ca2380184d6db274ddb9855e473fc01fe8ca46607319cc`; both exports match, SQLite checks and all 142 focused tests passed. No new avatar scans or directed follows.
 - Next: ForcePush_Sith, SelenaTatsukii, zNaN_Rot and Canizan.
+
+### 20:31 UTC — ForcePush_Sith and SelenaTatsukii rechecks
+
+- ForcePush_Sith (`4700793500`): opened the saved HTTPS profile and verified `@ForcePush_Sith` with 92 Friends. Clicking the profile Friends link opened a Chrome internal error; no Roblox denial or 404 was verified. Preserved the prior 16/92 partial.
+- SelenaTatsukii (`362858829`): verified the exact handle and 134 Friends after a normal profile reload. The linked Friends page’s mismatched zero shell recovered with one normal reload. From the top of pages 1–3, checked 52 exact IDs plus two anonymous Unavailable cards; all exact IDs were already in the journal. Next did not advance to page four. Preserved the prior 70/134 partial with four documented pages.
+- No new IDs, journal, or export changes. Next: zNaN_Rot and Canizan, then BigBoyyChriss and Tbpoqqq.
