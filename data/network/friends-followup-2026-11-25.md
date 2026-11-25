@@ -23,3 +23,8 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 
 - [tranquanghieu20](https://www.roblox.com/users/3135553986/friends#!/friends): one normal reload recovered the 22-friend list from an empty zero-count shell. Verified the first row at scroll top and all 18 page-one exact links at 16:31:54.157 UTC; identical to the prior observation. Next did not advance; kept 18/22 partial coverage. No new relationships or export changes.
 - The browser hit a Chrome navigation error for Sylilia and while beginning the ewoofs search. Neither list was verified in this run. Next start with shatter_yourselfgrgr, then ewoofs or another unrechecked partial profile. Leave Sylilia pending without a site-denial or termination claim.
+
+## 2026-11-25 16:46 UTC
+
+- [shatter_yourselfgrgr](https://www.roblox.com/users/8794906806/friends#!/friends): People search hit a Chrome internal navigation error; the saved HTTPS profile worked and displayed the exact handle and 53 Friends. Verified the first row at scroll top on pages one and two. At 16:46:50.072 UTC, 35 exact IDs were readable across the two pages, all already recorded. Page two showed one anonymous **Account Deleted** card with no exact ID, and Roblox disabled Next despite displaying 53 Friends. Kept the better earlier 51/53 partial observation across three pages. No new relationships and no journal or export changes.
+- Next: ewoofs and other unrechecked partial lists. Sylilia remains pending; the Chrome navigation error is not a Roblox denial.
