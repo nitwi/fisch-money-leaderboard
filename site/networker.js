@@ -526,9 +526,24 @@
     container.append(tabs, list);
   }
 
+  function renderInspectionBar(target, candidate) {
+    function fill(id, account, fallback) {
+      const holder = byId(id); holder.replaceChildren();
+      if (!account) { holder.append(node("span", "", fallback)); return; }
+      holder.append(accountImage(account));
+      const text = node("span", "nw-inspection-name", personLabel(account));
+      const meta = node("small", "", account.latest_rank ? `#${account.latest_rank} · ID ${account.id}` : `ID ${account.id}`);
+      text.append(meta); holder.append(text);
+    }
+    fill("inspection-main-person", target, "Choose main account");
+    fill("inspection-compare-person", candidate, "No comparison");
+    byId("inspection-main").disabled = !target;
+    byId("inspection-compare").disabled = !candidate;
+  }
   function renderComparison() {
     const wrapper = byId("comparison-content"); wrapper.replaceChildren(); byId("share-status").textContent = "";
     const target = referenceAccount(), candidate = state.byId.get(state.compareId);
+    renderInspectionBar(target, candidate);
     byId("share-comparison").disabled = !candidate;
     if (!target || !candidate) { wrapper.append(node("p", "nw-empty", "Choose another account to inspect its public data beside the reference.")); return; }
     const comparison = core.compareAccounts(target, candidate), avatar = comparison.avatar, namePattern = comparison.namePattern;
@@ -606,6 +621,8 @@
 
       byId("target-input").addEventListener("input", event => renderTop50List(event.target.value));
       byId("top50-more").addEventListener("click", () => { state.top50Expanded = !state.top50Expanded; renderTop50List(); });
+      byId("inspection-main").addEventListener("click", () => byId("target-form").scrollIntoView({block: "start", behavior: "smooth"}));
+      byId("inspection-compare").addEventListener("click", () => byId("comparison-panel").scrollIntoView({block: "start", behavior: "smooth"}));
       byId("target-form").addEventListener("submit", event => { event.preventDefault(); chooseTarget(accountFromInput(byId("target-input").value)); });
       byId("target-input").addEventListener("change", () => { const account = accountFromInput(byId("target-input").value); if (account) chooseTarget(account); });
       byId("candidate-scope").addEventListener("change", event => { state.scope = event.target.value; ensureComparison(); updateUrl(); renderReviewOverview(); renderCandidates(); renderComparison(); });
