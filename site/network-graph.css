@@ -101,3 +101,10 @@
 .fng-lane-right strong{color:#a9eaca}.fng-lane-left strong{color:#d7bbff}
 @media(max-width:1120px){.fng-lane-bar{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:520px){.fng-lane{padding:5px}.fng-lane strong{font-size:10px}.fng-lane-count{font-size:10px}.fng-lane .fng-button{padding:3px 6px;min-height:28px}}
+
+/* Sector controls are independently expandable and can move the graph camera. */
+.fng-lane-bar{grid-template-columns:repeat(2,minmax(0,1fr))}
+.fng-lane{justify-content:flex-start;gap:8px}
+.fng-lane strong{flex:1}
+.fng-lane .fng-lane-focus{font-size:11px;padding:4px 8px}
+@media(max-width:680px){.fng-lane-bar{grid-template-columns:1fr}.fng-lane{gap:7px}.fng-lane strong{font-size:11px}}
