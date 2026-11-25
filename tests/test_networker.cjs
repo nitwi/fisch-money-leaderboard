@@ -296,6 +296,23 @@ test('compact main picker shows nine initially, expands all and searches beyond 
   assert.equal(list.children.length, 9);
 });
 
+test('sticky inspection bar tracks selected root and comparison independently', async () => {
+  const a = account('1', {username: 'Main', latest_rank: 1, avatar_thumbnail: 'https://tr.rbxcdn.com/main.png'});
+  const b = account('2', {username: 'Other', latest_rank: 2});
+  const c = account('3', {username: 'Third', latest_rank: 3});
+  const {elements, location} = await renderSnapshot([a, b, c], '?target=1&compare=2');
+  assert.match(elements.get('inspection-main-person').textContent, /@Main/);
+  assert.match(elements.get('inspection-compare-person').textContent, /@Other/);
+  assert.ok(descendants(elements.get('inspection-main-person')).some(el => el.tagName === 'img' && el.src === a.avatar_thumbnail));
+  assert.equal(elements.get('inspection-main').disabled, false);
+  assert.equal(elements.get('inspection-compare').disabled, false);
+  elements.get('top50-target').children.find(el => el.textContent.includes('@Third')).listeners.click[0]();
+  assert.match(elements.get('inspection-main-person').textContent, /@Third/);
+  assert.doesNotMatch(elements.get('inspection-compare-person').textContent, /@Third/);
+  assert.equal(new URL(location.href).searchParams.get('target'), '3');
+  elements.get('inspection-main').listeners.click[0]();
+  elements.get('inspection-compare').listeners.click[0]();
+});
 test('missing target deep links show a clear empty state without substituting or rewriting the target', async () => {
   const target = account('12013950464', {username: 'Lunary810', ledger: false});
   const {elements, location} = await renderSnapshot([target, account('2', {latest_rank: 1})], '?target=999&compare=2');
