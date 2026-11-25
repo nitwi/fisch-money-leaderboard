@@ -31,7 +31,8 @@ jobs:
           node --check site/username-patterns.js
           node --check site/network-graph.js
           node --check site/networker.js
-          node --test tests/test_networker.cjs tests/test_username_patterns.cjs tests/test_network_graph.cjs tests/network-graph-evidence.test.cjs
+          node --check site/networker-focus.js
+          node --test tests/test_networker.cjs tests/test_networker_focus.cjs tests/test_username_patterns.cjs tests/test_network_graph.cjs tests/network-graph-evidence.test.cjs
           git diff --exit-code -- site/data.json
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
