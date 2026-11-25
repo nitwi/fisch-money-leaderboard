@@ -23,3 +23,12 @@ The table gives **readable unique IDs / displayed count** where supported. A non
 ## Screenshot-assisted continuation
 
 The browser later allowed screenshots and direct reading of the existing xNnoel Friends tab. Screenshots confirmed the rendered cards; the exact IDs came from the corresponding public profile links, not from text guesses. xNnoel: 375/392 unique IDs after visiting all 21 exposed pages (partial). Ceruleanflare2: 15/15 (complete). Together they added 390 previously unrecorded friendships, including xNnoel ↔ Nnoelq, and no follow rows. Friend-list coverage is now **14 of 70** (5 complete, 9 partial). The older shatter_yourselfgrgr Friends URL again rendered an empty shell despite a nonzero profile count and was not recorded as empty. Continue there and at Force_oNature when normal list access allows.
+
+## Roblox People search continuation
+
+Using Roblox's own search bar, selecting People, and clicking the exact account result reached the canonical HTTPS Friends pages for both previously stalled profiles. Verify the target's exact ID and visible username before opening Friends, then wait for the expected list count and cards rather than accepting the initial zero. Use verified leaderboard profile links only as a fallback.
+
+- shatter_yourselfgrgr: 51/53 exact IDs across three exposed pages (partial).
+- Force_oNature: 25/26 exact IDs across two exposed pages (partial).
+
+The batch added 76 previously unrecorded friendships, including leaderboard connections shatter_yourselfgrgr ↔ 0egoistic and shatter_yourselfgrgr ↔ Canizan. Friend-list coverage is now **16 of 70** (5 complete, 11 partial), with no new follow or avatar rows.
