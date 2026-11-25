@@ -100,3 +100,7 @@ Verified 17 of 39 linked IDs on page one, adding 17 distinct friendships and no 
 ### Scheduled Friends continuation: Minkib7661 and NoRoblox_Support
 
 Minkib7661: 34 of 161 exact IDs, pages one and two; the saved HTTPS profile worked after a Cloud Browser error on People search. NoRoblox_Support: 16 of 158 on page one after the exact People result click. Neither pagination control advanced further. The batch added 50 distinct friendships, including NoRoblox_Support ↔ Fischerwunk. No follower or avatar observations were added. First pass: **47 of 70 attempted** (10 complete, 35 partial, two documented profile 404s). Next: sanguifereum, then the historical sources in the plan. Keep 10ne17, Tbpoqqq, AliceSekai and m1_zm pending as noted above. Both exports match the canonical journal digest; SQLite integrity and foreign-key checks and all 142 focused tests passed.
+
+### Friends continuation: sanguifereum and three historical sources
+
+Exact People results led to the verified HTTPS profiles and linked Friends pages. Saved sanguifereum (18/103), 1234mysterio (16/411), 75percent3r (12/13, end of list with one unreadable ID), and anthonqt13 (14/424). All four are partial. The batch added 58 distinct friendships with no leaderboard cross-links and no new follower or avatar observations. First pass: **51 of 70 attempted** (10 complete, 39 partial, two documented profile 404s). Next: aurunqwer. Both exports match the canonical journal digest; SQLite integrity and foreign-key checks and all 142 focused tests passed.
