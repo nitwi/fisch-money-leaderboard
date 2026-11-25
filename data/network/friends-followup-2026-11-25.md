@@ -62,3 +62,8 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 
 - [TheDanishPlays](https://www.roblox.com/users/1579077690/friends#!/friends): saved HTTPS profile verified the exact handle and 381 Friends after People search hit a Chrome navigation error. Even after one normal reload, the Friends header showed 0 while exposing 18 cards. Checked the first row at scroll top at 18:01:44.084 UTC: 17 exact IDs, all already recorded, and one anonymous **Unavailable**. Next did not advance; kept earlier 89/381 partial coverage across five pages, not an empty list. No journal or export changes.
 - Next: prioritize other high-gap partial Friends lists, then collect Followers and Following separately after the partial pass. Do not repeatedly retry stalled pagination.
+
+## 2026-11-25 18:15 UTC
+
+- The signed-in Roblox home page rendered, but both People search for anthonqt13 and the normal saved-profile fallback hit browser runtime timeouts before the Friends list could be verified. No evidence of a Roblox denial and no journal or export changes. Prior 14/424 partial coverage stays intact.
+- Next: anthonqt13 or another unrechecked high-gap source such as Gamer3535356466, Renvuz, or Zipidy24. Continue as browser access permits, without repeating the same stalled request.
