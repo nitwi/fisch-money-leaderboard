@@ -140,3 +140,8 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 - `heanmichrkke_3` (`9543810680`): verified the exact handle and 76 Friends. Checked page 1 from the top: 16 exact IDs (all known), two anonymous Unavailable cards, and no verified advance to page 2. Preserved the earlier 33/76 partial with two documented pages.
 - `stoicc_xx` (`7608364841`): verified the exact handle and 57 Friends. Checked page 1 from the top: 17 exact IDs (all known), one anonymous Unavailable card, and no verified advance to page 2. Preserved 17/57 partial.
 - The prior generic list error did not recur on these two pages. No journal or export changes. Next: AliceSekai and YptSehjZiEs, then aurunqwer, EnderTitanKid, and pflugerson.
+
+### 21:30 UTC — Friends route rate limit
+
+- `AliceSekai` (`3747162372`): verified exact profile and 91 Friends while signed in. The profile’s Friends link rendered a generic error body; browser evidence confirmed HTTP 429. One ordinary reload returned the same visible error. Preserved 53/91 partial; there is no evidence of termination or an explicit bot ban.
+- Stopped Roblox collection for this batch without trying alternate routes. No journal or export changes. Let Friends navigation cool down until at least 22:30 UTC before one normal check; during the cooldown, use the saved journal for local coverage analysis only. If 429 persists, stop again rather than cycling through accounts or switching to Followers/Following to work around it.
