@@ -129,6 +129,28 @@ test('leaderboard lane retains priority even when a ledger account is also follo
   assert.equal(model.edges.filter(e=>e.kind==='follow').length,3,'directional edges are kept');
 });
 
+test('default four-sector view has no overlapping cards across adjacent directions', () => {
+  const nodes=[account(1), ...Array.from({length:6},(_,i)=>account(i+2)),
+    ...Array.from({length:5},(_,i)=>account(i+20,{ledger:false})),
+    ...Array.from({length:4},(_,i)=>account(i+30,{ledger:false})),
+    ...Array.from({length:4},(_,i)=>account(i+40,{ledger:false}))];
+  const edges=[
+    ...nodes.filter(n=>Number(n.id)>=2 && Number(n.id)<=7).map(n=>edge(1,n.id)),
+    ...nodes.filter(n=>Number(n.id)>=20 && Number(n.id)<=24).flatMap(n=>[edge(1,n.id),edge(2,n.id)]),
+    ...nodes.filter(n=>Number(n.id)>=30 && Number(n.id)<=33).map(n=>edge(1,n.id,'follow')),
+    ...nodes.filter(n=>Number(n.id)>=40 && Number(n.id)<=43).map(n=>edge(n.id,1,'follow'))];
+  const model=build(nodes,edges,{quadrant:true,includeConnectors:true,includeExternal:true,
+    laneLimits:{right:6,left:5,up:4,down:4}});
+  assert.deepEqual(model.laneCounts,{up:4,down:4,left:5,right:6});
+  assert.equal(model.nodes.length,20);
+  const positions=graph.layout(model);
+  for(const [id,a] of positions) for(const [other,b] of positions) {
+    if(id>=other) continue;
+    assert.ok(Math.abs(a.x-b.x)>=224 || Math.abs(a.y-b.y)>=72,
+      'overlapping cards: '+id+' and '+other);
+  }
+});
+
 test('every one of the 22 verified RBI presets can qualify a connected external account', () => {
   const nodes = [account(1), ...core.RBI_AVATAR_RULES.presets.map((preset, index) => account(index + 2, {ledger: false, avatar: avatar(preset.assetIds)}))];
   const model = build(nodes, nodes.slice(1).map(node => edge(1, node.id)));
