@@ -169,3 +169,7 @@ EV0224,1-16,Read Monday Nov 23 top-board names and every balance digit directly 
 EV0225,16-31,Read Monday Nov 23 middle-board names and every balance digit directly from original owner-attached PNG; independently cross-checked all fully visible overlap rows
 EV0226,30-45,"Read Monday Nov 23 lower-board names and every balance digit directly from original owner-attached PNG; independently cross-checked all fully visible overlap rows; #35 quest overlay partly covers username, with visible characters corroborated by existing exact Roblox identity and adjacent bottom image"
 EV0227,36-50,Read Monday Nov 23 bottom-board names and every balance digit directly from original owner-attached PNG; independently cross-checked all fully visible overlap rows; cropped #35 not used
+EV0228,1-16,Direct visual review of Nov 25 owner-attached top image. Read all 16 exact usernames and balances from original pixels
+EV0229,17-31,Direct visual review of Nov 25 owner-attached middle image. Read ranks 17-31 and cross-checked overlaps
+EV0230,32-45,Direct visual review of Nov 25 owner-attached lower image. Read ranks 32-45 and cross-checked overlaps
+EV0231,46-50,Direct visual review of Nov 25 owner-attached bottom image. Read ranks 46-50 and cross-checked overlaps

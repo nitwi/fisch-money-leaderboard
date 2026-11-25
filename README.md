@@ -2,9 +2,9 @@
 
 Independent, public, screenshot-backed history of the Fisch Top C$ board. The charts show *observed net held-balance changes*, not verified sales, earnings, or misconduct.
 
-Source window: October 10–November 23, 2026 leaderboard days (America/Chicago); later captures may be appended. Each original screenshot remains linked to its captured rank slots.
+Source window: October 10–November 24, 2026 leaderboard days (latest photo captured November 25 at approximately 00:59 Central) (America/Chicago); later captures may be appended. Each original screenshot remains linked to its captured rank slots.
 
-**Current coverage:** 51 original board captures and 227 board PNGs form 49 reconciled screenshot sessions and **44 displayed daily points across 44 leaderboard days**, all complete Top 50. One additional original player-profile screenshot updates a single photographed balance without asserting a new rank. I read and checked **2,410 of 2,413 pictured rank slots** directly from the board originals, including all **47 complete Top-50 captures**. Three partly pictured historical raw readings remain cropped/unreadable; 137 raw rank slots were not photographed, but every displayed point has all 50 confirmed ranks. **October 18 has no photo or daily point.** The latest complete Saturday photo is the end-of-week settlement baseline; Sunday starts a separate ordinary point. Every public measurement is photo-checked; no OCR-only suggestions are published.
+**Current coverage:** 52 original board captures and 231 board PNGs form 50 reconciled screenshot sessions and **45 displayed daily points across 45 leaderboard days**, all complete Top 50. One additional original player-profile screenshot updates a single photographed balance without asserting a new rank. I read and checked **2,460 of 2,463 pictured rank slots** directly from the board originals, including all **48 complete Top-50 captures**. Three partly pictured historical raw readings remain cropped/unreadable; 137 raw rank slots were not photographed, but every displayed point has all 50 confirmed ranks. **October 18 has no photo or daily point.** The latest complete Saturday photo is the end-of-week settlement baseline; Sunday starts a separate ordinary point. Every public measurement is photo-checked; no OCR-only suggestions are published.
 
 ## Refresh the data
 
@@ -17,6 +17,9 @@ For a later **single-player profile photo**, use `python tools/import_profile_up
 The site is deployed to GitHub Pages from `site/` via `.github/workflows/pages.yml`. No ShockieWockie dashboard or Worker resources are used. The public URL is `https://nitwi.github.io/fisch-money-leaderboard/`.
 
 ## Moderator graph exclusions
+
+The November 25 capture retains `Holladayyyyyyy` at board rank 3 while omitting the username from graph traces at the ledger owner's request. The owner identified the account as a trial moderator. Its exact Roblox numeric ID has not been independently resolved; no judgment is inferred from its balance.
+
 
 The chart omits the exact account IDs for `75percent3r` (8144154137), `BloxHeroj8` (9579548886), and `Nexvolt00` (12026234206). The latter two exclusions were requested by the ledger owner on November 24 after reporting game bans. This display policy preserves their photographed balances, original images, rank history, Standout Analysis, and command timestamps. A graph exclusion is a moderator decision, separate from API account status or automatically inferred relationships.
 
