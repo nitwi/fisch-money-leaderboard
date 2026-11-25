@@ -134,3 +134,9 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 
 - BigBoyyChriss (`2533535288`) and Tbpoqqq (`1481603669`): saved HTTPS profiles confirmed exact handles and displayed 66 and 55 Friends, respectively. Both profile-linked Friends routes returned a generic error body (`{"errors":[{"code":0,"message":""}]}`) instead of cards, including after one ordinary reload each. No explicit website denial or Roblox 404 was observed. Preserved earlier 18/66 and 9/55 partial records without treating either as empty.
 - No journal or export changes. Next: heanmichrkke_3 and stoicc_xx, then AliceSekai and YptSehjZiEs. If this same error persists across the next accounts, stop list navigation for that batch rather than repeating unchanged retries.
+
+### 21:17 UTC — heanmichrkke_3 and stoicc_xx rechecks
+
+- `heanmichrkke_3` (`9543810680`): verified the exact handle and 76 Friends. Checked page 1 from the top: 16 exact IDs (all known), two anonymous Unavailable cards, and no verified advance to page 2. Preserved the earlier 33/76 partial with two documented pages.
+- `stoicc_xx` (`7608364841`): verified the exact handle and 57 Friends. Checked page 1 from the top: 17 exact IDs (all known), one anonymous Unavailable card, and no verified advance to page 2. Preserved 17/57 partial.
+- The prior generic list error did not recur on these two pages. No journal or export changes. Next: AliceSekai and YptSehjZiEs, then aurunqwer, EnderTitanKid, and pflugerson.
