@@ -177,3 +177,9 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 - `aurunqwer` (`8102463207`): exact profile showed 43 Friends. One ordinary reload recovered the list. Verified all three exposed pages at scroll position zero with changed first rows on pages 2–3. Next was disabled on page 3. Coverage improved from 18/43 to 40/43; three cards on page 2 had no exact ID, so the list remains partial.
 - Added 22 distinct friendships (254 in PR #5 since production), no new leaderboard cross-links, follows, or avatar scans. Both exports match journal SHA-256 `94484cad1c70df1666cb5ab05b2460de9f21952c947aeb217a18781207a88dcc` with 3,255 external nodes. All 142 focused tests, SQLite integrity and foreign keys passed. Review-only; nothing deployed.
 - Next: EnderTitanKid and pflugerson, then the remaining actionable Friends gaps before separate directional collection.
+
+### 23:02 UTC — EnderTitanKid and pflugerson rechecks
+
+- `EnderTitanKid` (`1094289238`): normal reload recovered the profile and its count of 39. The Friends list briefly showed no cards; one standard reload rendered page 1 but the list header still said 0 and Next was disabled. Verified the first row at scroll position zero and 15 exact IDs, all already in the journal, plus three cards without exact IDs. Kept 15/39 partial; the contradictory zero was not treated as an empty list.
+- `pflugerson` (`987922899`): the saved HTTPS profile stayed an incomplete shell with no visible handle or account Friends link after one normal reload. No new exact observations; kept 17/39 partial. No explicit denial, 404, or 429 was observed in this batch.
+- No journal, export, or production change. Next: `kvllrx`, then `untoldmemoria`, `sabbath553`, and `johncenagaming347v2` before the separate directional pass. Do not rerun unchanged list errors in a loop.
