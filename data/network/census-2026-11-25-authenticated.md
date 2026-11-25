@@ -88,3 +88,7 @@ Nnoelq (69/69 across all four exposed pages) is complete. 10ne17's exact profile
 ### Friends continuation: Hxtaroo and ewoofs
 
 Hxtaroo: 16/16 (complete). ewoofs: 16/19 exact IDs (partial); the pagination ended at page two but no exact linked IDs were readable on that page. First pass: **43 of 70 attempted** (10 complete, 31 partial, two documented profile 404s). Keep 10ne17 pending for a retry; continue from Tbpoqqq. Journal hashes, SQLite checks, 50 Python and 92 Node tests passed.
+
+### Scheduled Friends continuation: zNaN_Rot
+
+Verified 34 of 90 linked IDs across pages one and two. People search had no exact result; the saved HTTPS profile showed the exact handle and Friends count. A normal reload recovered the linked Friends list from an initial zero-count shell. Page three did not advance. This adds 34 distinct friendships. First pass: **44 of 70 attempted** (10 complete, 32 partial, two documented profile 404s). Tbpoqqq remains pending after a Cloud Browser error; AliceSekai remains pending because the exact-ID profile returned an incomplete shell without an account name or list link, even after one reload. Neither is counted as a 404 or zero Friends. Continue from pflugerson, then revisit pending sources. Both exports match the canonical journal digest; SQLite integrity and foreign-key checks, 50 Python tests, and 92 Node tests passed.
