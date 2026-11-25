@@ -36,3 +36,9 @@ The batch added 76 previously unrecorded friendships, including leaderboard conn
 ## Ranked continuation
 
 The same People search and HTTPS verification reached three additional ranked profiles: sebax4514 (69/69, complete), TheDanishPlays (89/381, partial; first five pages), and Sylilia (53/55, partial across all exposed pages). This batch added 211 distinct friendships, including sebax4514 ↔ Renvuz and sebax4514 ↔ LasTnIghT2011. Friend-list coverage is now **19 of 70** (6 complete, 13 partial). No new follow or avatar rows were recorded. The next uninspected ranked source is metbepol.
+
+## Friends-first census continuation
+
+People search did not return an exact metbepol result. The saved numeric Roblox profile link redirected to a Roblox 404 page. This is an attempted but unavailable source, not a verified empty list or proof the account was terminated.
+
+Three Friends lists advanced: YptSehjZiEs (71/103, partial, first four pages), Myvexxx (21/22, partial at the end of the list), and Erutobi (62/168, partial, first four pages). They added 151 previously unrecorded friendships. Coverage is now **22 of 70 lists with saved evidence** (6 complete, 16 partial), plus the one unavailable attempt. The next uninspected ranked source is Luwuma. Review partials and unavailable cards after the first pass. Treat an ID-less or unavailable card as unknown unless Roblox explicitly identifies the account status.
