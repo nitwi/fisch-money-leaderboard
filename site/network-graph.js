@@ -40,12 +40,14 @@
 
   function neighborStats(id, model) {
     const neighbors = [...(model.adjacency.get(id) || [])];
-    const result = {total: neighbors.length, eligible: 0, ledger: 0, full: 0, partial: 0, unchecked: 0, noMatch: 0};
+    const result = {total: neighbors.length, eligible: 0, ledger: 0, full: 0, connector: 0, external: 0, partial: 0, unchecked: 0, noMatch: 0};
     for (const neighborId of neighbors) {
       const item = model.eligibility.get(neighborId);
       if (item.eligible) result.eligible++;
       if (item.category === "ledger") result.ledger++;
       else if (item.category === "full") result.full++;
+      else if (item.category === "connector") result.connector++;
+      else if (item.category === "external") result.external++;
       else if (item.category === "partial") result.partial++;
       else if (item.category === "unknown") result.unchecked++;
       else result.noMatch++;
@@ -59,7 +61,7 @@
    * when their ID is in expandedIds. A collapsed subtree may remain reachable
    * through a different expanded branch, as real shared connections should.
    */
-  function buildBranches({network, historicalEdges = [], avatarNodes = [], accounts = [], focusId, core, expandedIds = [], maxNodes = MAX_NODES}) {
+  function buildBranches({network, historicalEdges = [], avatarNodes = [], accounts = [], focusId, core, expandedIds = [], includeConnectors = false, includeExternal = false, maxNodes = MAX_NODES}) {
     if (!core?.normalizeId || !core?.reviewAvatar) throw new TypeError("A FischNetworker core is required.");
     const nodesById = new Map();
     for (const node of network?.nodes?.values?.() || []) {
@@ -94,6 +96,23 @@
       saved.evidence.push(...evidence);
       if (Array.isArray(edge.laterChecks)) saved.laterChecks.push(...edge.laterChecks);
       connect(from, to); connect(to, from);
+    }
+    // An external node can be a useful observable bridge between leaderboard accounts,
+    // independent of its username or avatar. Count DISTINCT leaderboard neighbors using
+    // only source-backed social edges. Shared text/assets NEVER create graph edges.
+    if (includeConnectors || includeExternal) for (const [nodeId, node] of nodesById) {
+      const review = eligibilityById.get(nodeId);
+      if (review.ledger || review.category === "full") continue;
+      const ledgerNeighbors = [...(adjacency.get(nodeId) || [])].filter(otherId => nodesById.get(otherId)?.ledger === true);
+      const connector = ledgerNeighbors.length >= 2;
+      if (includeConnectors && connector) eligibilityById.set(nodeId, {
+        ...review, eligible: true, category: "connector", ledgerConnections: ledgerNeighbors.length,
+        label: `Shared external connector · ${ledgerNeighbors.length} ledger accounts`
+      });
+      else if (includeExternal) eligibilityById.set(nodeId, {
+        ...review, eligible: true, category: "external", ledgerConnections: ledgerNeighbors.length,
+        label: review.label + " · observed external account"
+      });
     }
     const id = core.normalizeId(focusId), root = nodesById.get(id) || null;
     const expanded = new Set([...expandedIds].map(core.normalizeId).filter(Boolean));
@@ -296,10 +315,10 @@
     const pickerRow = el("label", "fng-picker"), picker = el("select"); picker.setAttribute("aria-label", "Inspect a visible account");
     pickerRow.append(el("span", "", "Inspect visible account"), picker);
     const legend = el("div", "fng-legend");
-    legend.append(el("span", "fng-legend-friend", "Solid cyan: friendship"), el("span", "fng-legend-follow", "Gold arrow: follows"), el("span", "", "Green: leaderboard"), el("span", "", "Gold node: full preset match"), el("span", "", "Faded: not seen in a later complete list"));
+    legend.append(el("span", "fng-legend-friend", "Solid cyan: friendship"), el("span", "fng-legend-follow", "Gold arrow: follows"), el("span", "", "Green: leaderboard"), el("span", "", "Purple: shared external connector"), el("span", "", "Gold: RBI preset"), el("span", "", "Faded: not seen in later complete list"));
     const help = el("p", "fng-help", "Select a node to inspect it, then expand its saved connections. Drag nodes or empty space to arrange the view. Pinch or Ctrl + scroll to zoom; keyboard + / − and arrow keys work on the canvas.");
     help.id = `${uniqueId}-help`;
-    const caution = el("p", "fng-help", "Branches require a recorded friend or follow relationship. Only leaderboard accounts or full RBI preset matches qualify. A saved observation is not a live status check or evidence of ownership or misconduct.");
+    const caution = el("p", "fng-help", "Every edge requires a saved friend/follow observation. External connectors link two or more ledger accounts through observed relationships; they are not proof of common ownership, automation or misconduct. Incomplete observations remain unknown.");
     const live = el("p", "fng-sr-only"); live.setAttribute("role", "status"); live.setAttribute("aria-live", "polite");
     wrapper.append(toolbar, summary, boundsNote, workspace, pickerRow, legend, help, caution, live);
     container.replaceChildren(wrapper);
@@ -349,7 +368,7 @@
         const label = name(node), labelLimit = 17;
         const nameText = svgEl("text", {x: -54, y: -5, class: "fng-node-name"}, label.length > labelLimit ? `${label.slice(0, labelLimit - 1)}…` : label);
         group.append(nameText);
-        const badge = isMain ? "MAIN ACCOUNT" : item.category === "ledger" ? rank(node) ? `LEADERBOARD #${rank(node)}` : "LEADERBOARD HISTORY" : item.category === "full" ? "FULL PRESET MATCH" : "PARTIAL PRESET MATCH";
+        const badge = isMain ? "MAIN ACCOUNT" : item.category === "ledger" ? rank(node) ? `LEADERBOARD #${rank(node)}` : "LEADERBOARD HISTORY" : item.category === "connector" ? "SHARED CONNECTOR" : item.category === "external" ? "EXTERNAL OBSERVED" : item.category === "full" ? "FULL PRESET MATCH" : "PARTIAL PRESET MATCH";
         group.append(svgEl("text", {x: -54, y: 15, class: "fng-node-badge"}, badge));
         if (!isMain && expanded.has(node.id)) group.append(svgEl("circle", {cx: 102, cy: -27, r: 5, class: "fng-expanded-dot"}));
         group.append(svgEl("title", {}, `${name(node)} · Roblox ID ${node.id} · ${item.label}${isMain ? " · Main account stays fixed" : ""}`));
@@ -377,7 +396,9 @@
     function select(id) {
       if (destroyed) return;
       if (!model.nodes.some(node => node.id === id)) return;
-      selectedId = id; picker.value = id; highlight(); renderInspector(); announce(`Selected ${name(model.nodesById.get(id))}. Main account remains ${name(model.root)}.`);
+      selectedId = id; picker.value = id; highlight(); renderInspector();
+      if (typeof options.onSelect === "function") options.onSelect(id, model.nodesById.get(id));
+      announce(`Selected ${name(model.nodesById.get(id))}. Main account remains ${name(model.root)}.`);
     }
     function hiddenText(stats) {
       const parts = [];
@@ -423,6 +444,7 @@
       const fact = (label, value) => { facts.append(el("dt", "", label), el("dd", "", value)); };
       fact("Roblox ID", node.id);
       fact("Leaderboard", node.ledger ? rank(node) ? `Latest rank #${rank(node)}` : "Seen in ledger history" : "Not in saved leaderboard");
+      if (item.category === "connector") fact("Network", `${item.ledgerConnections} observed ledger neighbors`);
       fact("Avatar", item.review.status === "full" ? "Full preset match" + (item.incomplete ? " · from incomplete scan" : "") :
         item.incomplete ? "Incomplete scan · full match not established" :
         item.review.available ? item.review.status === "partial" ? "Partial preset match" : "Checked · no preset match" : item.unavailable ? "Unavailable at last check" : "Unchecked");
@@ -526,7 +548,9 @@
         const option = el("option", "", `${node.id === model.focusId ? "MAIN · " : ""}${name(node)} · ${model.eligibility.get(node.id).label}`);
         option.value = node.id; picker.append(option);
       }
-      picker.value = selectedId || ""; draw(); renderSummary(); renderInspector(); if (shouldFit) fit();
+      picker.value = selectedId || ""; draw(); renderSummary(); renderInspector();
+      if (typeof options.onSelect === "function" && model.nodesById.has(selectedId)) options.onSelect(selectedId, model.nodesById.get(selectedId));
+      if (shouldFit) fit();
     }
     function point(event) {
       const rect = svg.getBoundingClientRect();
