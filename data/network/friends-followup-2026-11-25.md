@@ -97,3 +97,10 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 - Erutobi (`2464539843`): People search opened a Chrome internal error; the saved canonical HTTPS profile showed a blank account section initially and recovered after one ordinary reload. Exact `@Erutobi` and 168 Friends were confirmed.
 - Opened the visible Friends link; verified the first row from scroll position zero on pages 1–3. The 54 card positions had 46 exact IDs, all already recorded, plus seven anonymous Unavailable cards and one anonymous Account Deleted card. The move to page 4 did not advance. Retained the earlier 62/168 partial with four documented pages; did not infer an identity or termination for any anonymous card. No new edges or export changes.
 - Next prioritized recheck: Fischerwunk (`7867477313`), then zerealali and sanguifereum.
+
+### 19:47 UTC — Fischerwunk recheck
+
+- Fischerwunk (`7867477313`): People search hit a Chrome internal error; saved HTTPS profile rendered after a normal reload and confirmed the exact account and 118 Friends. Friends page initially showed a disabled Next button despite 18 cards; one normal reload restored it.
+- Verified first rows at the top of pages 1–2: 31 exact IDs and five anonymous positions (four Unavailable, one Account Deleted). Next did not advance to page 3. Coverage remains partial, improving 15 → 31/118. Page 2 adds 16 source IDs and 15 distinct new site friendships. The observed leaderboard edge Fischerwunk ↔ NoRoblox_Support was already documented from the other direction.
+- This review branch now has 185 new distinct site friendships since PR #4 and 3,189 external nodes. It does not add avatar scans or directional follows. Journal has 80 rows, digest `a3d71578b2c063d0ac6c80c282edeb3ffaa928350617027b5d7c8c4e9681724b`; both exports match, SQLite checks passed, and all 142 focused tests passed.
+- Next: zerealali, sanguifereum, then the remaining prioritized partial lists.
