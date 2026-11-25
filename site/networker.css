@@ -20,19 +20,14 @@
 .nw-controls input,.nw-controls select,#candidate-search{width:100%;min-width:0;min-height:45px;border:1px solid var(--border);border-radius:9px;background:var(--bg);color:var(--text);font:inherit;font-size:1rem;padding:10px 12px}
 .nw-controls select{appearance:none;padding-right:34px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='m2 4 4 4 4-4' stroke='%239cbdcc' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
 .nw-controls p{font-size:.8rem;color:var(--muted);margin:7px 0 0;line-height:1.4}
-.nw-top50-heading{display:flex;align-items:center;justify-content:space-between;margin:18px 0 8px;gap:12px;font-size:.9rem}
-.nw-top50-heading span{color:var(--muted);font-size:.8rem}
-.nw-top50-list{display:grid;gap:6px;max-height:332px;overflow-y:auto;overscroll-behavior:contain;padding:4px;border:1px solid var(--border);border-radius:10px;background:var(--bg)}
-.nw-top50-account{display:flex;align-items:center;text-align:left;gap:11px;min-height:61px;width:100%;border:1px solid transparent;border-radius:8px;padding:7px 9px;background:transparent;color:var(--text);font:inherit;cursor:pointer}
-.nw-top50-account:hover,.nw-top50-account:focus-visible{border-color:var(--cyan);background:rgba(41,248,255,.07)}
-.nw-top50-account.is-selected{border-color:var(--cyan);background:rgba(41,248,255,.11)}
-.nw-top50-rank{font-size:.8rem;color:var(--cyan);font-weight:800;min-width:29px}
-.nw-top50-account img,.nw-top50-account .nw-avatar-placeholder{height:43px;width:43px;min-width:43px;object-fit:cover;border-radius:9px;background:rgba(255,255,255,.05)}
-.nw-top50-details{display:grid;gap:2px;min-width:0}
-.nw-top50-details strong{font-size:.86rem;overflow-wrap:anywhere}
-.nw-top50-details small{color:var(--muted);font-size:.72rem;overflow-wrap:anywhere}
-.nw-top50-empty{padding:12px;font-size:.85rem}
-
+.nw-controls .nw-target-control{grid-column:1/-1;min-width:0}
+.nw-controls .nw-target-control.nw-candidates{padding:19px}
+.nw-controls .nw-target-control .nw-section-head{margin-bottom:14px}
+.nw-main-account-list{grid-template-columns:repeat(3,minmax(0,1fr));max-height:680px;align-content:start}
+.nw-main-account-card{min-width:0}
+.nw-main-account-card .nw-candidate-metrics{grid-template-columns:1fr}
+@media(max-width:1050px){.nw-main-account-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.nw-main-account-list{grid-template-columns:1fr;max-height:560px}}
 .nw-input-action{display:flex;gap:8px}
 .nw-input-action input{flex:1}
 .nw-primary,.nw-quiet{font:inherit;font-size:.875rem;font-weight:750;min-height:43px;border-radius:9px;padding:9px 14px;cursor:pointer}
