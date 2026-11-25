@@ -183,3 +183,8 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 - `EnderTitanKid` (`1094289238`): normal reload recovered the profile and its count of 39. The Friends list briefly showed no cards; one standard reload rendered page 1 but the list header still said 0 and Next was disabled. Verified the first row at scroll position zero and 15 exact IDs, all already in the journal, plus three cards without exact IDs. Kept 15/39 partial; the contradictory zero was not treated as an empty list.
 - `pflugerson` (`987922899`): the saved HTTPS profile stayed an incomplete shell with no visible handle or account Friends link after one normal reload. No new exact observations; kept 17/39 partial. No explicit denial, 404, or 429 was observed in this batch.
 - No journal, export, or production change. Next: `kvllrx`, then `untoldmemoria`, `sabbath553`, and `johncenagaming347v2` before the separate directional pass. Do not rerun unchanged list errors in a loop.
+
+### 23:03 UTC — Optional avatar coverage subset
+
+- The historical Apathy and n6sy Friends observations share 23 exact IDs, including 21 non-leaderboard endpoints with no saved avatar scans. Seven of those also appear in four source lists each: `37219128`, `324522122`, `605397849`, `1835982118`, `4001331807`, `4292249721`, `7593104865`. They are an optional targeted scan set, not a comparison feature or a basis for inferring preset matches.
+- Keep the broad, most-shared-first avatar queue as the default after the relationship pass. The top seven overall cover 41 observed source-to-friend entries versus 28 for this subset. No observation, export, or production change.
