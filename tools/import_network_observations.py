@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Offline importer for directly observed Roblox website friend lists.
+"""Offline importer for observed Roblox friend lists and equipped-avatar assets.
 
 The JSONL journal is canonical and append-only. JSON projections and SQLite are
 rebuildable. This module has no network, browser, authentication, or crawl code.
@@ -26,6 +26,8 @@ from urllib.parse import parse_qsl, urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 JOURNAL = ROOT / "data/network/website-observations.jsonl"
+AVATAR_JOURNAL = ROOT / "data/network/avatar-observations.jsonl"
+RBI_PRESETS = ROOT / "data/network/rbi-presets.json"
 WEBSITE = "roblox_website"
 LABELS = {WEBSITE: "Roblox website", "roblox_api": "Roblox public API"}
 TERMINATIONS = {"more_available", "end_of_list", "not_scrolled", "access_unavailable", "unknown"}
@@ -248,6 +250,141 @@ def append_journal(records, path=JOURNAL, *, allowed_sources=None):
         return {"added": len(added), "duplicates": len(normalized) - len(added), "total": len(existing) + len(added), "observation_ids": [record["observation_id"] for record in normalized]}
 
 
+def avatar_source_url(value, user_id):
+    """Keep only attributable, session-free Roblox equipped-avatar sources."""
+    if isinstance(value, str) and value == f"https://avatar.roblox.com/v1/users/{user_id}/avatar":
+        return value
+    return website_url(value, user_id, profile=True)
+
+
+def normalize_avatar_scan(record):
+    allowed_keys(record, {"schema_version", "user_id", "observed_at", "source_url",
+                          "status", "asset_ids", "scan_id"}, "avatar scan")
+    if type(record.get("schema_version", 1)) is not int or record.get("schema_version", 1) != 1:
+        raise ValueError("Only schema_version 1 avatar scans are accepted")
+    user_id = exact_id(record.get("user_id"))
+    status = record.get("status")
+    if status not in ("complete", "partial", "unavailable"):
+        raise ValueError("Avatar scan status must be complete, partial, or unavailable")
+    values = record.get("asset_ids")
+    if not isinstance(values, list) or len(values) > 1000:
+        raise ValueError("asset_ids must be a bounded list of exact equipped asset IDs")
+    assets = sorted({exact_id(asset_id) for asset_id in values}, key=int)
+    if status == "unavailable" and assets:
+        raise ValueError("An unavailable avatar scan cannot contain equipped asset evidence")
+    result = {"schema_version": 1, "user_id": user_id,
+              "observed_at": timestamp(record.get("observed_at")),
+              "source_url": avatar_source_url(record.get("source_url"), user_id),
+              "status": status, "asset_ids": assets}
+    result["scan_id"] = "avatar_" + digest(result)[:32]
+    if record.get("scan_id") not in (None, result["scan_id"]):
+        raise ValueError("Avatar scan ID does not match its immutable content")
+    return result
+
+
+def read_avatar_journal(path=AVATAR_JOURNAL):
+    path = Path(path)
+    if not path.exists():
+        return []
+    records, seen = [], set()
+    for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        if not line.strip():
+            continue
+        try:
+            record = normalize_avatar_scan(json.loads(line, object_pairs_hook=unique_object))
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"Avatar journal line {line_number} is invalid: {exc}") from exc
+        if record["scan_id"] in seen:
+            raise ValueError(f"Avatar journal has a duplicate scan ID at line {line_number}")
+        seen.add(record["scan_id"])
+        records.append(record)
+    return records
+
+
+def append_avatar_journal(records, path=AVATAR_JOURNAL, *, allowed_users):
+    if not isinstance(records, list):
+        raise ValueError("Avatar input must be a JSON array of observed scans")
+    normalized = [normalize_avatar_scan(record) for record in records]
+    unknown = {record["user_id"] for record in normalized} - allowed_users
+    if unknown:
+        raise ValueError("Avatar scans must name an existing exact-ID Networker node: " + ", ".join(sorted(unknown)))
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a+", encoding="utf-8") as handle:
+        try:
+            fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as exc:
+            raise ValueError("Another importer holds the avatar journal; retry after it completes") from exc
+        existing = read_avatar_journal(path)
+        seen = {record["scan_id"] for record in existing}
+        added = []
+        for record in normalized:
+            if record["scan_id"] not in seen:
+                added.append(record)
+                seen.add(record["scan_id"])
+        if added:
+            separator = "\n" if path.stat().st_size and not path.read_bytes().endswith(b"\n") else ""
+            handle.write(separator + "".join(canonical(record) + "\n" for record in added))
+            handle.flush()
+            os.fsync(handle.fileno())
+    return {"added": len(added), "duplicates": len(normalized) - len(added),
+            "total": len(existing) + len(added)}
+
+
+def recheck_avatar_presets(scan, rules):
+    """Absence is knowable only on complete input, but positives need no inference."""
+    present = set(scan["asset_ids"])
+    complete = scan["status"] == "complete"
+    unavailable = scan["status"] == "unavailable"
+    evidence = {"user_id": scan["user_id"], "scanned_at": scan["observed_at"],
+                "source_url": scan["source_url"], "scan_id": scan["scan_id"]}
+    results = []
+    for preset in rules["presets"]:
+        required = preset["assetIds"]
+        matched = [asset_id for asset_id in required if asset_id in present]
+        unobserved = [asset_id for asset_id in required if asset_id not in present]
+        state = ("unavailable" if unavailable else "full" if not unobserved else
+                 "partial" if matched else "none" if complete else "unknown")
+        results.append({"id": preset["id"], "name": preset["name"], "category": preset["category"],
+                        "status": state, "requiredIds": required, "requiredCount": len(required),
+                        "matchedIds": matched, "matchedCount": len(matched),
+                        "missingIds": unobserved if complete else [],
+                        "unverifiedIds": [] if complete else unobserved})
+    states = {result["status"] for result in results}
+    overall = next(state for state in ("full", "partial", "none", "unknown", "unavailable") if state in states)
+    return {**evidence, "status": overall, "scan_status": scan["status"],
+            "preset_version": rules["version"], "preset_source_url": rules["source_url"],
+            "presets": results}
+
+
+def apply_avatar_scans(merged, scans, rules):
+    """Project the latest explicit scan without mutating the append-only journal."""
+    nodes = {node["id"]: node for node in merged["network_nodes"]}
+    accounts = {account["id"]: account for account in merged["accounts"]}
+    latest = {}
+    for scan in scans:
+        user_id = scan["user_id"]
+        if user_id not in nodes:
+            raise ValueError(f"Avatar journal names a node not in the relationship snapshot: {user_id}")
+        if user_id not in latest or scan["observed_at"] >= latest[user_id]["observed_at"]:
+            latest[user_id] = scan
+    for user_id, scan in latest.items():
+        node = nodes[user_id]
+        account = accounts.get(user_id, {})
+        current = node.get("avatar") or account.get("avatar") or {}
+        if (current.get("checked_at") or current.get("fetched_at") or "") > scan["observed_at"]:
+            continue
+        current_assets = {str(item.get("id")): item for item in current.get("assets", [])}
+        node["avatar"] = {"status": "ok" if scan["status"] == "complete" else scan["status"],
+                          "assets": [current_assets.get(asset_id, {"id": asset_id}) for asset_id in scan["asset_ids"]],
+                          "fetched_at": scan["observed_at"] if scan["status"] != "unavailable" else None,
+                          "checked_at": scan["observed_at"], "source_url": scan["source_url"]}
+        node["avatar_preset_review"] = recheck_avatar_presets(scan, rules)
+    merged["avatar_observations"] = {"count": len(scans), "scanned_node_count": len(latest),
+        "scan_ids": [scan["scan_id"] for scan in scans],
+        "preset_version": rules["version"], "latest_observed_at": max((scan["observed_at"] for scan in scans), default=None)}
+
+
 def api_event(account):
     original = copy.deepcopy(account.get("friend_evidence", {}).get("api", account.get("friends", {})))
     event_id = "api_" + digest({"source_id": account["id"], "record": original})[:32]
@@ -321,6 +458,36 @@ def project_friends(events):
     return result
 
 
+def project_historical_friends(events):
+    """Keep superseded positive evidence separate from the current list."""
+    complete_events = [event for event in events
+                       if event["status"] == "complete" and event["checked_at"] == event["at"]]
+    if not complete_events:
+        return []
+    replacement = max(complete_events, key=lambda event: (event["at"], event["index"]))
+    present = {item["id"] for item in replacement["items"]}
+    owner = replacement["source_id"]
+    old = {}
+    for event in events:
+        if event["status"] not in ("complete", "partial"):
+            continue
+        for item in event["items"]:
+            target = item["id"]
+            if target in present or item["observed_at"] >= replacement["at"]:
+                continue
+            evidence = old.setdefault(target, {})
+            link = {"observation_id": event["id"], "ownerId": owner, "targetId": target, "kind": "friends",
+                    "method": event["method"], "source_label": LABELS[event["method"]],
+                    "observed_at": item["observed_at"], "source_url": item["source_url"]}
+            evidence[canonical(link)] = link
+    return [{"kind": "friend", "from": owner, "to": target,
+             "evidence": sorted(evidence.values(), key=lambda link: (link["observed_at"], link["observation_id"])),
+             "laterChecks": [{"ownerId": owner, "kind": "friends", "observed_at": replacement["at"],
+                              "source_url": replacement["source_url"],
+                              "source_label": LABELS[replacement["method"]]}]}
+            for target, evidence in sorted(old.items(), key=lambda pair: int(pair[0]))]
+
+
 def merge_snapshot(snapshot, records):
     merged = copy.deepcopy(snapshot)
     accounts = {exact_id(account["id"]): account for account in merged.get("accounts", [])}
@@ -346,6 +513,7 @@ def merge_snapshot(snapshot, records):
             raise ValueError("Website source is not a resolved account in the snapshot: " + record["source_id"])
         by_source.setdefault(record["source_id"], []).append(website_event(record, index))
     all_events = []
+    historical_friends = []
     nodes = {}
     for account in accounts.values():
         account["id"] = exact_id(account["id"])
@@ -365,6 +533,7 @@ def merge_snapshot(snapshot, records):
                                                              "coverage": copy.deepcopy(latest_website["raw"]["coverage"])},
                                           "projection_policy": "latest_complete_then_later_positive"}
             account["friends"] = project_friends(events)
+            historical_friends.extend(project_historical_friends(events))
     # External neighbors live here and in SQLite, never in avatar candidates.
     for event in sorted(all_events, key=lambda e: (e["at"], e["index"])):
         if event["method"] == WEBSITE:
@@ -388,6 +557,7 @@ def merge_snapshot(snapshot, records):
             prior = prior_nodes.get(node_id, {})
             node.update({key: copy.deepcopy(prior[key]) for key in EXTERNAL_VISUAL_FIELDS if key in prior})
     merged["network_nodes"] = sorted(nodes.values(), key=lambda node: int(node["id"]))
+    merged["historical_friend_edges"] = sorted(historical_friends, key=lambda edge: (int(edge["from"]), int(edge["to"])))
     merged.setdefault("api_generated_at", snapshot.get("api_generated_at", snapshot.get("generated_at")))
     merged["generated_at"] = utc_now()
     merged["website_observations"] = {
@@ -418,7 +588,7 @@ def atomic_json(path, value):
         Path(name).unlink(missing_ok=True)
 
 
-def build_database(path, merged, events):
+def build_database(path, merged, events, *, avatar_scans=(), avatar_rules=None):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     descriptor, name = tempfile.mkstemp(dir=path.parent, prefix=".network-db-", suffix=".sqlite")
@@ -435,6 +605,8 @@ def build_database(path, merged, events):
                 CREATE TABLE observations(id TEXT PRIMARY KEY,source_id TEXT NOT NULL REFERENCES nodes(id),method TEXT NOT NULL,relation TEXT NOT NULL,observed_at TEXT,checked_at TEXT,source_url TEXT,coverage_status TEXT NOT NULL,displayed_total_count INTEGER,raw_json TEXT NOT NULL);
                 CREATE TABLE friendship_evidence(observation_id TEXT NOT NULL REFERENCES observations(id),source_id TEXT NOT NULL REFERENCES nodes(id),target_id TEXT NOT NULL REFERENCES nodes(id),observed_at TEXT NOT NULL,source_url TEXT,target_profile_url TEXT NOT NULL,target_username TEXT,method TEXT NOT NULL,PRIMARY KEY(observation_id,source_id,target_id,observed_at,source_url));
                 CREATE TABLE friendship_current(source_id TEXT NOT NULL REFERENCES nodes(id),target_id TEXT NOT NULL REFERENCES nodes(id),observed_at TEXT,source_url TEXT,source_label TEXT,coverage_status TEXT NOT NULL,evidence_json TEXT NOT NULL,PRIMARY KEY(source_id,target_id));
+                CREATE TABLE avatar_observations(scan_id TEXT PRIMARY KEY,user_id TEXT NOT NULL REFERENCES nodes(id),observed_at TEXT NOT NULL,source_url TEXT NOT NULL,scan_status TEXT NOT NULL,asset_ids_json TEXT NOT NULL,preset_review_json TEXT NOT NULL);
+                CREATE INDEX avatar_observations_user_time ON avatar_observations(user_id,observed_at);
                 CREATE INDEX observations_source_time ON observations(source_id,observed_at);
                 CREATE INDEX evidence_source_target_time ON friendship_evidence(source_id,target_id,observed_at);
                 CREATE INDEX evidence_target_source ON friendship_evidence(target_id,source_id);
@@ -445,6 +617,13 @@ def build_database(path, merged, events):
             connection.execute("INSERT INTO metadata VALUES(?,?)", ("generated_at", canonical(merged["generated_at"])))
             for node in merged["network_nodes"]:
                 connection.execute("INSERT INTO nodes VALUES(?,?,?,?,?,?,?,?)", (node["id"], node["username"], node["display_name"], node["profile_url"], int(node["ledger"]), int(node["target"]), int(node["external"]), canonical(node["aliases"])))
+            if "avatar_observations" in merged:
+                connection.execute("INSERT INTO metadata VALUES(?,?)", ("avatar_observations", canonical(merged["avatar_observations"])))
+            for scan in avatar_scans:
+                review = recheck_avatar_presets(scan, avatar_rules)
+                connection.execute("INSERT INTO avatar_observations VALUES(?,?,?,?,?,?,?)", (
+                    scan["scan_id"], scan["user_id"], scan["observed_at"], scan["source_url"],
+                    scan["status"], canonical(scan["asset_ids"]), canonical(review)))
             cp = merged.get("ledger_latest_checkpoint") or {}
             if cp.get("id"):
                 connection.execute("INSERT INTO checkpoints VALUES(?,?,?)", (cp["id"], cp.get("at"), cp.get("day_key")))
@@ -484,9 +663,15 @@ def main(argv=None):
     importer.add_argument("--input", required=True, type=Path)
     importer.add_argument("--journal", type=Path, default=JOURNAL)
     importer.add_argument("--plan", type=Path, default=ROOT / "data/network/census-plan.json")
+    avatars = commands.add_parser("import-avatars", help="Validate and append exact-ID observations of equipped avatar assets")
+    avatars.add_argument("--input", required=True, type=Path)
+    avatars.add_argument("--avatar-journal", type=Path, default=AVATAR_JOURNAL)
+    avatars.add_argument("--journal", type=Path, default=JOURNAL, help="Canonical friends journal, read-only")
+    avatars.add_argument("--snapshot", type=Path, default=ROOT / "site/network-data.json")
     builder = commands.add_parser("build", help="Build reviewable merged JSON and/or a derived SQLite database")
     builder.add_argument("--journal", type=Path, default=JOURNAL)
     builder.add_argument("--snapshot", type=Path, default=ROOT / "site/network-data.json")
+    builder.add_argument("--avatar-journal", type=Path, default=AVATAR_JOURNAL)
     builder.add_argument("--output", type=Path)
     builder.add_argument("--sqlite", type=Path, help="SQLite output; a .gz suffix writes a compressed SQLite download")
     args = parser.parse_args(argv)
@@ -496,18 +681,35 @@ def main(argv=None):
             allowed = {exact_id(item["id"]) for item in plan["targets"]}
             result = append_journal(load_json(args.input), args.journal, allowed_sources=allowed)
             print(canonical({"journal": str(args.journal), **result}))
+        elif args.command == "import-avatars":
+            if args.avatar_journal.resolve() in {args.journal.resolve(), args.snapshot.resolve(),
+                                                  (ROOT / "data/network/census-plan.json").resolve(), RBI_PRESETS.resolve()}:
+                raise ValueError("Avatar journal must not replace an input, the census plan, or the preset definitions")
+            merged, _ = merge_snapshot(load_json(args.snapshot), read_journal(args.journal))
+            eligible_ids = {node["id"] for node in merged["network_nodes"]}
+            result = append_avatar_journal(load_json(args.input), args.avatar_journal, allowed_users=eligible_ids)
+            print(canonical({"avatar_journal": str(args.avatar_journal), **result}))
         else:
             if not args.output and not args.sqlite:
                 parser.error("build requires --output and/or --sqlite; the source snapshot is not changed implicitly")
-            protected = {args.journal.resolve(), (ROOT / "data/network/census-plan.json").resolve()}
+            protected = {args.journal.resolve(), args.avatar_journal.resolve(), RBI_PRESETS.resolve(),
+                         (ROOT / "data/network/census-plan.json").resolve()}
             if any(path is not None and path.resolve() in protected for path in (args.output, args.sqlite)):
                 raise ValueError("Derived output must not replace the canonical journal or census plan")
             if args.sqlite and (args.sqlite.resolve() == args.snapshot.resolve() or (args.output and args.sqlite.resolve() == args.output.resolve())):
                 raise ValueError("SQLite output must be separate from input/output JSON files")
             records = read_journal(args.journal)
-            merged, events = merge_snapshot(load_json(args.snapshot), records)
+            snapshot = load_json(args.snapshot)
+            avatar_scans = read_avatar_journal(args.avatar_journal)
+            retained_avatar_ids = set(snapshot.get("avatar_observations", {}).get("scan_ids", []))
+            if retained_avatar_ids - {scan["scan_id"] for scan in avatar_scans}:
+                raise ValueError("Previously retained avatar observations are missing; restore the complete avatar journal")
+            merged, events = merge_snapshot(snapshot, records)
+            avatar_rules = load_json(RBI_PRESETS)
+            if avatar_scans:
+                apply_avatar_scans(merged, avatar_scans, avatar_rules)
             if args.sqlite:
-                build_database(args.sqlite, merged, events)
+                build_database(args.sqlite, merged, events, avatar_scans=avatar_scans, avatar_rules=avatar_rules)
             if args.output:
                 atomic_json(args.output, merged)
             print(canonical({"website_observations": len(records), "source_accounts": merged["website_observations"]["source_account_count"], "external_nodes": merged["website_observations"]["external_node_count"], "output": str(args.output) if args.output else None, "sqlite": str(args.sqlite) if args.sqlite else None}))

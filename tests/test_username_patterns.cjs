@@ -169,11 +169,49 @@ test('multiple complete tokens with different remaining parts are possible', () 
   assert.ok(has(result, 'shared_tokens'));
 });
 
+test('embedded numeric series require the same whole name parts around clearly separated digits', () => {
+  for (const [left, right] of [['Cerulean12Beacon', 'Cerulean34Beacon'], ['cerulean_12_beacon', 'cerulean_34_beacon']]) {
+    const result = patterns.compare(left, right);
+    assert.equal(result.tier, 'possible');
+    assert.ok(has(result, 'embedded_number_variant'));
+    assert.deepEqual(result.signals[0].tokens, ['cerulean', 'beacon']);
+    assert.match(result.reasons[0], /different number between/);
+    assert.deepEqual(result.signals, patterns.compare(right, left).signals);
+  }
+  for (const pair of [['Fisch12Gamer', 'Fisch34Gamer'], ['Cerulean12Beacon', 'Copper12Beacon'], ['Cerul3anflare', 'Cerul4anflare']]) {
+    assert.equal(has(patterns.compare(...pair), 'embedded_number_variant'), false, pair.join(' / '));
+  }
+});
+
+test('a distinctive prefix or suffix can pair a marked edge with a flattened name', () => {
+  for (const [left, right, edge] of [['Cerulean_Flare', 'ceruleanstone', 'prefix'], ['Stone_Cerulean', 'flarecerulean', 'suffix']]) {
+    const result = patterns.compare(left, right);
+    assert.equal(result.tier, 'possible');
+    assert.ok(has(result, 'shared_edge_stem'));
+    assert.equal(result.signals[0].edge, edge);
+    assert.match(result.reasons[0], new RegExp(`${edge}.*cerulean`));
+    assert.deepEqual(result.signals, patterns.compare(right, left).signals);
+  }
+  for (const pair of [['Official_Flare', 'officialstone'], ['Princess_Flare', 'princessstone'], ['Princess_Flare', 'Princess_Stone'], ['CeruleanFlare', 'CeruleanizationFox'], ['RedFlare', 'redstone'], ['CeruleanStone', 'myceruleanflare']]) {
+    assert.equal(patterns.compare(...pair).tier, 'none', pair.join(' / '));
+  }
+});
+
 test('small repeated-letter changes have their own qualified pattern', () => {
   const result = patterns.compare('tatsukii12', 'tatsuki45');
   assert.equal(result.tier, 'possible');
   assert.ok(has(result, 'repeated_letter'));
   assert.match(result.reasons[0], /repeated letters/);
+});
+
+test('a repeated-letter match with a recognized label is explained and ranked lower', () => {
+  const result = patterns.compare('Official_Tatsukii', 'Tatsuki_Alt');
+  assert.equal(result.tier, 'possible');
+  assert.ok(has(result, 'repeated_letter'));
+  assert.deepEqual(result.signals, patterns.compare('Tatsuki_Alt', 'Official_Tatsukii').signals);
+  assert.match(result.reasons[0], /repeated letters.*removing account labels/);
+  assert.ok(result.score < patterns.compare('Tatsukii', 'Tatsuki').score);
+  assert.equal(patterns.compare('Official_Playerrr', 'Player_Alt').tier, 'none');
 });
 
 test('arbitrary low edit distance and partial internal substrings are not patterns', () => {

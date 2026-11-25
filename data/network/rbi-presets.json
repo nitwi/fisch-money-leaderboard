@@ -1,0 +1,262 @@
+{
+  "source_url": "https://github.com/nitwi/Roblox-Bot-Investigator/blob/3b3f4e40a9ce3a258f3dac6584add47959a9a980/RBI_Bot.py",
+  "commit": "3b3f4e40a9ce3a258f3dac6584add47959a9a980",
+  "version": "v0.18.1.1-beta",
+  "presets": [
+    {
+      "id": "bacon",
+      "name": "Bacon",
+      "category": "defaultcombos",
+      "assetIds": [
+        "144076760",
+        "144076358",
+        "63690008"
+      ]
+    },
+    {
+      "id": "beanie",
+      "name": "Beanie",
+      "category": "defaultcombos",
+      "assetIds": [
+        "382537569",
+        "4047884939",
+        "1772336109"
+      ]
+    },
+    {
+      "id": "acorn",
+      "name": "Acorn",
+      "category": "defaultcombos",
+      "assetIds": [
+        "62724852",
+        "144076512",
+        "144076436"
+      ]
+    },
+    {
+      "id": "john",
+      "name": "John",
+      "category": "xboxcombos",
+      "assetIds": [
+        "301809996",
+        "301811279",
+        "301819845",
+        "301820684"
+      ]
+    },
+    {
+      "id": "oakley",
+      "name": "Oakley",
+      "category": "xboxcombos",
+      "assetIds": [
+        "301810204",
+        "301811432",
+        "301819935",
+        "301820724"
+      ]
+    },
+    {
+      "id": "greenbean",
+      "name": "GreenBean",
+      "category": "freeoutfitcombos",
+      "assetIds": [
+        "617605556"
+      ]
+    },
+    {
+      "id": "claire",
+      "name": "Claire",
+      "category": "xboxcombos",
+      "assetIds": [
+        "301820599",
+        "301819020"
+      ]
+    },
+    {
+      "id": "casey",
+      "name": "Casey",
+      "category": "xboxcombos",
+      "assetIds": [
+        "301819154",
+        "301820642",
+        "301809497",
+        "301811027"
+      ]
+    },
+    {
+      "id": "lin",
+      "name": "Lin",
+      "category": "xboxcombos",
+      "assetIds": [
+        "301820310",
+        "301818464",
+        "301806786",
+        "301810423"
+      ]
+    },
+    {
+      "id": "serena",
+      "name": "Serena",
+      "category": "xboxcombos",
+      "assetIds": [
+        "301818806",
+        "301820523",
+        "301807898",
+        "301810602"
+      ]
+    },
+    {
+      "id": "junkbot",
+      "name": "Junkbot",
+      "category": "freeoutfitcombos",
+      "assetIds": [
+        "12724232885",
+        "4381832739",
+        "4381828509",
+        "4381823417",
+        "4381821661",
+        "4381819685",
+        "4381817635",
+        "4381815211"
+      ]
+    },
+    {
+      "id": "knightsofredcliff",
+      "name": "Knights of Redcliff",
+      "category": "freeoutfitcombos",
+      "assetIds": [
+        "2493559059",
+        "2493559856",
+        "2493586650",
+        "2493590711",
+        "2493776828",
+        "2493786076",
+        "137831860413813"
+      ]
+    },
+    {
+      "id": "dennis",
+      "name": "Dennis",
+      "category": "freeoutfitcombos",
+      "assetIds": [
+        "11822635053",
+        "4637596615",
+        "4637601297",
+        "4637254498"
+      ]
+    },
+    {
+      "id": "lindsey",
+      "name": "Lindsey",
+      "category": "freeoutfitcombos",
+      "assetIds": [
+        "12945228337",
+        "4637605284",
+        "4637267557",
+        "4637603462"
+      ]
+    },
+    {
+      "id": "denny",
+      "name": "Denny",
+      "category": "freeoutfitcombos",
+      "assetIds": [
+        "128985581083096",
+        "6445270994",
+        "6445268819",
+        "6445265102",
+        "6445263379",
+        "6445262286",
+        "6445260402"
+      ]
+    },
+    {
+      "id": "linlin",
+      "name": "Linlin",
+      "category": "freeoutfitcombos",
+      "assetIds": [
+        "85216210917123",
+        "6494077172",
+        "6494056892",
+        "6494055897",
+        "6494055013",
+        "6494053789",
+        "6494051962"
+      ]
+    },
+    {
+      "id": "kenneth",
+      "name": "Kenneth",
+      "category": "freeoutfitcombos",
+      "assetIds": [
+        "15093144795",
+        "4637618900",
+        "4637617396",
+        "4637431811"
+      ]
+    },
+    {
+      "id": "oliver",
+      "name": "Oliver",
+      "category": "freeoutfitcombos",
+      "assetIds": [
+        "3963861732",
+        "3963864909",
+        "3963867514",
+        "3963869770",
+        "3963871432",
+        "3963874672",
+        "3670737444",
+        "12778883791"
+      ]
+    },
+    {
+      "id": "cindy",
+      "name": "Cindy",
+      "category": "freeoutfitcombos",
+      "assetIds": [
+        "13253943097",
+        "4637612548",
+        "4637611578",
+        "4637156063"
+      ]
+    },
+    {
+      "id": "citylifewoman",
+      "name": "City Life Woman",
+      "category": "freeoutfitcombos",
+      "assetIds": [
+        "15093243863",
+        "2492675286",
+        "2492674027",
+        "2492670347",
+        "2492669375",
+        "2492671662",
+        "2492667589"
+      ]
+    },
+    {
+      "id": "squadghoulstedd",
+      "name": "Squad Ghouls: Drop Dead Tedd",
+      "category": "freeoutfitcombos",
+      "assetIds": [
+        "2499654059",
+        "112187483939951",
+        "2499646611",
+        "2499646090",
+        "2499645445",
+        "2499644791",
+        "2499643947"
+      ]
+    },
+    {
+      "id": "summer",
+      "name": "Summer",
+      "category": "freeoutfitcombos",
+      "assetIds": [
+        "3963490791",
+        "3670737444"
+      ]
+    }
+  ]
+}

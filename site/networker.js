@@ -342,7 +342,7 @@
     const badge = byId("social-coverage"); badge.classList.toggle("is-known", view.totalEdges > 0);
     badge.textContent = view.totalEdges ? `${view.totalEdges} observed link${view.totalEdges === 1 ? "" : "s"}` : readable ? "No links observed" : "Coverage unknown";
     byId("social-summary").textContent = `Start at ${personLabel(target)} and expand saved connections to leaderboard accounts or verified RBI preset matches. Select a node to inspect its evidence. The main account stays fixed until you choose Use as main account.`;
-    const options = {network: state.network, accounts: state.accounts, focusId: target.id, core, usernamePatterns: patterns,
+    const options = {network: state.network, historicalEdges: state.data.historical_friend_edges, avatarNodes: state.data.network_nodes, accounts: state.accounts, focusId: target.id, core, usernamePatterns: patterns,
       onCompare: id => chooseCandidate(id, true),
       onReference: (id, person) => chooseTarget(person || state.network.nodes.get(id))};
     if (graphView) graphView.update(options);

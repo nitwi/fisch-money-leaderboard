@@ -114,3 +114,22 @@ Tests run entirely offline:
 ```bash
 python -m unittest discover -s tests -p test_network_observations.py -v
 ```
+
+## Import observed equipped avatar assets
+
+The optional `avatar-observations.jsonl` journal preserves equipped-asset observations independently of website relationship observations. Record only exact equipped asset IDs actually visible in a permitted interface; never infer an asset from a picture, name, similarity score, friend relationship, or inaccessible page.
+
+Pass `import-avatars --input scans.json` a JSON array of objects with `user_id`, `observed_at` (actual UTC time ending in Z), `source_url` (that exact user's public Roblox profile or public equipped-avatar endpoint), `status`, and `asset_ids` (positive decimal IDs as strings). For example, the following is a **fictional** format example, not a verified observation:
+
+```json
+[{"user_id":"12345","observed_at":"2026-11-24T05:10:00Z","source_url":"https://www.roblox.com/users/12345/profile","status":"partial","asset_ids":["617605556"]}]
+```
+
+```sh
+python tools/import_network_observations.py import-avatars --input scans.json
+python tools/import_network_observations.py build --output /tmp/network-review.json --sqlite /tmp/network-review.sqlite
+```
+
+Use `complete` only when the interface confirms the entire equipped list. Use `partial` for an incomplete view: visible IDs can prove an exact full preset match, but unobserved items remain unverified rather than absent. Use `unavailable` and an empty ID array when the interface exposes no usable equipped data. Only a complete scan can establish a nonmatch. This importer will not create new social links or add avatar-only identities to the network, and it never initiates a browser visit or an API request.
+
+`rbi-presets.json` pins all 22 presets from RBI v0.18.1.1-beta, including the corrected single-asset GreenBean rule. SQLite `avatar_observations` retains every observation and its required, matched, missing or unverified IDs for each preset. The site's node projection uses the latest observed avatar, independently of the relationship observation time; prior scans stay in the journal and database. A positive preset match describes equipped assets only and is not evidence of automation, shared ownership, or misconduct.

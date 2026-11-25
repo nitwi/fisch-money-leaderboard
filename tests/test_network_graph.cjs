@@ -30,7 +30,7 @@ test('eligibility distinguishes historical ledger, full presets, partial presets
   const incomplete = account(3, {ledger: false, avatar: partial()});
   assert.equal(graph.eligibility(incomplete, core).category, 'partial');
   assert.equal(graph.eligibility(incomplete, core).eligible, false);
-  assert.equal(graph.eligibility(incomplete, core, true).eligible, true);
+  assert.equal(graph.eligibility(incomplete, core, true).eligible, false);
   for (const value of [undefined, {status: 'unavailable', assets: full().assets}]) {
     const unchecked = graph.eligibility(account(4, {ledger: false, avatar: value}), core, true);
     assert.equal(unchecked.category, 'unknown'); assert.equal(unchecked.eligible, false);
@@ -47,7 +47,7 @@ test('branches use observed connections, and do not connect matching names or ma
   assert.deepEqual(ids(model), ['1', '2', '3']);
   assert.deepEqual(model.hidden, {unchecked: 1, partial: 1, noMatch: 1});
   assert.equal(model.directStats.total, 5); assert.equal(model.directStats.eligible, 2);
-  assert.deepEqual(ids(build(nodes, edges, {includePartial: true})), ['1', '2', '3', '5']);
+  assert.deepEqual(ids(build(nodes, edges, {includePartial: true})), ['1', '2', '3']);
   assert.deepEqual(ids(build(nodes, [])), ['1']);
 });
 
@@ -239,13 +239,11 @@ test('select, compare and expand leave the main account fixed; same-root update 
   f.api.destroy();
 });
 
-test('explicit partial toggle qualifies connected partial avatars only, and selection has a keyboard alternative', () => {
+test('a partial-only neighbor is ineligible, and selection has a keyboard alternative', () => {
   const f = fixture(); assert.equal(f.node('4'), undefined);
-  const checkbox = f.find(item => item.tagName === 'INPUT'); checkbox.checked = true; checkbox.dispatch('change');
-  assert.ok(f.node('4')); f.node('4').dispatch('keydown', {key: 'Enter'});
-  assert.equal(f.node('4').getAttribute('aria-pressed'), 'true'); assert.equal(f.main(), '@player1');
-  checkbox.checked = false; checkbox.dispatch('change'); assert.equal(f.node('4'), undefined);
-  assert.equal(f.node('1').getAttribute('aria-pressed'), 'true');
+  assert.equal(f.find(item => item.tagName === 'INPUT'), undefined);
+  f.node('2').dispatch('keydown', {key: 'Enter'});
+  assert.equal(f.node('2').getAttribute('aria-pressed'), 'true'); assert.equal(f.main(), '@player1');
   const picker = f.find(item => item.tagName === 'SELECT'); picker.value = '2'; picker.dispatch('change');
   assert.equal(f.node('2').getAttribute('aria-pressed'), 'true');
   f.api.destroy();
