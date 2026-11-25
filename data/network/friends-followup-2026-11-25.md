@@ -73,3 +73,9 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 - Gamer3535356466: the exact saved HTTPS profile displayed the correct handle and 343 Friends, but its own Friends link landed on Chrome's internal error page. No verification of the Friends listing this run and no Roblox denial observed. Retained 18/343 partial coverage.
 - [Renvuz](https://www.roblox.com/users/1529100107/friends#!/friends): confirmed the exact handle and 317 Friends, and recovered the list from a zero-count shell with one normal reload. At 18:31:50.541 UTC, viewed page one at scroll top and verified all 18 exact IDs, already recorded. Next did not advance. Kept earlier 35/317 partial coverage. No journal, export, or production changes.
 - Next: Zipidy24 and other unrechecked partial lists such as cekersetan and NoRoblox_Support. Avoid retrying unchanged errors in this batch.
+
+## 2026-11-25 18:46–18:47 UTC
+
+- Zipidy24: the delayed HTTPS profile rendered the verified handle and 268 Friends, but its Friends link landed on Chrome’s internal error page. No Friends listing was verified in this run and no Roblox denial was observed. Retained 18/268 partial coverage.
+- [cekersetan](https://www.roblox.com/users/1399635767/friends#!/friends): after one normal reload the verified profile and Friends list both showed 210 (earlier observation showed 211). At 18:47:34.235 UTC, verified the first row at scroll top and all 18 exact page-one IDs, all already recorded. Next did not advance. Preserved earlier 36/211 historical coverage and did not assume which relationship changed. No new relationship or export changes.
+- Next: NoRoblox_Support, Minkib7661, zackbourbon, and other not-yet-rechecked partial lists.
