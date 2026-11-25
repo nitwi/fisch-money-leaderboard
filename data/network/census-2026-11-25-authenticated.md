@@ -80,3 +80,7 @@ People search hit a Chrome internal navigation error, but the saved HTTPS profil
 ### Friends continuation: minmin8280 and jonnhy1835
 
 minmin8280 (15/15) is complete. jonnhy1835 (21/22 across both exposed pages) remains partial. First pass: **40 of 70 attempted** (8 complete, 30 partial, two documented profile 404s). Next source: Nnoelq. The exports match the journal digest, and SQLite integrity and foreign-key checks, 50 Python tests, and 92 Node tests passed.
+
+### Friends continuation: Nnoelq
+
+Nnoelq (69/69 across all four exposed pages) is complete. 10ne17's exact profile showed 178 Friends, but the linked Friends list rendered an empty zero-count shell after one normal reload; it is not counted as empty or as a verified first pass. First pass: **41 of 70 attempted** (9 complete, 30 partial, two documented profile 404s). Leave 10ne17 pending for a later normal-browser retry if needed and continue through the rest of the queue. The two exports match the website journal digest, and SQLite integrity and foreign-key checks, 50 Python tests, and 92 Node tests passed.
