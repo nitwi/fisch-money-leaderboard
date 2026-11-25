@@ -184,15 +184,16 @@
       const latest = projected.get(node.id);
       const date = avatar => avatar?.checked_at || avatar?.fetched_at || "";
       const avatar = latest && (!baseline || date(latest) >= date(baseline)) ? latest : baseline;
-      return {node, ...classifyPresetResemblance(avatar), observedAt: date(avatar) || null};
+      return {node, ...classifyPresetResemblance(avatar), completeScan: avatar?.status === "ok" && Array.isArray(avatar.assets), observedAt: date(avatar) || null};
     });
-    const classifiedCount = reviewed.filter(result => result.status !== "unknown").length;
+    const classifiedCount = reviewed.filter(result => result.completeScan).length;
     const outfitFriends = reviewed.filter(result => result.status === "full" || result.status === "near");
-    return {observedFriendCount: directFriends.length, classifiedCount,
-      unknownCount: directFriends.length - classifiedCount,
+    const partialExactCount = outfitFriends.filter(entry => !entry.completeScan).length;
+    return {observedFriendCount: directFriends.length, classifiedCount, partialExactCount,
+      unknownCount: directFriends.length - classifiedCount - partialExactCount,
       fullCount: outfitFriends.filter(entry => entry.status === "full").length,
       nearCount: outfitFriends.filter(entry => entry.status === "near").length,
-      matchPercent: classifiedCount ? 100 * outfitFriends.length / classifiedCount : null,
+      matchPercent: classifiedCount ? 100 * (outfitFriends.length - partialExactCount) / classifiedCount : null,
       leaderboardFriends: directFriends.filter(node => node.ledger === true),
       outfitFriends, followers: list(followers), following: list(following)};
   }

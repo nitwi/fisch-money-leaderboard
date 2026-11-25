@@ -619,6 +619,15 @@ test("relationship breakdown separates follow directions, de-duplicates direct f
   const later = network.relationshipLens(graph, "1", [{id:"3", avatar:outfit([], "unavailable", "2026-11-26T04:00:00Z")}]);
   assert.equal(later.classifiedCount, 2);
   assert.equal(later.matchPercent, 50);
+  const partialPositive = network.relationshipLens(graph, "1", [
+    {id:"5", avatar:outfit(kit.assetIds, "partial", "2026-11-26T04:00:00Z")},
+  ]);
+  assert.equal(partialPositive.partialExactCount, 1);
+  assert.equal(partialPositive.fullCount, 2);
+  assert.equal(partialPositive.classifiedCount, 3);
+  assert.equal(partialPositive.unknownCount, 0);
+  assert.equal(partialPositive.matchPercent, base.matchPercent);
+  assert.ok(partialPositive.outfitFriends.some(entry => entry.node.id === "5" && !entry.completeScan));
 });
 
 test("near outfits require complete scans and multiple exact required items; partial positives must be exact", () => {
