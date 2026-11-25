@@ -129,3 +129,8 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 - zNaN_Rot (`3228802017`): the saved HTTPS profile showed an incomplete shell with zero Friends and no visible exact handle, including after one normal reload. No site denial or verified zero list. Retained the prior 34/90 partial.
 - Canizan (`3060545720`): verified the exact handle and 140 Friends on the saved HTTPS profile. The linked list recovered its 140 count after one normal reload. At scroll position zero, verified 17 exact IDs on page 1 (all already present), with one anonymous Unavailable card. Next did not advance to page 2. Preserved the earlier 88/140 partial over five pages.
 - No new IDs, journal, or export changes. Next: BigBoyyChriss, Tbpoqqq, heanmichrkke_3, and stoicc_xx.
+
+### 21:01 UTC — BigBoyyChriss and Tbpoqqq rechecks
+
+- BigBoyyChriss (`2533535288`) and Tbpoqqq (`1481603669`): saved HTTPS profiles confirmed exact handles and displayed 66 and 55 Friends, respectively. Both profile-linked Friends routes returned a generic error body (`{"errors":[{"code":0,"message":""}]}`) instead of cards, including after one ordinary reload each. No explicit website denial or Roblox 404 was observed. Preserved earlier 18/66 and 9/55 partial records without treating either as empty.
+- No journal or export changes. Next: heanmichrkke_3 and stoicc_xx, then AliceSekai and YptSehjZiEs. If this same error persists across the next accounts, stop list navigation for that batch rather than repeating unchanged retries.
