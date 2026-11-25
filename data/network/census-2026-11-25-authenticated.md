@@ -64,3 +64,7 @@ Roblox briefly rendered zero-count shells; a normal reload recovered readable da
 ### Scheduled Friends batch: sabbath553
 
 sabbath553: 18/46 exact IDs on page one (partial); later pages were not verified. This adds 18 distinct friendships and no leaderboard, follow, or avatar rows. First pass: **35 of 70 attempted** (7 complete, 26 partial, two documented profile 404s). The Cloud Browser returned an internal Chrome error during navigation for the next source, heanmichrkke_3; it was not counted as a Roblox profile 404 or a completed attempt. Resume from heanmichrkke_3 through normal HTTPS People search when the browser is available. Both exports match the journal SHA-256; SQLite integrity/foreign key checks, 49 Python tests, and 92 Node tests passed.
+
+### Manual retry: heanmichrkke_3
+
+Normal HTTPS People search and an exact result click opened the expected profile. The linked list initially showed zero; a normal reload restored the displayed count of 76 and 33 exact IDs across pages one and two. The next-page control remained enabled but did not advance again, so the list is partial. Added 33 distinct friendships, no new leaderboard cross-links. First pass: **36 of 70 attempted** (7 complete, 27 partial, two documented profile 404s). Next source: hc2khunowpng43ntk1. The journal prefix and both export digests were verified; SQLite integrity and foreign-key checks, 49 Python tests, and 92 Node tests passed.
