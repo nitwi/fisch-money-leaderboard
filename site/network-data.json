@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-25T22:46:58.770Z",
+  "generated_at": "2026-11-25T23:31:53.308Z",
   "scan_started_at": "2026-11-24T08:34:44Z",
   "ledger_latest_checkpoint": {
     "id": "2026-11-23_2317",
@@ -63775,7 +63775,7 @@
             "username": "",
             "display_name": "",
             "profile_url": "https://www.roblox.com/users/2588977821/profile",
-            "observed_at": "2026-11-25T05:27:16.031Z",
+            "observed_at": "2026-11-25T23:31:06.856Z",
             "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
             "method": "roblox_website",
             "source_label": "Roblox website",
@@ -63789,6 +63789,16 @@
                 "observed_at": "2026-11-25T05:27:16.031Z",
                 "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
                 "profile_url": "https://www.roblox.com/users/2588977821/profile"
+              },
+              {
+                "observation_id": "web_0db6b11ff7ed7f0cd9cb418c2e2ed805",
+                "source_id": "2246025273",
+                "target_id": "2588977821",
+                "method": "roblox_website",
+                "source_label": "Roblox website",
+                "observed_at": "2026-11-25T23:31:06.856Z",
+                "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
+                "profile_url": "https://www.roblox.com/users/2588977821/profile"
               }
             ]
           },
@@ -63797,7 +63807,7 @@
             "username": "",
             "display_name": "",
             "profile_url": "https://www.roblox.com/users/3877663197/profile",
-            "observed_at": "2026-11-25T05:27:16.031Z",
+            "observed_at": "2026-11-25T23:31:06.856Z",
             "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
             "method": "roblox_website",
             "source_label": "Roblox website",
@@ -63811,6 +63821,16 @@
                 "observed_at": "2026-11-25T05:27:16.031Z",
                 "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
                 "profile_url": "https://www.roblox.com/users/3877663197/profile"
+              },
+              {
+                "observation_id": "web_0db6b11ff7ed7f0cd9cb418c2e2ed805",
+                "source_id": "2246025273",
+                "target_id": "3877663197",
+                "method": "roblox_website",
+                "source_label": "Roblox website",
+                "observed_at": "2026-11-25T23:31:06.856Z",
+                "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
+                "profile_url": "https://www.roblox.com/users/3877663197/profile"
               }
             ]
           },
@@ -63819,7 +63839,7 @@
             "username": "",
             "display_name": "",
             "profile_url": "https://www.roblox.com/users/4426743660/profile",
-            "observed_at": "2026-11-25T05:27:16.031Z",
+            "observed_at": "2026-11-25T23:31:06.856Z",
             "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
             "method": "roblox_website",
             "source_label": "Roblox website",
@@ -63833,6 +63853,16 @@
                 "observed_at": "2026-11-25T05:27:16.031Z",
                 "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
                 "profile_url": "https://www.roblox.com/users/4426743660/profile"
+              },
+              {
+                "observation_id": "web_0db6b11ff7ed7f0cd9cb418c2e2ed805",
+                "source_id": "2246025273",
+                "target_id": "4426743660",
+                "method": "roblox_website",
+                "source_label": "Roblox website",
+                "observed_at": "2026-11-25T23:31:06.856Z",
+                "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
+                "profile_url": "https://www.roblox.com/users/4426743660/profile"
               }
             ]
           },
@@ -63841,7 +63871,7 @@
             "username": "",
             "display_name": "",
             "profile_url": "https://www.roblox.com/users/4506161637/profile",
-            "observed_at": "2026-11-25T05:27:16.031Z",
+            "observed_at": "2026-11-25T23:31:06.856Z",
             "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
             "method": "roblox_website",
             "source_label": "Roblox website",
@@ -63855,6 +63885,16 @@
                 "observed_at": "2026-11-25T05:27:16.031Z",
                 "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
                 "profile_url": "https://www.roblox.com/users/4506161637/profile"
+              },
+              {
+                "observation_id": "web_0db6b11ff7ed7f0cd9cb418c2e2ed805",
+                "source_id": "2246025273",
+                "target_id": "4506161637",
+                "method": "roblox_website",
+                "source_label": "Roblox website",
+                "observed_at": "2026-11-25T23:31:06.856Z",
+                "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
+                "profile_url": "https://www.roblox.com/users/4506161637/profile"
               }
             ]
           },
@@ -63863,7 +63903,7 @@
             "username": "",
             "display_name": "",
             "profile_url": "https://www.roblox.com/users/4761118072/profile",
-            "observed_at": "2026-11-25T05:27:16.031Z",
+            "observed_at": "2026-11-25T23:31:06.856Z",
             "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
             "method": "roblox_website",
             "source_label": "Roblox website",
@@ -63877,6 +63917,16 @@
                 "observed_at": "2026-11-25T05:27:16.031Z",
                 "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
                 "profile_url": "https://www.roblox.com/users/4761118072/profile"
+              },
+              {
+                "observation_id": "web_0db6b11ff7ed7f0cd9cb418c2e2ed805",
+                "source_id": "2246025273",
+                "target_id": "4761118072",
+                "method": "roblox_website",
+                "source_label": "Roblox website",
+                "observed_at": "2026-11-25T23:31:06.856Z",
+                "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
+                "profile_url": "https://www.roblox.com/users/4761118072/profile"
               }
             ]
           },
@@ -63885,7 +63935,7 @@
             "username": "",
             "display_name": "",
             "profile_url": "https://www.roblox.com/users/4859616244/profile",
-            "observed_at": "2026-11-25T05:27:16.031Z",
+            "observed_at": "2026-11-25T23:31:06.856Z",
             "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
             "method": "roblox_website",
             "source_label": "Roblox website",
@@ -63899,6 +63949,16 @@
                 "observed_at": "2026-11-25T05:27:16.031Z",
                 "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
                 "profile_url": "https://www.roblox.com/users/4859616244/profile"
+              },
+              {
+                "observation_id": "web_0db6b11ff7ed7f0cd9cb418c2e2ed805",
+                "source_id": "2246025273",
+                "target_id": "4859616244",
+                "method": "roblox_website",
+                "source_label": "Roblox website",
+                "observed_at": "2026-11-25T23:31:06.856Z",
+                "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
+                "profile_url": "https://www.roblox.com/users/4859616244/profile"
               }
             ]
           },
@@ -63907,7 +63967,7 @@
             "username": "",
             "display_name": "",
             "profile_url": "https://www.roblox.com/users/5103064493/profile",
-            "observed_at": "2026-11-25T05:27:16.031Z",
+            "observed_at": "2026-11-25T23:31:06.856Z",
             "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
             "method": "roblox_website",
             "source_label": "Roblox website",
@@ -63921,6 +63981,16 @@
                 "observed_at": "2026-11-25T05:27:16.031Z",
                 "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
                 "profile_url": "https://www.roblox.com/users/5103064493/profile"
+              },
+              {
+                "observation_id": "web_0db6b11ff7ed7f0cd9cb418c2e2ed805",
+                "source_id": "2246025273",
+                "target_id": "5103064493",
+                "method": "roblox_website",
+                "source_label": "Roblox website",
+                "observed_at": "2026-11-25T23:31:06.856Z",
+                "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
+                "profile_url": "https://www.roblox.com/users/5103064493/profile"
               }
             ]
           },
@@ -63929,7 +63999,7 @@
             "username": "",
             "display_name": "",
             "profile_url": "https://www.roblox.com/users/5201543381/profile",
-            "observed_at": "2026-11-25T05:27:16.031Z",
+            "observed_at": "2026-11-25T23:31:06.856Z",
             "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
             "method": "roblox_website",
             "source_label": "Roblox website",
@@ -63943,6 +64013,16 @@
                 "observed_at": "2026-11-25T05:27:16.031Z",
                 "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
                 "profile_url": "https://www.roblox.com/users/5201543381/profile"
+              },
+              {
+                "observation_id": "web_0db6b11ff7ed7f0cd9cb418c2e2ed805",
+                "source_id": "2246025273",
+                "target_id": "5201543381",
+                "method": "roblox_website",
+                "source_label": "Roblox website",
+                "observed_at": "2026-11-25T23:31:06.856Z",
+                "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
+                "profile_url": "https://www.roblox.com/users/5201543381/profile"
               }
             ]
           },
@@ -63951,7 +64031,7 @@
             "username": "",
             "display_name": "",
             "profile_url": "https://www.roblox.com/users/7232103507/profile",
-            "observed_at": "2026-11-25T05:27:16.031Z",
+            "observed_at": "2026-11-25T23:31:06.856Z",
             "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
             "method": "roblox_website",
             "source_label": "Roblox website",
@@ -63965,6 +64045,16 @@
                 "observed_at": "2026-11-25T05:27:16.031Z",
                 "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
                 "profile_url": "https://www.roblox.com/users/7232103507/profile"
+              },
+              {
+                "observation_id": "web_0db6b11ff7ed7f0cd9cb418c2e2ed805",
+                "source_id": "2246025273",
+                "target_id": "7232103507",
+                "method": "roblox_website",
+                "source_label": "Roblox website",
+                "observed_at": "2026-11-25T23:31:06.856Z",
+                "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
+                "profile_url": "https://www.roblox.com/users/7232103507/profile"
               }
             ]
           },
@@ -63973,7 +64063,7 @@
             "username": "",
             "display_name": "",
             "profile_url": "https://www.roblox.com/users/7944538244/profile",
-            "observed_at": "2026-11-25T05:27:16.031Z",
+            "observed_at": "2026-11-25T23:31:06.856Z",
             "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
             "method": "roblox_website",
             "source_label": "Roblox website",
@@ -63987,6 +64077,16 @@
                 "observed_at": "2026-11-25T05:27:16.031Z",
                 "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
                 "profile_url": "https://www.roblox.com/users/7944538244/profile"
+              },
+              {
+                "observation_id": "web_0db6b11ff7ed7f0cd9cb418c2e2ed805",
+                "source_id": "2246025273",
+                "target_id": "7944538244",
+                "method": "roblox_website",
+                "source_label": "Roblox website",
+                "observed_at": "2026-11-25T23:31:06.856Z",
+                "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
+                "profile_url": "https://www.roblox.com/users/7944538244/profile"
               }
             ]
           },
@@ -63995,7 +64095,7 @@
             "username": "",
             "display_name": "",
             "profile_url": "https://www.roblox.com/users/10541469647/profile",
-            "observed_at": "2026-11-25T05:27:16.031Z",
+            "observed_at": "2026-11-25T23:31:06.856Z",
             "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
             "method": "roblox_website",
             "source_label": "Roblox website",
@@ -64009,6 +64109,16 @@
                 "observed_at": "2026-11-25T05:27:16.031Z",
                 "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
                 "profile_url": "https://www.roblox.com/users/10541469647/profile"
+              },
+              {
+                "observation_id": "web_0db6b11ff7ed7f0cd9cb418c2e2ed805",
+                "source_id": "2246025273",
+                "target_id": "10541469647",
+                "method": "roblox_website",
+                "source_label": "Roblox website",
+                "observed_at": "2026-11-25T23:31:06.856Z",
+                "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
+                "profile_url": "https://www.roblox.com/users/10541469647/profile"
               }
             ]
           },
@@ -64017,7 +64127,7 @@
             "username": "",
             "display_name": "",
             "profile_url": "https://www.roblox.com/users/10963496591/profile",
-            "observed_at": "2026-11-25T05:27:16.031Z",
+            "observed_at": "2026-11-25T23:31:06.856Z",
             "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
             "method": "roblox_website",
             "source_label": "Roblox website",
@@ -64031,6 +64141,16 @@
                 "observed_at": "2026-11-25T05:27:16.031Z",
                 "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
                 "profile_url": "https://www.roblox.com/users/10963496591/profile"
+              },
+              {
+                "observation_id": "web_0db6b11ff7ed7f0cd9cb418c2e2ed805",
+                "source_id": "2246025273",
+                "target_id": "10963496591",
+                "method": "roblox_website",
+                "source_label": "Roblox website",
+                "observed_at": "2026-11-25T23:31:06.856Z",
+                "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
+                "profile_url": "https://www.roblox.com/users/10963496591/profile"
               }
             ]
           },
@@ -64039,7 +64159,7 @@
             "username": "",
             "display_name": "",
             "profile_url": "https://www.roblox.com/users/11222810455/profile",
-            "observed_at": "2026-11-25T05:27:16.031Z",
+            "observed_at": "2026-11-25T23:31:06.856Z",
             "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
             "method": "roblox_website",
             "source_label": "Roblox website",
@@ -64053,6 +64173,16 @@
                 "observed_at": "2026-11-25T05:27:16.031Z",
                 "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
                 "profile_url": "https://www.roblox.com/users/11222810455/profile"
+              },
+              {
+                "observation_id": "web_0db6b11ff7ed7f0cd9cb418c2e2ed805",
+                "source_id": "2246025273",
+                "target_id": "11222810455",
+                "method": "roblox_website",
+                "source_label": "Roblox website",
+                "observed_at": "2026-11-25T23:31:06.856Z",
+                "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
+                "profile_url": "https://www.roblox.com/users/11222810455/profile"
               }
             ]
           },
@@ -64061,7 +64191,7 @@
             "username": "",
             "display_name": "",
             "profile_url": "https://www.roblox.com/users/11314607431/profile",
-            "observed_at": "2026-11-25T05:27:16.031Z",
+            "observed_at": "2026-11-25T23:31:06.856Z",
             "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
             "method": "roblox_website",
             "source_label": "Roblox website",
@@ -64075,6 +64205,16 @@
                 "observed_at": "2026-11-25T05:27:16.031Z",
                 "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
                 "profile_url": "https://www.roblox.com/users/11314607431/profile"
+              },
+              {
+                "observation_id": "web_0db6b11ff7ed7f0cd9cb418c2e2ed805",
+                "source_id": "2246025273",
+                "target_id": "11314607431",
+                "method": "roblox_website",
+                "source_label": "Roblox website",
+                "observed_at": "2026-11-25T23:31:06.856Z",
+                "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
+                "profile_url": "https://www.roblox.com/users/11314607431/profile"
               }
             ]
           },
@@ -64083,7 +64223,7 @@
             "username": "",
             "display_name": "",
             "profile_url": "https://www.roblox.com/users/11318637986/profile",
-            "observed_at": "2026-11-25T05:27:16.031Z",
+            "observed_at": "2026-11-25T23:31:06.856Z",
             "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
             "method": "roblox_website",
             "source_label": "Roblox website",
@@ -64097,6 +64237,16 @@
                 "observed_at": "2026-11-25T05:27:16.031Z",
                 "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
                 "profile_url": "https://www.roblox.com/users/11318637986/profile"
+              },
+              {
+                "observation_id": "web_0db6b11ff7ed7f0cd9cb418c2e2ed805",
+                "source_id": "2246025273",
+                "target_id": "11318637986",
+                "method": "roblox_website",
+                "source_label": "Roblox website",
+                "observed_at": "2026-11-25T23:31:06.856Z",
+                "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
+                "profile_url": "https://www.roblox.com/users/11318637986/profile"
               }
             ]
           },
@@ -64105,7 +64255,7 @@
             "username": "",
             "display_name": "",
             "profile_url": "https://www.roblox.com/users/11389056038/profile",
-            "observed_at": "2026-11-25T05:27:16.031Z",
+            "observed_at": "2026-11-25T23:31:06.856Z",
             "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
             "method": "roblox_website",
             "source_label": "Roblox website",
@@ -64119,6 +64269,16 @@
                 "observed_at": "2026-11-25T05:27:16.031Z",
                 "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
                 "profile_url": "https://www.roblox.com/users/11389056038/profile"
+              },
+              {
+                "observation_id": "web_0db6b11ff7ed7f0cd9cb418c2e2ed805",
+                "source_id": "2246025273",
+                "target_id": "11389056038",
+                "method": "roblox_website",
+                "source_label": "Roblox website",
+                "observed_at": "2026-11-25T23:31:06.856Z",
+                "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
+                "profile_url": "https://www.roblox.com/users/11389056038/profile"
               }
             ]
           },
@@ -64127,7 +64287,7 @@
             "username": "",
             "display_name": "",
             "profile_url": "https://www.roblox.com/users/11427601978/profile",
-            "observed_at": "2026-11-25T05:27:16.031Z",
+            "observed_at": "2026-11-25T23:31:06.856Z",
             "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
             "method": "roblox_website",
             "source_label": "Roblox website",
@@ -64141,6 +64301,16 @@
                 "observed_at": "2026-11-25T05:27:16.031Z",
                 "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
                 "profile_url": "https://www.roblox.com/users/11427601978/profile"
+              },
+              {
+                "observation_id": "web_0db6b11ff7ed7f0cd9cb418c2e2ed805",
+                "source_id": "2246025273",
+                "target_id": "11427601978",
+                "method": "roblox_website",
+                "source_label": "Roblox website",
+                "observed_at": "2026-11-25T23:31:06.856Z",
+                "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
+                "profile_url": "https://www.roblox.com/users/11427601978/profile"
               }
             ]
           },
@@ -64149,7 +64319,7 @@
             "username": "",
             "display_name": "",
             "profile_url": "https://www.roblox.com/users/11513339899/profile",
-            "observed_at": "2026-11-25T05:27:16.031Z",
+            "observed_at": "2026-11-25T23:31:06.856Z",
             "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
             "method": "roblox_website",
             "source_label": "Roblox website",
@@ -64163,19 +64333,30 @@
                 "observed_at": "2026-11-25T05:27:16.031Z",
                 "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
                 "profile_url": "https://www.roblox.com/users/11513339899/profile"
+              },
+              {
+                "observation_id": "web_0db6b11ff7ed7f0cd9cb418c2e2ed805",
+                "source_id": "2246025273",
+                "target_id": "11513339899",
+                "method": "roblox_website",
+                "source_label": "Roblox website",
+                "observed_at": "2026-11-25T23:31:06.856Z",
+                "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
+                "profile_url": "https://www.roblox.com/users/11513339899/profile"
               }
             ]
           }
         ],
-        "fetched_at": "2026-11-25T05:27:16.031Z",
-        "checked_at": "2026-11-25T05:27:16.031Z",
+        "fetched_at": "2026-11-25T23:31:06.856Z",
+        "checked_at": "2026-11-25T23:31:06.856Z",
         "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
         "attempted": true,
         "method": "roblox_website",
         "source_label": "Roblox website",
         "observation_ids": [
           "api_da9f1fb9e363928ef004ff21c8d7b6fe",
-          "web_599cc26893b778f9d4da4f27fd681260"
+          "web_599cc26893b778f9d4da4f27fd681260",
+          "web_0db6b11ff7ed7f0cd9cb418c2e2ed805"
         ],
         "coverage_policy": "Latest complete observation replaces older positives; later partial positives are added. Later partial/unavailable checks make absence unknown.",
         "latest_complete_at": null
@@ -64379,13 +64560,14 @@
           "checked_at": null
         },
         "website_observation_ids": [
-          "web_599cc26893b778f9d4da4f27fd681260"
+          "web_599cc26893b778f9d4da4f27fd681260",
+          "web_0db6b11ff7ed7f0cd9cb418c2e2ed805"
         ],
         "latest_website": {
-          "observation_id": "web_599cc26893b778f9d4da4f27fd681260",
-          "observed_at": "2026-11-25T05:27:16.031Z",
+          "observation_id": "web_0db6b11ff7ed7f0cd9cb418c2e2ed805",
+          "observed_at": "2026-11-25T23:31:06.856Z",
           "source_url": "https://www.roblox.com/users/2246025273/friends#!/friends",
-          "displayed_total_count": null,
+          "displayed_total_count": 135,
           "observed_id_count": 18,
           "coverage": {
             "status": "partial",
@@ -64393,7 +64575,7 @@
             "pages_observed": [
               1
             ],
-            "termination": "unknown"
+            "termination": "more_available"
           }
         },
         "projection_policy": "latest_complete_then_later_positive"
@@ -96789,28 +96971,38 @@
         "total_count": 1
       },
       "followers": {
-        "status": "unavailable",
+        "status": "complete",
         "items": [],
-        "fetched_at": null,
-        "source_url": "https://friends.roblox.com/v1/users/12013950464/followers?limit=50&sortOrder=Asc",
+        "fetched_at": "2026-11-25T23:31:37.840Z",
+        "checked_at": "2026-11-25T23:31:37.840Z",
+        "source_url": "https://www.roblox.com/users/12013950464/friends#!/followers",
         "attempted": true,
-        "pages_fetched": 0,
-        "http_status": 401,
-        "error": "Authentication token is missing",
-        "checked_at": "2026-11-24T08:35:20Z",
-        "failed_at": "2026-11-24T08:35:20Z"
+        "method": "roblox_website",
+        "source_label": "Roblox website",
+        "observation_ids": [
+          "api_5353357deeb7972bdef3cf25847fa9f7",
+          "web_6959f380d2361bc515346ddba66a8c51"
+        ],
+        "coverage_policy": "Latest complete observation replaces older positives; later partial positives are added. Later partial/unavailable checks make absence unknown.",
+        "latest_complete_at": "2026-11-25T23:31:37.840Z",
+        "total_count": 0
       },
       "following": {
-        "status": "unavailable",
+        "status": "complete",
         "items": [],
-        "fetched_at": null,
-        "source_url": "https://friends.roblox.com/v1/users/12013950464/followings?limit=50&sortOrder=Asc",
+        "fetched_at": "2026-11-25T23:31:38.148Z",
+        "checked_at": "2026-11-25T23:31:38.148Z",
+        "source_url": "https://www.roblox.com/users/12013950464/friends#!/following",
         "attempted": true,
-        "pages_fetched": 0,
-        "http_status": 401,
-        "error": "Authentication token is missing",
-        "checked_at": "2026-11-24T08:35:35Z",
-        "failed_at": "2026-11-24T08:35:35Z"
+        "method": "roblox_website",
+        "source_label": "Roblox website",
+        "observation_ids": [
+          "api_31fc75b64fe1efb3bf3e15875b403be6",
+          "web_50bd0a56f8ede9c610da44d93ac7af97"
+        ],
+        "coverage_policy": "Latest complete observation replaces older positives; later partial positives are added. Later partial/unavailable checks make absence unknown.",
+        "latest_complete_at": "2026-11-25T23:31:38.148Z",
+        "total_count": 0
       },
       "avatar": {
         "status": "ok",
@@ -96951,6 +97143,42 @@
           }
         },
         "projection_policy": "latest_complete_then_later_positive"
+      },
+      "follow_evidence": {
+        "followers": {
+          "api": {
+            "status": "unavailable",
+            "items": [],
+            "fetched_at": null,
+            "source_url": "https://friends.roblox.com/v1/users/12013950464/followers?limit=50&sortOrder=Asc",
+            "attempted": true,
+            "pages_fetched": 0,
+            "http_status": 401,
+            "error": "Authentication token is missing",
+            "checked_at": "2026-11-24T08:35:20Z",
+            "failed_at": "2026-11-24T08:35:20Z"
+          },
+          "website_observation_ids": [
+            "web_6959f380d2361bc515346ddba66a8c51"
+          ]
+        },
+        "following": {
+          "api": {
+            "status": "unavailable",
+            "items": [],
+            "fetched_at": null,
+            "source_url": "https://friends.roblox.com/v1/users/12013950464/followings?limit=50&sortOrder=Asc",
+            "attempted": true,
+            "pages_fetched": 0,
+            "http_status": 401,
+            "error": "Authentication token is missing",
+            "checked_at": "2026-11-24T08:35:35Z",
+            "failed_at": "2026-11-24T08:35:35Z"
+          },
+          "website_observation_ids": [
+            "web_50bd0a56f8ede9c610da44d93ac7af97"
+          ]
+        }
       }
     }
   ],
@@ -134943,13 +135171,13 @@
   "website_observations": {
     "method": "roblox_website",
     "source_label": "Roblox website",
-    "journal_sha256": "94484cad1c70df1666cb5ab05b2460de9f21952c947aeb217a18781207a88dcc",
+    "journal_sha256": "2017287b7c018d731ea56c363bb51b6babff083ab5ea8aadbf24652aeab278d3",
     "journal_hash_format": "canonical_jsonl_v1",
-    "observation_count": 83,
+    "observation_count": 86,
     "source_account_count": 64,
-    "latest_observed_at": "2026-11-25T22:46:44.735Z",
-    "follow_observation_count": 9,
-    "follow_source_count": 5,
+    "latest_observed_at": "2026-11-25T23:31:38.148Z",
+    "follow_observation_count": 11,
+    "follow_source_count": 6,
     "ledger_source_count": 63,
     "complete_source_count": 12,
     "partial_source_count": 52,
