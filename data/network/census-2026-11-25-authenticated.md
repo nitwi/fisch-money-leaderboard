@@ -76,3 +76,7 @@ Verified 35 distinct IDs across all three exposed pages against the displayed co
 ### Scheduled retry: Zipidy24
 
 People search hit a Chrome internal navigation error, but the saved HTTPS profile URL loaded and its linked Friends page displayed 268. Verified 18 exact IDs on the first page; the enabled next-page control did not advance, so the list is partial. First pass: **38 of 70 attempted** (7 complete, 29 partial, two documented profile 404s). The next source, minmin8280, was not counted because the Cloud Browser failed before People search. Both exports match the journal digest. SQLite integrity and foreign-key checks, 50 Python tests, and 92 Node tests passed.
+
+### Friends continuation: minmin8280 and jonnhy1835
+
+minmin8280 (15/15) is complete. jonnhy1835 (21/22 across both exposed pages) remains partial. First pass: **40 of 70 attempted** (8 complete, 30 partial, two documented profile 404s). Next source: Nnoelq. The exports match the journal digest, and SQLite integrity and foreign-key checks, 50 Python tests, and 92 Node tests passed.
