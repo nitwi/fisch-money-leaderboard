@@ -188,3 +188,9 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 
 - The historical Apathy and n6sy Friends observations share 23 exact IDs, including 21 non-leaderboard endpoints with no saved avatar scans. Seven of those also appear in four source lists each: `37219128`, `324522122`, `605397849`, `1835982118`, `4001331807`, `4292249721`, `7593104865`. They are an optional targeted scan set, not a comparison feature or a basis for inferring preset matches.
 - Keep the broad, most-shared-first avatar queue as the default after the relationship pass. The top seven overall cover 41 observed source-to-friend entries versus 28 for this subset. No observation, export, or production change.
+
+### 23:16 UTC — kvllrx and untoldmemoria rechecks
+
+- `kvllrx` (`655658280`): verified profile count 27 and, after an ordinary Friends reload, page 1 at scroll position zero. All 17 readable IDs were already recorded; one card had no exact ID. Next did not advance, so 17/27 remains partial.
+- `untoldmemoria` (`128840304`): verified profile count 134 and page 1 at scroll position zero after one normal list reload. All 18 readable IDs were already recorded; Next did not advance. Kept the prior 87/134 partial from five pages.
+- No journal, export, or production change. Finish the prioritized Friends rechecks with `sabbath553` and `johncenagaming347v2`; preserve unresolved gaps and then begin Followers/Following separately with `Lunary810` in plan order. Do not loop stalled pagination or treat an incomplete shell as an empty list.
