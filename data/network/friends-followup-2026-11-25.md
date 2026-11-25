@@ -18,3 +18,8 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 - [Force_oNature](https://www.roblox.com/users/1295019815/friends#!/friends) at 16:18:19.747 UTC: profile showed 26, but the list still headed zero after reload while showing 18 exact page-one IDs. Next stalled. Kept 25/26 prior partial coverage.
 - Returned to the top of each readable page and verified the first row. Every verified ID was already in prior evidence for its source. No journal or export changes. Anonymous cards do not identify accounts or explain unavailability.
 - Sylilia’s HTTPS profile loaded a shell and then hit Chrome’s navigation error, not a verified Roblox 404. Next: Sylilia, shatter_yourselfgrgr, ewoofs, and tranquanghieu20. Continue rechecks before directional collection.
+
+## 2026-11-25 16:31–16:32 UTC
+
+- [tranquanghieu20](https://www.roblox.com/users/3135553986/friends#!/friends): one normal reload recovered the 22-friend list from an empty zero-count shell. Verified the first row at scroll top and all 18 page-one exact links at 16:31:54.157 UTC; identical to the prior observation. Next did not advance; kept 18/22 partial coverage. No new relationships or export changes.
+- The browser hit a Chrome navigation error for Sylilia and while beginning the ewoofs search. Neither list was verified in this run. Next start with shatter_yourselfgrgr, then ewoofs or another unrechecked partial profile. Leave Sylilia pending without a site-denial or termination claim.
