@@ -590,3 +590,43 @@ test('pattern explanations appear in candidate, comparison and observed-friend r
   assert.doesNotMatch(elements.get('candidate-list').textContent, /Username: \d/);
   assert.doesNotMatch(elements.get('comparison-content').textContent, /Username text similarity|characters in the longer username/);
 });
+
+test("relationship breakdown separates follow directions, de-duplicates direct friends, and reports classified coverage", () => {
+  const kit = network.RBI_AVATAR_RULES.presets.find(p => p.assetIds.length >= 5);
+  assert.ok(kit);
+  const outfit = (ids, status = "ok", checked_at = "2026-11-25T04:00:00Z") => ({status, checked_at, assets: ids.map(id => ({id}))});
+  const accounts = [
+    {id:"1", ledger:true}, {id:"2", ledger:true, avatar:outfit(kit.assetIds)},
+    {id:"3", avatar:outfit(kit.assetIds.slice(1))}, {id:"4", avatar:outfit(["987654321"])}, {id:"5"},
+    {id:"6", avatar:outfit(kit.assetIds)}, {id:"7", avatar:outfit(kit.assetIds)},
+  ];
+  const edges = [{kind:"friend",from:"1",to:"2"}, {kind:"friend",from:"2",to:"1"},
+    {kind:"friend",from:"1",to:"3"}, {kind:"friend",from:"1",to:"4"},
+    {kind:"friend",from:"1",to:"5"}, {kind:"follow",from:"1",to:"6"},
+    {kind:"follow",from:"7",to:"1"}, {kind:"friend",from:"4",to:"7"}];
+  const graph = {nodes:new Map(accounts.map(a => [a.id,a])),edges};
+  const base = network.relationshipLens(graph, "1");
+  assert.equal(base.observedFriendCount, 4);
+  assert.equal(base.classifiedCount, 3);
+  assert.equal(base.unknownCount, 1);
+  assert.equal(base.fullCount, 1);
+  assert.equal(base.nearCount, 1);
+  assert.ok(Math.abs(base.matchPercent - 100 * 2/3) < 1e-8);
+  assert.deepEqual(base.leaderboardFriends.map(a => a.id), ["2"]);
+  assert.deepEqual(base.followers.map(a => a.id), ["7"]);
+  assert.deepEqual(base.following.map(a => a.id), ["6"]);
+  assert.equal(network.relationshipLens(graph, "99").matchPercent, null);
+  const later = network.relationshipLens(graph, "1", [{id:"3", avatar:outfit([], "unavailable", "2026-11-26T04:00:00Z")}]);
+  assert.equal(later.classifiedCount, 2);
+  assert.equal(later.matchPercent, 50);
+});
+
+test("near outfits require complete scans and multiple exact required items; partial positives must be exact", () => {
+  const rules = [{id:"sample",name:"Sample",assetIds:["101","102","103","104","105"]}];
+  const avatar = (ids, status) => ({status, assets: ids.map(id => ({id}))});
+  assert.equal(network.classifyPresetResemblance(avatar(["101","102","103","104"], "ok"), rules).status, "near");
+  assert.equal(network.classifyPresetResemblance(avatar(["101","102","103","104"], "partial"), rules).status, "unknown");
+  assert.equal(network.classifyPresetResemblance(avatar(["101","102","103","104","105","999"], "partial"), rules).status, "full");
+  assert.equal(network.classifyPresetResemblance(avatar(["101","102","103"], "ok"), rules).status, "none");
+  assert.equal(network.classifyPresetResemblance(avatar(["101"], "ok"), [{id:"two",assetIds:["101","102"]}]).status, "none");
+});

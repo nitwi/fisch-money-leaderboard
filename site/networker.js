@@ -327,10 +327,56 @@
     more.hidden = shown.length >= matches.length;
   }
 
+  function renderRelationshipLens(target) {
+    const host = byId("relationship-lens");
+    if (!host) return;
+    host.replaceChildren();
+    if (!target) return;
+    const lens = core.relationshipLens(state.network, target.id, state.data.network_nodes || []);
+    const coverage = core.socialList(target, "friends");
+    const summary = node("p", "nw-lens-metric", lens.matchPercent === null
+      ? "Outfit match rate unavailable"
+      : `${percentage(lens.matchPercent)} of classified friends matched a preset`);
+    const counts = node("p", "nw-help", `${lens.fullCount} exact · ${lens.nearCount} near · ${lens.classifiedCount}/${lens.observedFriendCount} observed friends classifiable · ${lens.unknownCount} unknown`);
+    const note = node("p", "nw-help", "Near means at least 80% of a preset’s required item IDs, using a complete outfit scan. A full preset match contains every required ID. Outfit matches, including defaults, do not establish botting, shared ownership, or farming.");
+    const listCoverage = node("p", "nw-help", coverage.complete
+      ? "A complete Friends list was recorded. Entries and outfits reflect saved observation times, not live status."
+      : "The Friends list is incomplete or unavailable. The rate describes only classifiable observed friends, not the whole list.");
+    const grid = node("div", "nw-lens-grid");
+    function lane(key, title, entries, format = entry => ({person: entry}), empty = "No saved links in this group.") {
+      const article = node("section", `nw-lens-lane nw-lens-${key}`);
+      article.append(node("h3", "", `${title} · ${entries.length}`));
+      if (!entries.length) article.append(node("p", "nw-help", empty));
+      else {
+        const list = node("ul", "nw-lens-list");
+        for (const entry of entries) {
+          const {person, description, observedAt} = format(entry), row = node("li");
+          row.append(externalLink(personLabel(person), core.profileUrl(person.id)));
+          if (description) row.append(node("span", "nw-help", description));
+          if (observedAt) row.append(checkedTime(observedAt));
+          list.append(row);
+        }
+        article.append(list);
+      }
+      return article;
+    }
+    grid.append(
+      lane("followers", "Followers (they follow this account)", lens.followers, undefined, "No saved incoming follows; the list may be uninspected."),
+      lane("outfits", "Friends with preset matches", lens.outfitFriends, entry => ({
+        person: entry.node, description: entry.matches.map(m => `${entry.status === "full" ? "Exact" : "Near"}: ${m.name} (${m.matchedCount}/${m.requiredCount})`).join(" · "),
+        observedAt: entry.observedAt,
+      }), "No exact or near matches in the available scans."),
+      lane("leaderboard", "Leaderboard friends", lens.leaderboardFriends),
+      lane("following", "Following (this account follows them)", lens.following, undefined, "No saved outgoing follows; the list may be uninspected.")
+    );
+    host.append(summary, counts, listCoverage, note, grid);
+  }
+
   function renderSocialGraph() {
     const target = referenceAccount();
     renderWebsiteCoverage();
     renderCensusCoverage();
+    renderRelationshipLens(target);
     if (!target) {
       byId("social-coverage").textContent = "No main account selected";
       byId("social-summary").textContent = "Choose an account to explore its saved social connections.";
