@@ -8,6 +8,8 @@
 
   const SVG_NS = "http://www.w3.org/2000/svg";
   const NODE_WIDTH = 224, NODE_HEIGHT = 72, MAX_NODES = 120;
+  const DEFAULT_LANE_LIMITS = Object.freeze({up: 4, right: 8, down: 4, left: 5});
+  const LANE_NAMES = Object.freeze({up: "↑ Following", right: "→ Leaderboard", down: "↓ Followers", left: "← External leads"});
   let instanceCount = 0;
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
   const name = node => node?.username ? `@${node.username}` : node?.display_name || `ID ${node?.id || "unknown"}`;
@@ -332,6 +334,7 @@
     const uniqueId = `fng-${++instanceCount}`;
     let options = {...initialOptions}, model, positions = new Map(), manual = new Map();
     let expanded = new Set(), selectedId = null, focusId = options.focusId;
+    let laneLimits = options.quadrant ? {...DEFAULT_LANE_LIMITS, ...options.laneLimits} : options.laneLimits || null;
     let view = {x: 0, y: 0, scale: 1}, dimensions = {width: 900, height: 500};
     let destroyed = false, gesture = null, suppressClickUntil = 0;
     const pointers = new Map(), listeners = [], nodeElements = new Map(), edgeElements = [];
@@ -372,6 +375,17 @@
     heading.append(kicker, mainName);
     toolbar.append(heading);
     const summary = el("p", "fng-summary"); summary.setAttribute("aria-live", "polite");
+    const laneBar = el("div", "fng-lane-bar"), laneControls = new Map();
+    for (const [lane, title] of Object.entries(LANE_NAMES)) {
+      const area = el("div", "fng-lane fng-lane-" + lane), heading = el("strong", "", title);
+      const counts = el("span", "fng-lane-count", "0 shown");
+      const less = button("−", () => { laneLimits[lane] = DEFAULT_LANE_LIMITS[lane]; rebuild(false); });
+      less.setAttribute("aria-label", "Show fewer " + title);
+      const more = button("+", () => { laneLimits[lane] = Math.min(model.laneCounts[lane], laneLimits[lane] + 5); rebuild(false); });
+      more.setAttribute("aria-label", "Show more " + title);
+      area.append(heading, counts, less, more); laneBar.append(area);
+      laneControls.set(lane, {area, counts, more, less});
+    }
     const boundsNote = el("p", "fng-bounds"), workspace = el("div", "fng-workspace"), canvas = el("div", "fng-canvas");
     const controls = el("div", "fng-controls"), zoomLabel = el("output", "fng-zoom", "100%");
     zoomLabel.setAttribute("aria-label", "Graph zoom");
@@ -393,12 +407,12 @@
     const pickerRow = el("label", "fng-picker"), picker = el("select"); picker.setAttribute("aria-label", "Inspect a visible account");
     pickerRow.append(el("span", "", "Inspect visible account"), picker);
     const legend = el("div", "fng-legend");
-    legend.append(el("span", "fng-legend-friend", "Solid cyan: friendship"), el("span", "fng-legend-follow", "Gold arrow: follows"), el("span", "", "Green: leaderboard"), el("span", "", "Purple: shared external connector"), el("span", "", "Gold: RBI preset"), el("span", "", "Faded: not seen in later complete list"));
+    legend.append(el("span", "fng-legend-friend", "Cyan solid: recorded friends"), el("span", "fng-legend-follow", "Gold arrows: following direction"), el("span", "", "Green: ledger account"), el("span", "", "Purple: external account connected to ≥2 ledger accounts (not proof of bots)"), el("span", "", "Gold node: RBI preset match"), el("span", "", "Faded: older link not seen in later complete list"));
     const help = el("p", "fng-help", "Select a node to inspect it, then expand its saved connections. Drag nodes or empty space to arrange the view. Pinch or Ctrl + scroll to zoom; keyboard + / − and arrow keys work on the canvas.");
     help.id = `${uniqueId}-help`;
     const caution = el("p", "fng-help", "Every edge requires a saved friend/follow observation. External connectors link two or more ledger accounts through observed relationships; they are not proof of common ownership, automation or misconduct. Incomplete observations remain unknown.");
     const live = el("p", "fng-sr-only"); live.setAttribute("role", "status"); live.setAttribute("aria-live", "polite");
-    wrapper.append(toolbar, summary, boundsNote, workspace, pickerRow, legend, help, caution, live);
+    wrapper.append(toolbar, summary, laneBar, boundsNote, workspace, pickerRow, legend, help, caution, live);
     container.replaceChildren(wrapper);
 
     function announce(message) { live.textContent = message; }
@@ -415,6 +429,11 @@
       measure();
       const routePoints = model.edges.flatMap(edge => edgeGeometry(edge, positions, model.parents).points);
       view = fitTransform(positions, dimensions.width, dimensions.height, routePoints); transform();
+    }
+    function rootView() {
+      measure();
+      view = {scale: dimensions.width < 600 ? .64 : .72, x: dimensions.width / 2, y: dimensions.height / 2};
+      transform();
     }
     function zoom(factor) { view = zoomTransform(view, factor, {x: dimensions.width / 2, y: dimensions.height / 2}); transform(); }
     function positionNodes() {
@@ -489,9 +508,13 @@
       mainName.textContent = model.root ? name(model.root) : "Choose an account";
       if (!model.root) { summary.textContent = "Choose a saved account to explore its observed connections."; boundsNote.hidden = true; return; }
       const stats = model.directStats, shown = Math.max(0, model.nodes.length - 1);
-      summary.textContent = `${shown} visible branch account${shown === 1 ? "" : "s"} · ${stats.eligible} eligible direct neighbor${stats.eligible === 1 ? "" : "s"} of ${stats.total} observed. ${hiddenText(model.hidden) ? `Hidden across open branches: ${hiddenText(model.hidden)}.` : ""}`;
+      summary.textContent = options.quadrant ?
+        `${shown} visible connected accounts · ${stats.eligible} qualifying direct neighbors out of ${stats.total} observed. Use the + controls to reveal more in each direction; drag to pan.` :
+        `${shown} visible branch account${shown === 1 ? "" : "s"} · ${stats.eligible} eligible direct neighbor${stats.eligible === 1 ? "" : "s"} of ${stats.total} observed. ${hiddenText(model.hidden) ? `Hidden across open branches: ${hiddenText(model.hidden)}.` : ""}`;
       boundsNote.hidden = !model.omittedEligibleIds.length;
-      boundsNote.textContent = `${model.omittedEligibleIds.length} more eligible account${model.omittedEligibleIds.length === 1 ? "" : "s"} cannot fit within this view's ${model.maxNodes}-account limit. Collapse another branch or use a connected account as main to inspect them.`;
+      boundsNote.textContent = options.quadrant ?
+        `${model.omittedEligibleIds.length} qualifying accounts are not drawn yet. Expand the relevant direction with +; selection limits only hide cards, never erase evidence.` :
+        `${model.omittedEligibleIds.length} more eligible account${model.omittedEligibleIds.length === 1 ? "" : "s"} cannot fit within this view's ${model.maxNodes}-account limit. Collapse another branch or use a connected account as main to inspect them.`;
       collapseButton.disabled = expanded.size === 0 && manual.size === 0;
       svg.setAttribute("aria-label", `Observed connections branching from ${name(model.root)}. ${shown} visible branch accounts.`);
     }
@@ -562,7 +585,7 @@
         const unseenCount = [...(model.adjacency.get(node.id) || [])].filter(id => !visible.has(id) && model.eligibility.get(id).eligible).length;
         const expand = button(isOpen ? "Collapse this branch" : `Expand saved neighbors (${unseenCount})`, () => {
           if (expanded.has(node.id)) expanded.delete(node.id); else expanded.add(node.id);
-          rebuild(true); announce(`${expanded.has(node.id) ? "Expanded" : "Collapsed"} ${name(node)}. Main account remains ${name(model.root)}.`);
+          rebuild(!options.quadrant); announce(`${expanded.has(node.id) ? "Expanded" : "Collapsed"} ${name(node)}. Main account remains ${name(model.root)}.`);
         }, "fng-action-primary");
         expand.disabled = !isOpen && !unseenCount;
         actions.append(expand);
@@ -618,7 +641,13 @@
     }
     function rebuild(shouldFit = false) {
       if (destroyed) return;
-      model = buildBranches({...options, focusId, expandedIds: expanded});
+      model = buildBranches({...options, focusId, expandedIds: expanded, laneLimits});
+      laneBar.hidden = !options.quadrant;
+      if (options.quadrant) for (const [lane, control] of laneControls) {
+        control.counts.textContent = `${model.laneShown[lane]} / ${model.laneCounts[lane]}`;
+        control.more.disabled = laneLimits[lane] >= model.laneCounts[lane];
+        control.less.disabled = laneLimits[lane] <= DEFAULT_LANE_LIMITS[lane];
+      }
       if (!model.nodes.some(node => node.id === selectedId)) selectedId = model.focusId;
       positions = layout(model, manual);
       picker.replaceChildren();
@@ -628,7 +657,7 @@
       }
       picker.value = selectedId || ""; draw(); renderSummary(); renderInspector();
       if (typeof options.onSelect === "function" && model.nodesById.has(selectedId)) options.onSelect(selectedId, model.nodesById.get(selectedId));
-      if (shouldFit) fit();
+      if (shouldFit) { if (options.quadrant) rootView(); else fit(); }
     }
     function point(event) {
       const rect = svg.getBoundingClientRect();
@@ -719,7 +748,8 @@
         const nextFocus = nextOptions.focusId === undefined ? focusId : nextOptions.focusId;
         const changed = options.core.normalizeId(nextFocus) !== options.core.normalizeId(focusId);
         options = {...options, ...nextOptions}; focusId = nextFocus;
-        if (changed) { expanded.clear(); manual.clear(); selectedId = focusId; pointers.clear(); gesture = null; }
+        if (changed) { expanded.clear(); manual.clear(); selectedId = focusId; pointers.clear(); gesture = null;
+          laneLimits = options.quadrant ? {...DEFAULT_LANE_LIMITS, ...options.laneLimits} : options.laneLimits || null; }
         rebuild(changed);
       },
       destroy() {
