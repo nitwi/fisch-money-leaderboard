@@ -68,3 +68,7 @@ sabbath553: 18/46 exact IDs on page one (partial); later pages were not verified
 ### Manual retry: heanmichrkke_3
 
 Normal HTTPS People search and an exact result click opened the expected profile. The linked list initially showed zero; a normal reload restored the displayed count of 76 and 33 exact IDs across pages one and two. The next-page control remained enabled but did not advance again, so the list is partial. Added 33 distinct friendships, no new leaderboard cross-links. First pass: **36 of 70 attempted** (7 complete, 27 partial, two documented profile 404s). Next source: hc2khunowpng43ntk1. The journal prefix and both export digests were verified; SQLite integrity and foreign-key checks, 49 Python tests, and 92 Node tests passed.
+
+### Friends continuation: hc2khunowpng43ntk1
+
+Verified 35 distinct IDs across all three exposed pages against the displayed count of 40, so the list remains partial. All 35 friendships are new; no new leaderboard cross-links. First pass: **37 of 70 attempted** (7 complete, 28 partial, 2 documented profile 404s). The exact Zipidy24 profile displayed 268 Friends, but the linked Friends page showed an empty zero-count shell even after a normal reload. It was not counted as a reliable first pass or as zero Friends; retry Zipidy24 next. Both export digests and SQLite integrity and foreign-key checks passed, along with 50 Python and 92 Node tests.
