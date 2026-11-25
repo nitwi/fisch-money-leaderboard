@@ -52,3 +52,11 @@ emitnick (45/55, all four exposed pages) and Canizan (88/140, first five pages) 
 ### Friends batch: LasTnIghT2011 and johncenagaming347v2
 
 LasTnIghT2011: 65/471 across the first four pages. johncenagaming347v2: 18 exact IDs on page one. People search returned no result, but the verified profile showed the correct handle and 135 Friends; the linked Friends page showed a conflicting 0 and real cards. Saved those exact IDs with the total unknown. This batch adds 80 distinct friendships, including LasTnIghT2011 ↔ Renvuz and LasTnIghT2011 ↔ zerealali. Coverage: **29 of 70 with saved Friends lists** (7 complete, 22 partial) plus two documented 404 attempts flagged for possible termination review, not confirmed. Next uninspected ranked source: injurylowk.
+
+### Friends batch: injurylowk, Renvuz and anyokc
+
+- injurylowk: 16/22 exact IDs on page one; no later page verified.
+- Renvuz: 35/317 exact IDs across the first two pages; further pages remain.
+- anyokc: 23/24 exact IDs across both exposed pages; the final missing ID stays unknown.
+
+Roblox briefly rendered zero-count shells; a normal reload recovered readable data. The batch added 71 distinct friendships, including Renvuz ↔ zerealali. First-pass progress: **34 of 70 attempted** (7 complete, 25 partial, 2 unavailable Roblox 404s flagged for possible termination review). No new follow or avatar rows. Next ranked source: sabbath553. The 49 focused Python and 92 Node tests passed.
