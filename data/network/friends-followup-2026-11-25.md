@@ -28,3 +28,8 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 
 - [shatter_yourselfgrgr](https://www.roblox.com/users/8794906806/friends#!/friends): People search hit a Chrome internal navigation error; the saved HTTPS profile worked and displayed the exact handle and 53 Friends. Verified the first row at scroll top on pages one and two. At 16:46:50.072 UTC, 35 exact IDs were readable across the two pages, all already recorded. Page two showed one anonymous **Account Deleted** card with no exact ID, and Roblox disabled Next despite displaying 53 Friends. Kept the better earlier 51/53 partial observation across three pages. No new relationships and no journal or export changes.
 - Next: ewoofs and other unrechecked partial lists. Sylilia remains pending; the Chrome navigation error is not a Roblox denial.
+
+## 2026-11-25 17:00–17:01 UTC
+
+- [ewoofs](https://www.roblox.com/users/200918130/friends#!/friends): the saved HTTPS profile revealed the exact handle and 19 Friends after one normal reload. Checked the first row at scroll top on both pages and verified all 19 card positions, ending at 17:01:07.389 UTC. Fifteen cards had exact profile IDs, all already recorded. Two displayed **Account Deleted** and two displayed **Unavailable**, all without an exact profile ID in the settled view. The earlier 16/19 partial observation remains intact; an ID briefly displayed in a loading state was not attributed to an anonymous card. No new relationships or export changes.
+- Next: hc2khunowpng43ntk1 and other unrechecked partial lists. Continue to record anonymous cards separately from exact-ID relationships.
