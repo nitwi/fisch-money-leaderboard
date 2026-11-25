@@ -123,3 +123,9 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 - ForcePush_Sith (`4700793500`): opened the saved HTTPS profile and verified `@ForcePush_Sith` with 92 Friends. Clicking the profile Friends link opened a Chrome internal error; no Roblox denial or 404 was verified. Preserved the prior 16/92 partial.
 - SelenaTatsukii (`362858829`): verified the exact handle and 134 Friends after a normal profile reload. The linked Friends page’s mismatched zero shell recovered with one normal reload. From the top of pages 1–3, checked 52 exact IDs plus two anonymous Unavailable cards; all exact IDs were already in the journal. Next did not advance to page four. Preserved the prior 70/134 partial with four documented pages.
 - No new IDs, journal, or export changes. Next: zNaN_Rot and Canizan, then BigBoyyChriss and Tbpoqqq.
+
+### 20:46 UTC — zNaN_Rot and Canizan rechecks
+
+- zNaN_Rot (`3228802017`): the saved HTTPS profile showed an incomplete shell with zero Friends and no visible exact handle, including after one normal reload. No site denial or verified zero list. Retained the prior 34/90 partial.
+- Canizan (`3060545720`): verified the exact handle and 140 Friends on the saved HTTPS profile. The linked list recovered its 140 count after one normal reload. At scroll position zero, verified 17 exact IDs on page 1 (all already present), with one anonymous Unavailable card. Next did not advance to page 2. Preserved the earlier 88/140 partial over five pages.
+- No new IDs, journal, or export changes. Next: BigBoyyChriss, Tbpoqqq, heanmichrkke_3, and stoicc_xx.
