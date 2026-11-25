@@ -3,7 +3,7 @@
   const core = window.FischNetworker, time = window.FischTime, patterns = window.FischUsernamePatterns;
   let graphView = null;
   const byId = id => document.getElementById(id);
-  const state = {data: null, accounts: [], byId: new Map(), assetCatalog: new Map(), network: null, targetId: null, compareId: null, scope: "latest", sort: "review", reviewFilter: "all", filter: "", friendFilter: "", friendLimit: 50, assetFilter: "all"};
+  const state = {data: null, accounts: [], byId: new Map(), assetCatalog: new Map(), network: null, targetId: null, compareId: null, scope: "latest", sort: "review", reviewFilter: "all", filter: "", friendFilter: "", friendLimit: 50, assetFilter: "all", top50Expanded: false};
   const viewerZone = time.viewerTimeZone();
   const localTimeFormat = new Intl.DateTimeFormat("en-US", {timeZone: viewerZone, month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short"});
   const GROUP_LABELS = {cosmetic: "Clothing & accessories", body: "Body parts & faces", animation: "Animations", other: "Other assets"};
@@ -70,13 +70,17 @@
       String(account.username).toLowerCase().includes(needle) || String(account.id).includes(needle) ||
       (account.aliases || []).some(alias => String(alias).toLowerCase().includes(needle)) ||
       String(account.latest_rank) === needle);
+    const expanded = state.top50Expanded || Boolean(needle), visible = expanded ? matches : matches.slice(0, 9);
     list.replaceChildren();
-    byId("top50-count").textContent = `${matches.length} / ${state.top50Accounts.length}`;
+    byId("top50-count").textContent = `${visible.length} of ${matches.length} shown`;
+    const more = byId("top50-more"); more.hidden = Boolean(needle) || matches.length <= 9;
+    more.textContent = state.top50Expanded ? "Show fewer accounts" : `Show all ${matches.length} accounts`;
+    more.setAttribute("aria-expanded", String(state.top50Expanded));
     if (!matches.length) {
       list.append(node("p", "nw-empty", "No Top 50 accounts match this search. You can still select a saved historical account with Set main account."));
       return;
     }
-    for (const account of matches) {
+    for (const account of visible) {
       const button = node("button", "nw-candidate nw-main-account-card");
       button.type = "button";
       button.setAttribute("aria-pressed", String(account.id === state.targetId));
@@ -85,15 +89,7 @@
       const name = node("span", "nw-candidate-name", `@${account.username}`);
       name.append(node("small", "", `ID ${account.id}`));
       head.append(accountImage(account), name, node("span", "nw-rank", `#${account.latest_rank}`));
-      const metrics = node("span", "nw-candidate-metrics");
-      const avatar = core.reviewAvatar(account.avatar);
-      const presetStatus = !avatar.available ? "Avatar not scanned" : avatar.fullMatches.length ?
-        `Full RBI preset: ${avatar.fullMatches[0].name}` : avatar.partialMatches.length ?
-        `Partial RBI preset: ${avatar.partialMatches[0].name}` : "No RBI preset match";
-      metrics.append(node("span", "nw-wide", presetStatus));
-      const coverage = account.friends?.status || "unavailable";
-      metrics.append(node("span", "nw-wide", `Friend list: ${coverage === "complete" ? "complete" : coverage === "partial" ? "partial" : "not fully verified"}`));
-      button.append(head, metrics);
+      button.append(head);
       button.addEventListener("click", () => chooseTarget(account));
       list.append(button);
     }
@@ -609,6 +605,7 @@
       updateUrl(); renderPresetLibrary(); renderReference(); renderReviewOverview(); renderSocialGraph(); renderCandidates(); renderComparison();
 
       byId("target-input").addEventListener("input", event => renderTop50List(event.target.value));
+      byId("top50-more").addEventListener("click", () => { state.top50Expanded = !state.top50Expanded; renderTop50List(); });
       byId("target-form").addEventListener("submit", event => { event.preventDefault(); chooseTarget(accountFromInput(byId("target-input").value)); });
       byId("target-input").addEventListener("change", () => { const account = accountFromInput(byId("target-input").value); if (account) chooseTarget(account); });
       byId("candidate-scope").addEventListener("change", event => { state.scope = event.target.value; ensureComparison(); updateUrl(); renderReviewOverview(); renderCandidates(); renderComparison(); });
