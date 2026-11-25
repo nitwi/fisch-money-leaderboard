@@ -61,7 +61,7 @@
    * when their ID is in expandedIds. A collapsed subtree may remain reachable
    * through a different expanded branch, as real shared connections should.
    */
-  function buildBranches({network, historicalEdges = [], avatarNodes = [], accounts = [], focusId, core, expandedIds = [], includeConnectors = false, includeExternal = false, maxNodes = MAX_NODES}) {
+  function buildBranches({network, historicalEdges = [], avatarNodes = [], accounts = [], focusId, core, expandedIds = [], includeConnectors = false, includeExternal = false, quadrant = false, laneLimits = null, maxNodes = MAX_NODES}) {
     if (!core?.normalizeId || !core?.reviewAvatar) throw new TypeError("A FischNetworker core is required.");
     const nodesById = new Map();
     for (const node of network?.nodes?.values?.() || []) {
@@ -115,24 +115,69 @@
       });
     }
     const id = core.normalizeId(focusId), root = nodesById.get(id) || null;
+    // Classify each directly observed connection ONCE. Other relationship kinds
+    // remain represented by separate friend/follow edges and in the inspector.
+    // Priority: known ledger → right, external friendship → left, outgoing
+    // follow → up, incoming follow → down. No username/avatar similarity
+    // ever creates a relationship or direction.
+    const lanes = new Map(), laneCounts = {up: 0, down: 0, left: 0, right: 0};
+    const laneShown = {up: 0, down: 0, left: 0, right: 0};
+    const related = new Map();
+    for (const edge of edgeMap.values()) {
+      if (edge.from !== id && edge.to !== id) continue;
+      const other = edge.from === id ? edge.to : edge.from;
+      if (!related.has(other)) related.set(other, {friend: false, following: false, follower: false});
+      const state = related.get(other);
+      if (edge.kind === "friend") state.friend = true;
+      else if (edge.from === id) state.following = true;
+      else state.follower = true;
+    }
+    for (const [other, relation] of related) {
+      if (!eligibilityById.get(other)?.eligible) continue;
+      const lane = nodesById.get(other)?.ledger ? "right" :
+        relation.friend ? "left" : relation.following ? "up" : relation.follower ? "down" : "left";
+      lanes.set(other, lane);
+      laneCounts[lane]++;
+    }
+    const cap = name => laneLimits && Number.isFinite(laneLimits[name]) ?
+      Math.max(0, Math.floor(laneLimits[name])) : Infinity;
+    const priority = (a, b) => {
+      const ca = eligibilityById.get(a.id), cb = eligibilityById.get(b.id);
+      return Number(cb.category === "connector") - Number(ca.category === "connector") ||
+        (cb.ledgerConnections || 0) - (ca.ledgerConnections || 0) || compareNodes(a, b);
+    };
     const expanded = new Set([...expandedIds].map(core.normalizeId).filter(Boolean));
     if (id) expanded.add(id);
     const limit = Number.isFinite(maxNodes) ? clamp(Math.floor(maxNodes), 2, MAX_NODES) : MAX_NODES;
     const model = {focusId: id, root, nodesById, eligibility: eligibilityById, adjacency, expanded,
       nodes: [], edges: [], parents: new Map(), depths: new Map(), maxNodes: limit,
+      lanes, laneCounts, laneShown, quadrant: Boolean(quadrant),
       omittedEligibleIds: [], hidden: {unchecked: 0, partial: 0, noMatch: 0}};
     if (!root) return model;
     const included = new Set([id]), queue = [id], omitted = new Set(), hidden = new Set();
+    const directAllowed = new Set();
+    for (const lane of ["right", "left", "up", "down"]) {
+      const candidates = [...lanes].filter(([, side]) => side === lane)
+        .map(([nodeId]) => nodesById.get(nodeId)).sort(priority);
+      for (const person of candidates.slice(0, cap(lane))) directAllowed.add(person.id);
+      for (const person of candidates.slice(cap(lane))) omitted.add(person.id);
+    }
     model.depths.set(id, 0);
     for (let cursor = 0; cursor < queue.length; cursor++) {
       const ownerId = queue[cursor];
       if (!expanded.has(ownerId)) continue;
-      const neighbors = [...(adjacency.get(ownerId) || [])].map(otherId => nodesById.get(otherId)).sort(compareNodes);
+      const neighbors = [...(adjacency.get(ownerId) || [])].map(otherId => nodesById.get(otherId))
+        .sort(ownerId === id ? (a, b) => {
+          const order = {right: 0, left: 1, up: 2, down: 3};
+          return (order[lanes.get(a.id)] ?? 4) - (order[lanes.get(b.id)] ?? 4) || priority(a, b);
+        } : compareNodes);
       for (const node of neighbors) {
         if (!eligibilityById.get(node.id).eligible && node.id !== id) { hidden.add(node.id); continue; }
+        if (lanes.has(node.id) && !directAllowed.has(node.id)) { omitted.add(node.id); continue; }
         if (included.has(node.id)) continue;
         if (included.size >= limit) { omitted.add(node.id); continue; }
         included.add(node.id); queue.push(node.id);
+        if (ownerId === id) laneShown[lanes.get(node.id)]++;
         model.parents.set(node.id, ownerId); model.depths.set(node.id, model.depths.get(ownerId) + 1);
       }
     }
@@ -178,6 +223,39 @@
   function layout(model, manualPositions = new Map()) {
     const positions = new Map(), children = new Map();
     if (!model.root) return positions;
+    if (model.quadrant) {
+      // Stable 4-way radial rows, one lane per saved connection type. Unlike
+      // tree-fit, no lane can form a 55-node column that collapses to 11% zoom.
+      const buckets = new Map();
+      for (const person of model.nodes) {
+        if (person.id === model.focusId) continue;
+        let first = person.id;
+        while (model.parents.get(first) && model.parents.get(first) !== model.focusId) {
+          first = model.parents.get(first);
+        }
+        const lane = model.lanes.get(first) || "left", depth = model.depths.get(person.id) || 1;
+        const key = lane + ":" + depth;
+        if (!buckets.has(key)) buckets.set(key, []);
+        buckets.get(key).push(person.id);
+      }
+      positions.set(model.focusId, {x: 0, y: 0});
+      for (const [key, ids] of buckets) {
+        const [lane, depthText] = key.split(":"), depth = Number(depthText);
+        ids.forEach((nodeId, index) => {
+          const offset = index - (ids.length - 1) / 2;
+          const position = lane === "right" ? {x: depth * 380, y: offset * 112} :
+            lane === "left" ? {x: -depth * 380, y: offset * 112} :
+            lane === "up" ? {x: offset * 260, y: -depth * 260} :
+            {x: offset * 260, y: depth * 260};
+          const manual = manualPositions.get(nodeId);
+          if (Number.isFinite(manual?.x) && Number.isFinite(manual?.y)) {
+            position.x = manual.x; position.y = manual.y;
+          }
+          positions.set(nodeId, position);
+        });
+      }
+      return positions;
+    }
     for (const node of model.nodes) children.set(node.id, []);
     for (const [child, parent] of model.parents) children.get(parent).push(child);
     let nextRow = 0;
