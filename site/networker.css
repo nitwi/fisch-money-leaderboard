@@ -20,6 +20,8 @@
 .nw-controls input,.nw-controls select,#candidate-search{width:100%;min-width:0;min-height:45px;border:1px solid var(--border);border-radius:9px;background:var(--bg);color:var(--text);font:inherit;font-size:1rem;padding:10px 12px}
 .nw-controls select{appearance:none;padding-right:34px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='m2 4 4 4 4-4' stroke='%239cbdcc' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
 .nw-controls p{font-size:.8rem;color:var(--muted);margin:7px 0 0;line-height:1.4}
+.nw-target-control #top50-target{margin-bottom:13px}
+.nw-target-control .nw-target-search-label{margin-top:0}
 .nw-input-action{display:flex;gap:8px}
 .nw-input-action input{flex:1}
 .nw-primary,.nw-quiet{font:inherit;font-size:.875rem;font-weight:750;min-height:43px;border-radius:9px;padding:9px 14px;cursor:pointer}
