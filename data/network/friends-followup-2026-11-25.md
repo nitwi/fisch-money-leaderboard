@@ -79,3 +79,10 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 - Zipidy24: the delayed HTTPS profile rendered the verified handle and 268 Friends, but its Friends link landed on Chrome’s internal error page. No Friends listing was verified in this run and no Roblox denial was observed. Retained 18/268 partial coverage.
 - [cekersetan](https://www.roblox.com/users/1399635767/friends#!/friends): after one normal reload the verified profile and Friends list both showed 210 (earlier observation showed 211). At 18:47:34.235 UTC, verified the first row at scroll top and all 18 exact page-one IDs, all already recorded. Next did not advance. Preserved earlier 36/211 historical coverage and did not assume which relationship changed. No new relationship or export changes.
 - Next: NoRoblox_Support, Minkib7661, zackbourbon, and other not-yet-rechecked partial lists.
+
+## 2026-11-25 19:00–19:02 UTC
+
+- NoRoblox_Support: verified the exact saved HTTPS profile and 158 Friends, but opening the Friends link hit a Chrome navigation error before any list could be verified. No Roblox denial observed. Retained 16/158 partial coverage.
+- [Minkib7661](https://www.roblox.com/users/1528395974/friends#!/friends): verified the exact handle and 161 Friends. One normal reload restored the count and list. Verified the first row at scroll top on each of four pages, ending at 19:02:12.537 UTC. Of 72 positions, 68 had exact IDs; three anonymous **Account Deleted** and one anonymous **Unavailable** had no verified IDs. Next did not advance to page five. Improved coverage from 34/161 to 68/161; still partial. Added 34 distinct website friendships and no historical leaderboard cross-links.
+- Both exports match journal SHA-256 `db66ea8b140080557efe28d9162dfd6b17124cb3f2b2a82792c754583936610f`. All 142 focused tests and SQLite integrity and foreign-key checks passed. Review total since PR #4: 170 distinct website friendships, with 3,183 external nodes in the exports. No new avatar or directional-follow scans in this batch.
+- Next: zackbourbon, Erutobi, Fischerwunk, zerealali, and other unrechecked lists.
