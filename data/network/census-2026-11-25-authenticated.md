@@ -104,3 +104,7 @@ Minkib7661: 34 of 161 exact IDs, pages one and two; the saved HTTPS profile work
 ### Friends continuation: sanguifereum and three historical sources
 
 Exact People results led to the verified HTTPS profiles and linked Friends pages. Saved sanguifereum (18/103), 1234mysterio (16/411), 75percent3r (12/13, end of list with one unreadable ID), and anthonqt13 (14/424). All four are partial. The batch added 58 distinct friendships with no leaderboard cross-links and no new follower or avatar observations. First pass: **51 of 70 attempted** (10 complete, 39 partial, two documented profile 404s). Next: aurunqwer. Both exports match the canonical journal digest; SQLite integrity and foreign-key checks and all 142 focused tests passed.
+
+### Scheduled Friends continuation: aurunqwer, BigBoyyChriss and casketdream
+
+Exact People results led to all three HTTPS profiles and public Friends pages. aurunqwer (18/43) and BigBoyyChriss (18/66) are partial because the next-page controls did not advance; casketdream (11/11) is complete. This batch added 47 distinct friendships, with no new leaderboard cross-links, directional follows, or avatar scans. First pass: **54 of 70 attempted** (11 complete, 41 partial, two documented profile 404s). Next: cekersetan. Both exports match the canonical journal digest; SQLite integrity and foreign-key checks and all 142 focused tests passed.
