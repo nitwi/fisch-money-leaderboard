@@ -242,6 +242,29 @@ test('page defaults to the neutral reference, exposes real shared assets, and re
   assert.ok(dates.every(element => element.title.includes(CHECKED)));
 });
 
+test('Top 50 main-account dropdown is ranked and synchronized with search and deep links', async () => {
+  const top2 = account('2', {username: 'Second', ledger: true, latest_rank: 2});
+  const top1 = account('1', {username: 'First', ledger: true, latest_rank: 1});
+  const history = account('3', {username: 'Historic', ledger: true, latest_rank: null});
+  const {elements, location, graphCalls} = await renderSnapshot([top2, history, top1], '?target=2');
+  const picker = elements.get('top50-target');
+  assert.equal(picker.value, '2');
+  assert.deepEqual(picker.children.slice(1).map(child => child.value), ['1', '2']);
+  assert.deepEqual(picker.children.slice(1).map(child => child.textContent), ['#1 · @First', '#2 · @Second']);
+  picker.listeners.change[0]({target: {value: '1'}});
+  assert.equal(elements.get('target-input').value, 'First');
+  assert.equal(picker.value, '1');
+  assert.equal(new URL(location.href).searchParams.get('target'), '1');
+  assert.equal(graphCalls.at(-1).focusId, '1');
+  elements.get('target-input').value = 'Historic';
+  elements.get('target-form').listeners.submit[0]({preventDefault() {}});
+  assert.equal(picker.value, '');
+  assert.equal(new URL(location.href).searchParams.get('target'), '3');
+  elements.get('target-input').value = 'Second';
+  elements.get('target-form').listeners.submit[0]({preventDefault() {}});
+  assert.equal(picker.value, '2');
+});
+
 test('missing target deep links show a clear empty state without substituting or rewriting the target', async () => {
   const target = account('12013950464', {username: 'Lunary810', ledger: false});
   const {elements, location} = await renderSnapshot([target, account('2', {latest_rank: 1})], '?target=999&compare=2');
