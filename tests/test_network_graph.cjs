@@ -51,6 +51,26 @@ test('branches use observed connections, and do not connect matching names or ma
   assert.deepEqual(ids(build(nodes, [])), ['1']);
 });
 
+test('shared external connector appears only from two distinct observed ledger edges', () => {
+  const nodes = [account(1), account(2), account(3), account(4, {ledger:false, avatar:{status:'unavailable'}}),
+    account(5, {ledger:false}), account(6, {ledger:false})];
+  const edges = [edge(1,4), edge(2,4), edge(1,5), edge(1,6),
+    {kind:'name', from:'1',to:'5',evidence:evidence()}];
+  const basic = build(nodes, edges);
+  assert.deepEqual(ids(basic), ['1']);
+  const graph = build(nodes, edges, {includeConnectors:true});
+  assert.equal(graph.eligibility.get('4').category, 'connector');
+  assert.equal(graph.eligibility.get('4').ledgerConnections, 2);
+  assert.equal(graph.eligibility.get('5').eligible, false);
+  assert.deepEqual(ids(graph), ['1','4']);
+  const expanded = build(nodes, edges, {includeConnectors:true,expandedIds:['4']});
+  assert.equal(expanded.nodes.some(node => node.id === '2'),true);
+  assert.equal(expanded.edges.length,2);
+  const external = build(nodes,edges,{includeExternal:true});
+  assert.equal(external.nodes.length,4);
+  assert.equal(external.eligibility.get('5').category,'external');
+});
+
 test('every one of the 22 verified RBI presets can qualify a connected external account', () => {
   const nodes = [account(1), ...core.RBI_AVATAR_RULES.presets.map((preset, index) => account(index + 2, {ledger: false, avatar: avatar(preset.assetIds)}))];
   const model = build(nodes, nodes.slice(1).map(node => edge(1, node.id)));

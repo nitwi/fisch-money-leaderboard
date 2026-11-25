@@ -50,6 +50,10 @@
 .fng-node-main{cursor:pointer}
 .fng-node-card{fill:#102d43;stroke:#467187;stroke-width:1.4}
 .fng-node-icon{fill:#173d52;stroke:#467187;stroke-width:1}
+.fng-node-connector .fng-node-card,.fng-node-connector .fng-node-icon{stroke:#c2a2ff}
+.fng-node-external .fng-node-card,.fng-node-external .fng-node-icon{stroke:#89abc1;stroke-dasharray:3 2}
+.fng-node-connector .fng-node-badge{fill:#c2a2ff}
+.fng-node-external .fng-node-badge{fill:#a3bdca}
 .fng-node-ledger .fng-node-card,.fng-node-ledger .fng-node-icon{stroke:#61e5b3}
 .fng-node-full .fng-node-card,.fng-node-full .fng-node-icon{stroke:#ffd166}
 .fng-node-partial .fng-node-card{stroke:#e7b65b;stroke-dasharray:5 3}

@@ -28,4 +28,6 @@ jobs:
           node --check site/time-utils.js
           node --check site/ledger-timestamp.js
           node --check site/timestamp.js
-          node --test tests/test_timestamp.cjs tests/test_ledger_timestamp.cjs
+          node --check site/networker-focus.js
+          node --check site/network-graph.js
+          node --test tests/test_timestamp.cjs tests/test_ledger_timestamp.cjs tests/test_networker_focus.cjs tests/test_network_graph.cjs
