@@ -68,23 +68,32 @@
     const list = byId("top50-target"), needle = String(query || "").trim().replace(/^@/, "").toLowerCase();
     const matches = state.top50Accounts.filter(account => !needle ||
       String(account.username).toLowerCase().includes(needle) || String(account.id).includes(needle) ||
+      (account.aliases || []).some(alias => String(alias).toLowerCase().includes(needle)) ||
       String(account.latest_rank) === needle);
     list.replaceChildren();
-    byId("top50-count").textContent = `${matches.length} of ${state.top50Accounts.length}`;
+    byId("top50-count").textContent = `${matches.length} / ${state.top50Accounts.length}`;
     if (!matches.length) {
-      list.append(node("p", "nw-top50-empty", "No Top 50 matches. You can still select a saved historical account using the search above."));
+      list.append(node("p", "nw-empty", "No Top 50 accounts match this search. You can still select a saved historical account with Set main account."));
       return;
     }
     for (const account of matches) {
-      const button = node("button", "nw-top50-account");
+      const button = node("button", "nw-candidate nw-main-account-card");
       button.type = "button";
       button.setAttribute("aria-pressed", String(account.id === state.targetId));
       button.setAttribute("aria-label", `Set @${account.username}, rank #${account.latest_rank}, as main account`);
-      if (account.id === state.targetId) button.className += " is-selected";
-      const rank = node("span", "nw-top50-rank", `#${account.latest_rank}`);
-      const details = node("span", "nw-top50-details");
-      details.append(node("strong", "", `@${account.username}`), node("small", "", `Roblox ID ${account.id}`));
-      button.append(rank, accountImage(account), details);
+      const head = node("span", "nw-candidate-head");
+      const name = node("span", "nw-candidate-name", `@${account.username}`);
+      name.append(node("small", "", `ID ${account.id}`));
+      head.append(accountImage(account), name, node("span", "nw-rank", `#${account.latest_rank}`));
+      const metrics = node("span", "nw-candidate-metrics");
+      const avatar = core.reviewAvatar(account.avatar);
+      const presetStatus = !avatar.available ? "Avatar not scanned" : avatar.fullMatches.length ?
+        `Full RBI preset: ${avatar.fullMatches[0].name}` : avatar.partialMatches.length ?
+        `Partial RBI preset: ${avatar.partialMatches[0].name}` : "No RBI preset match";
+      metrics.append(node("span", "nw-wide", presetStatus));
+      const coverage = account.friends?.status || "unavailable";
+      metrics.append(node("span", "nw-wide", `Friend list: ${coverage === "complete" ? "complete" : coverage === "partial" ? "partial" : "not fully verified"}`));
+      button.append(head, metrics);
       button.addEventListener("click", () => chooseTarget(account));
       list.append(button);
     }
