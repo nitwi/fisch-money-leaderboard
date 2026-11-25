@@ -72,3 +72,7 @@ Normal HTTPS People search and an exact result click opened the expected profile
 ### Friends continuation: hc2khunowpng43ntk1
 
 Verified 35 distinct IDs across all three exposed pages against the displayed count of 40, so the list remains partial. All 35 friendships are new; no new leaderboard cross-links. First pass: **37 of 70 attempted** (7 complete, 28 partial, 2 documented profile 404s). The exact Zipidy24 profile displayed 268 Friends, but the linked Friends page showed an empty zero-count shell even after a normal reload. It was not counted as a reliable first pass or as zero Friends; retry Zipidy24 next. Both export digests and SQLite integrity and foreign-key checks passed, along with 50 Python and 92 Node tests.
+
+### Scheduled retry: Zipidy24
+
+People search hit a Chrome internal navigation error, but the saved HTTPS profile URL loaded and its linked Friends page displayed 268. Verified 18 exact IDs on the first page; the enabled next-page control did not advance, so the list is partial. First pass: **38 of 70 attempted** (7 complete, 29 partial, two documented profile 404s). The next source, minmin8280, was not counted because the Cloud Browser failed before People search. Both exports match the journal digest. SQLite integrity and foreign-key checks, 50 Python tests, and 92 Node tests passed.
