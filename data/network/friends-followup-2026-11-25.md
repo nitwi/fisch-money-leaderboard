@@ -86,3 +86,8 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 - [Minkib7661](https://www.roblox.com/users/1528395974/friends#!/friends): verified the exact handle and 161 Friends. One normal reload restored the count and list. Verified the first row at scroll top on each of four pages, ending at 19:02:12.537 UTC. Of 72 positions, 68 had exact IDs; three anonymous **Account Deleted** and one anonymous **Unavailable** had no verified IDs. Next did not advance to page five. Improved coverage from 34/161 to 68/161; still partial. Added 34 distinct website friendships and no historical leaderboard cross-links.
 - Both exports match journal SHA-256 `db66ea8b140080557efe28d9162dfd6b17124cb3f2b2a82792c754583936610f`. All 142 focused tests and SQLite integrity and foreign-key checks passed. Review total since PR #4: 170 distinct website friendships, with 3,183 external nodes in the exports. No new avatar or directional-follow scans in this batch.
 - Next: zackbourbon, Erutobi, Fischerwunk, zerealali, and other unrechecked lists.
+
+## 2026-11-25 19:17 UTC
+
+- [zackbourbon](https://www.roblox.com/users/3293820394/friends#!/friends): verified the saved HTTPS profile, exact handle and 169 Friends. One normal reload recovered the list from a zero-count shell. At 19:17:24.229 UTC checked the first row at scroll top and read 17 exact page-one IDs, all previously recorded, plus one anonymous **Unavailable** card. Next did not advance; retained the earlier 52/169 partial evidence across three pages. No journal or export changes.
+- Next: Erutobi, Fischerwunk and other unrechecked partial lists.
