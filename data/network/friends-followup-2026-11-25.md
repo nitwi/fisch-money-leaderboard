@@ -33,3 +33,8 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 
 - [ewoofs](https://www.roblox.com/users/200918130/friends#!/friends): the saved HTTPS profile revealed the exact handle and 19 Friends after one normal reload. Checked the first row at scroll top on both pages and verified all 19 card positions, ending at 17:01:07.389 UTC. Fifteen cards had exact profile IDs, all already recorded. Two displayed **Account Deleted** and two displayed **Unavailable**, all without an exact profile ID in the settled view. The earlier 16/19 partial observation remains intact; an ID briefly displayed in a loading state was not attributed to an anonymous card. No new relationships or export changes.
 - Next: hc2khunowpng43ntk1 and other unrechecked partial lists. Continue to record anonymous cards separately from exact-ID relationships.
+
+## 2026-11-25 17:15–17:16 UTC
+
+- [hc2khunowpng43ntk1](https://www.roblox.com/users/11482999303/friends#!/friends): the People search did not render a usable exact result, but the saved HTTPS profile verified the handle and 40 Friends. Checked the first row at scroll top on all three pages and counted 40 card positions, ending at 17:16:37.126 UTC. All 35 exact profile IDs matched the existing partial observation. Two cards displayed **Account Deleted** and three displayed **Unavailable**, all without readable exact profile IDs. Retained 35/40 partial coverage; no new relationships or export changes.
+- Next: injurylowk and a higher-gap list such as LasTnIghT2011, using the same top-row checks after every page change.
