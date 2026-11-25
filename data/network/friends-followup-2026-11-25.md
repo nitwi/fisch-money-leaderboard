@@ -163,3 +163,10 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 - The 70-source plan has 3 complete, 1 partial, and 66 uninspected Followers lists; 4 complete, 1 partial, and 65 uninspected Following lists. Keep the two directions independent. Start with missing directions in plan order once the prioritized Friends rechecks finish.
 - The website Friends journal identifies 3,169 distinct non-leaderboard friend endpoints; none have a saved avatar observation. This narrower queue excludes external nodes known only from follows or other evidence. Of these, 161 occur in at least two source lists. To maximize coverage per scan, start with the shared IDs `590207822` (8 sources), `1925600487` (7), and `772900511` (6), then the four with five source lists. Shared-list frequency is a scan priority only, not evidence of outfit matches or misconduct.
 - No browser navigation during the cooldown, no new observations, and no changes to production. The first ordinary Friends recheck remains due no earlier than 22:30 UTC.
+
+### 22:31 UTC — AliceSekai Friends recovered
+
+- The signed-in profile and Friends page each initially showed an incomplete shell, not another HTTP 429. One ordinary reload of each affected page recovered the exact profile and live Friends list. The count was 91 on both.
+- Verified pages 1–5 from scroll position zero, including each first row. Saved 83/91 readable exact IDs, up from 53/91, with seven ID-less card positions on the inspected pages. Next did not advance to page 6. Coverage stays partial; no identities were inferred for the anonymous cards.
+- Appended one exact-ID observation with 30 new distinct friendships (232 in PR #5 since production); no new leaderboard cross-links, follows, or avatar findings. Exports contain 3,233 external nodes. All 142 focused tests, SQLite integrity and foreign keys passed. Both exports agree with the append-only journal SHA-256 `c91ed8bc0c4177f7465dfb5828e54f4f0af07bd58041f88d87820edcae46511b`.
+- Next highest-priority recheck: `YptSehjZiEs`, then the saved partial Friends queue before directional follow collection. Review-only; nothing deployed.
