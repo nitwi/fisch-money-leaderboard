@@ -9,6 +9,10 @@ const patchEvents = [
 // Preserve photographed balances and proofs; moderator-requested exclusions affect graph traces only.
 // BloxHeroj8 and Nexvolt00: game bans reported by the ledger owner on 2026-11-24.
 const chartExcludedKeys = new Set(["id:8144154137","id:9579548886","id:12026234206"]);
+// Owner-requested chart-only moderator exclusion on 2026-11-25; keep source board rows.
+// Match username until the Roblox numeric account identity is independently resolved.
+const chartExcludedNames = new Set(["holladayyyyyyy"]);
+const isChartExcluded = (key) => chartExcludedKeys.has(key) || chartExcludedNames.has(String(player(key).name).toLowerCase());
 const state = {data:null, index:0, selected:null, view:"all", filter:"all", highlightPage:0, standoutSeverity:"all", standoutSearch:"", rangeStart:null, rangeEnd:null, byCapture:new Map(), byPlayer:new Map(), playerMeta:new Map(), proofs:new Map(), profileUpdates:new Map(), chartBound:false};
 const byId = (id) => state.proofs.get(id);
 const compact = (amount) => {
@@ -206,8 +210,8 @@ function renderChart() {
   const slots=chartSlots(cps,cps[0].day_key,cps.at(-1).day_key).filter(slot=>!state.selected || slot.day>=state.rangeStart && slot.day<=state.rangeEnd);
   const days=slots.map(slot=>slot.id);
   const compactTicks=node.clientWidth<500;
-  const selected=state.selected, graphedSelected=selected&&!chartExcludedKeys.has(selected)?selected:null, limit=state.filter==="all"?50:Number(state.filter);
-  const allowed=new Set(cps.flatMap((cp)=>(state.byCapture.get(cp.id)||[]).filter((row)=>row.rank<=limit&&!chartExcludedKeys.has(row.key)).map((row)=>row.key)));
+  const selected=state.selected, graphedSelected=selected&&!isChartExcluded(selected)?selected:null, limit=state.filter==="all"?50:Number(state.filter);
+  const allowed=new Set(cps.flatMap((cp)=>(state.byCapture.get(cp.id)||[]).filter((row)=>row.rank<=limit&&!isChartExcluded(row.key)).map((row)=>row.key)));
   if(graphedSelected)allowed.add(graphedSelected);
   const keys=[...allowed].sort((a,b)=>memberHistory(a)[0]?.rank-memberHistory(b)[0]?.rank || a.localeCompare(b));
   if (!keys.length) {node.textContent="No screenshot readings yet for this range.";return;}
@@ -249,7 +253,7 @@ function renderChart() {
     });
     state.chartBound=true;
   }
-  $("chart-title").textContent=selected?chartExcludedKeys.has(selected)?`${player(selected).name} · omitted from graph`:`${player(selected).name} · balance history`:"Leaderboard trajectories";
+  $("chart-title").textContent=selected?isChartExcluded(selected)?`${player(selected).name} · omitted from graph`:`${player(selected).name} · balance history`:"Leaderboard trajectories";
 }
 function renderMovement() {
   const cp=state.data.checkpoints[state.index], previous=state.data.checkpoints[state.index-1];
