@@ -67,3 +67,9 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 
 - The signed-in Roblox home page rendered, but both People search for anthonqt13 and the normal saved-profile fallback hit browser runtime timeouts before the Friends list could be verified. No evidence of a Roblox denial and no journal or export changes. Prior 14/424 partial coverage stays intact.
 - Next: anthonqt13 or another unrechecked high-gap source such as Gamer3535356466, Renvuz, or Zipidy24. Continue as browser access permits, without repeating the same stalled request.
+
+## 2026-11-25 18:30–18:32 UTC
+
+- Gamer3535356466: the exact saved HTTPS profile displayed the correct handle and 343 Friends, but its own Friends link landed on Chrome's internal error page. No verification of the Friends listing this run and no Roblox denial observed. Retained 18/343 partial coverage.
+- [Renvuz](https://www.roblox.com/users/1529100107/friends#!/friends): confirmed the exact handle and 317 Friends, and recovered the list from a zero-count shell with one normal reload. At 18:31:50.541 UTC, viewed page one at scroll top and verified all 18 exact IDs, already recorded. Next did not advance. Kept earlier 35/317 partial coverage. No journal, export, or production changes.
+- Next: Zipidy24 and other unrechecked partial lists such as cekersetan and NoRoblox_Support. Avoid retrying unchanged errors in this batch.
