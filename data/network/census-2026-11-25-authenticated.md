@@ -48,3 +48,7 @@ The next batch reached Aumjung8267 (108/468 IDs, first six pages) and SelenaTats
 ### Next scheduled Friends batch
 
 emitnick (45/55, all four exposed pages) and Canizan (88/140, first five pages) remain partial; 0egoistic (10/10) is complete. This batch added 139 distinct friendships, including four new leaderboard links through Canizan. Coverage is **27 of 70 with saved Friends lists** (7 complete, 20 partial), with two additional unavailable attempts. Next uninspected ranked source: LasTnIghT2011. Both exports match the journal digest and SQLite passed its integrity and foreign-key checks.
+
+### Friends batch: LasTnIghT2011 and johncenagaming347v2
+
+LasTnIghT2011: 65/471 across the first four pages. johncenagaming347v2: 18 exact IDs on page one. People search returned no result, but the verified profile showed the correct handle and 135 Friends; the linked Friends page showed a conflicting 0 and real cards. Saved those exact IDs with the total unknown. This batch adds 80 distinct friendships, including LasTnIghT2011 ↔ Renvuz and LasTnIghT2011 ↔ zerealali. Coverage: **29 of 70 with saved Friends lists** (7 complete, 22 partial) plus two documented 404 attempts flagged for possible termination review, not confirmed. Next uninspected ranked source: injurylowk.
