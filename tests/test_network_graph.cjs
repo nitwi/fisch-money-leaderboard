@@ -71,6 +71,64 @@ test('shared external connector appears only from two distinct observed ledger e
   assert.equal(external.eligibility.get('5').category,'external');
 });
 
+test('quadrant layout sends distinct evidence-backed account types in four directions', () => {
+  const nodes = [
+    account(1), account(2), account(3),
+    account(4, {ledger: false, username:'ExternalBridge', avatar: {status:'unavailable'}}),
+    account(5, {ledger: false}), account(6, {ledger: false})
+  ];
+  const edges = [edge(1,2), edge(1,4), edge(4,3),
+    edge(1,5,'follow'), edge(6,1,'follow')];
+  const model = build(nodes,edges,{quadrant:true,includeConnectors:true,includeExternal:true,
+    laneLimits:{right:1,left:1,up:1,down:1}});
+  assert.deepEqual(model.laneCounts,{up:1,down:1,left:1,right:1});
+  assert.deepEqual(model.laneShown,{up:1,down:1,left:1,right:1});
+  assert.equal(model.lanes.get('2'),'right');
+  assert.equal(model.lanes.get('4'),'left');
+  assert.equal(model.lanes.get('5'),'up');
+  assert.equal(model.lanes.get('6'),'down');
+  const pos=graph.layout(model);
+  assert.deepEqual(pos.get('1'),{x:0,y:0});
+  assert.ok(pos.get('2').x>0 && pos.get('4').x<0);
+  assert.ok(pos.get('5').y<0 && pos.get('6').y>0);
+  assert.equal(new Set([...pos.values()].map(p=>p.x+':'+p.y)).size,5);
+  assert.equal(model.edges.length,4,'only the four observed root edges are drawn until a branch expands');
+  const deeper=build(nodes,edges,{quadrant:true,includeConnectors:true,includeExternal:true,
+    laneLimits:{right:1,left:1,up:1,down:1},expandedIds:['4']});
+  assert.ok(deeper.nodes.some(n=>n.id==='3'));
+  assert.ok(graph.layout(deeper).get('3').x<graph.layout(deeper).get('4').x);
+});
+
+test('dense shared external connectors are paged rather than compressed into one column', () => {
+  const nodes=[account(1),account(2),...Array.from({length:65},(_,i)=>
+    account(i+10,{ledger:false,username:'external'+i,avatar:{status:'unavailable'}}))];
+  const edges=nodes.slice(2).flatMap(n=>[edge(1,n.id),edge(2,n.id)]);
+  const model=build(nodes,edges,{quadrant:true,includeConnectors:true,
+    laneLimits:{up:4,right:6,down:4,left:5}});
+  assert.equal(model.directStats.total,65);
+  assert.equal(model.laneCounts.left,65);
+  assert.equal(model.laneShown.left,5);
+  assert.equal(model.nodes.length,6,'root plus five visible connectors, not 65 tiny cards');
+  assert.equal(model.omittedEligibleIds.length,60);
+  const pos=graph.layout(model);
+  assert.equal(new Set([...pos.values()].map(v=>v.x+':'+v.y)).size,6);
+  assert.ok(model.nodes.slice(1).every(n=>pos.get(n.id).x<0));
+  const more=build(nodes,edges,{quadrant:true,includeConnectors:true,
+    laneLimits:{up:4,right:6,down:4,left:10}});
+  assert.equal(more.nodes.length,11);
+  assert.equal(more.laneShown.left,10);
+});
+
+test('leaderboard lane retains priority even when a ledger account is also followed', () => {
+  const nodes=[account(1),account(2),account(3,{ledger:false}),account(4,{ledger:false})];
+  const edges=[edge(1,2),edge(1,2,'follow'),edge(1,3),edge(1,3,'follow'),edge(4,1,'follow')];
+  const model=build(nodes,edges,{quadrant:true,includeExternal:true});
+  assert.equal(model.lanes.get('2'),'right');
+  assert.equal(model.lanes.get('3'),'left','external friend stays left even if followed');
+  assert.equal(model.lanes.get('4'),'down');
+  assert.equal(model.edges.filter(e=>e.kind==='follow').length,3,'directional edges are kept');
+});
+
 test('every one of the 22 verified RBI presets can qualify a connected external account', () => {
   const nodes = [account(1), ...core.RBI_AVATAR_RULES.presets.map((preset, index) => account(index + 2, {ledger: false, avatar: avatar(preset.assetIds)}))];
   const model = build(nodes, nodes.slice(1).map(node => edge(1, node.id)));
