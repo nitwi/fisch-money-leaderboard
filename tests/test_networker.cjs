@@ -242,6 +242,36 @@ test('page defaults to the neutral reference, exposes real shared assets, and re
   assert.ok(dates.every(element => element.title.includes(CHECKED)));
 });
 
+test('Top 50 avatar list is ranked, searchable and synchronized with selected main account', async () => {
+  const top2 = account('2', {username: 'Second', ledger: true, latest_rank: 2, avatar_thumbnail: 'https://tr.rbxcdn.com/second.png'});
+  const top1 = account('1', {username: 'First', ledger: true, latest_rank: 1, headshot: 'https://tr.rbxcdn.com/first.png'});
+  const history = account('3', {username: 'Historic', ledger: true, latest_rank: null});
+  const {elements, location, graphCalls} = await renderSnapshot([top2, history, top1], '?target=2');
+  const list = elements.get('top50-target');
+  assert.equal(elements.get('top50-count').textContent, '2 of 2');
+  assert.deepEqual(list.children.map(child => child.textContent.match(/#\\d+/)[0]), ['#1', '#2']);
+  assert.equal(list.children[1].attributes['aria-pressed'], 'true');
+  assert.ok(descendants(list.children[1]).some(child => child.tagName === 'img' && child.src === top2.avatar_thumbnail));
+  assert.ok(descendants(list.children[0]).some(child => child.tagName === 'img' && child.src === top1.headshot));
+  elements.get('target-input').value = 'Fir';
+  elements.get('target-input').listeners.input[0]({target: {value: 'Fir'}});
+  assert.equal(elements.get('top50-count').textContent, '1 of 2');
+  assert.match(list.children[0].textContent, /@First/);
+  list.children[0].listeners.click[0]();
+  assert.equal(elements.get('target-input').value, 'First');
+  assert.equal(list.children.length, 2);
+  assert.equal(list.children[0].attributes['aria-pressed'], 'true');
+  assert.equal(new URL(location.href).searchParams.get('target'), '1');
+  assert.equal(graphCalls.at(-1).focusId, '1');
+  elements.get('target-input').value = 'Historic';
+  elements.get('target-form').listeners.submit[0]({preventDefault() {}});
+  assert.equal(list.children.filter(child => child.attributes['aria-pressed'] === 'true').length, 0);
+  assert.equal(new URL(location.href).searchParams.get('target'), '3');
+  elements.get('target-input').value = 'ZZZ';
+  elements.get('target-input').listeners.input[0]({target: {value: 'ZZZ'}});
+  assert.match(list.textContent, /No Top 50 matches/);
+});
+
 test('missing target deep links show a clear empty state without substituting or rewriting the target', async () => {
   const target = account('12013950464', {username: 'Lunary810', ledger: false});
   const {elements, location} = await renderSnapshot([target, account('2', {latest_rank: 1})], '?target=999&compare=2');
