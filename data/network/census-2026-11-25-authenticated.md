@@ -19,3 +19,7 @@ On 25 November 2026, the Cloud Browser confirmed `countycheck` was signed in and
 | [Force_oNature](https://www.roblox.com/users/1295019815/profile) | Navigation blocked | Not inspected | Not inspected |
 
 The table gives **readable unique IDs / displayed count** where supported. A nonzero profile count with a zero/loading list shell was not accepted as an empty list. An unavailable identity card was not counted. The observer stopped at a Cloud Browser URL-policy denial while opening the `Force_oNature` list; no account ban, bot denial, or Roblox rate limit was confirmed. Resume the remaining friend lists from `xNnoel`, `Ceruleanflare2`, `shatter_yourselfgrgr`, and `Force_oNature`, and continue from the [census plan](census-plan.json) if normal access is restored.
+
+## Screenshot-assisted continuation
+
+The browser later allowed screenshots and direct reading of the existing xNnoel Friends tab. Screenshots confirmed the rendered cards; the exact IDs came from the corresponding public profile links, not from text guesses. xNnoel: 375/392 unique IDs after visiting all 21 exposed pages (partial). Ceruleanflare2: 15/15 (complete). Together they added 390 previously unrecorded friendships, including xNnoel ↔ Nnoelq, and no follow rows. Friend-list coverage is now **14 of 70** (5 complete, 9 partial). The older shatter_yourselfgrgr Friends URL again rendered an empty shell despite a nonzero profile count and was not recorded as empty. Continue there and at Force_oNature when normal list access allows.
