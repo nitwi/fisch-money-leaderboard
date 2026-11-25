@@ -32,3 +32,7 @@ Using Roblox's own search bar, selecting People, and clicking the exact account 
 - Force_oNature: 25/26 exact IDs across two exposed pages (partial).
 
 The batch added 76 previously unrecorded friendships, including leaderboard connections shatter_yourselfgrgr ↔ 0egoistic and shatter_yourselfgrgr ↔ Canizan. Friend-list coverage is now **16 of 70** (5 complete, 11 partial), with no new follow or avatar rows.
+
+## Ranked continuation
+
+The same People search and HTTPS verification reached three additional ranked profiles: sebax4514 (69/69, complete), TheDanishPlays (89/381, partial; first five pages), and Sylilia (53/55, partial across all exposed pages). This batch added 211 distinct friendships, including sebax4514 ↔ Renvuz and sebax4514 ↔ LasTnIghT2011. Friend-list coverage is now **19 of 70** (6 complete, 13 partial). No new follow or avatar rows were recorded. The next uninspected ranked source is metbepol.
