@@ -52,6 +52,27 @@ class ObservationTests(unittest.TestCase):
             with self.subTest(invalid=invalid), self.assertRaises(ValueError):
                 obs.safe_text(invalid, username=True)
 
+    def test_paired_website_placeholder_is_not_projected_as_an_identity(self):
+        earlier = record(targets=("3",))
+        later = record(targets=("2", "3", "4", "5"), at="2026-11-24T10:00:00Z")
+        for item in later["friends"][:3]:
+            item.update(username="Unavailable", display_name="Unavailable")
+        later["friends"][3].update(username="RealHandle", display_name="Unavailable")
+        records = list(map(obs.normalize_observation, (earlier, later)))
+        merged, events = obs.merge_snapshot(snapshot(), records)
+        self.assertEqual(records[1]["friends"][0]["username"], "Unavailable")
+        self.assertTrue(any(e["method"] == obs.WEBSITE and e["items"][0]["username"] == "Unavailable" for e in events))
+        nodes = {node["id"]: node for node in merged["network_nodes"]}
+        self.assertEqual(nodes["2"]["aliases"], [])
+        self.assertEqual((nodes["3"]["username"], nodes["3"]["aliases"]), ("Friend3", ["Friend3"]))
+        self.assertEqual((nodes["4"]["username"], nodes["4"]["display_name"]), ("", ""))
+        self.assertEqual((nodes["5"]["username"], nodes["5"]["display_name"]), ("RealHandle", "Unavailable"))
+        items = {item["id"]: item for item in merged["accounts"][0]["friends"]["items"]}
+        self.assertEqual(items["3"]["username"], "Friend3")
+        self.assertEqual(len(items["3"]["evidence"]), 2)
+        self.assertEqual(items["4"]["username"], "")
+        self.assertEqual(set(items), {"2", "3", "4", "5"})
+
     def test_displayed_total_and_latest_website_coverage_are_kept_separate(self):
         observed = obs.normalize_observation(record(targets=("3",), total=336))
         merged, _ = obs.merge_snapshot(snapshot(), [observed])

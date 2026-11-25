@@ -423,6 +423,14 @@ def website_event(record, index):
             "items": record[record["relation"]], "raw": record, "index": index}
 
 
+def is_website_name_placeholder(item, method):
+    """Recognize the paired website card label, not a single name or status."""
+    return method == WEBSITE and all(
+        (item.get(key) or "").strip().casefold() == "unavailable"
+        for key in ("username", "display_name")
+    )
+
+
 def project_friends(events):
     ordered = sorted(events, key=lambda event: (event["at"], event["index"]))
     complete_indexes = [i for i, event in enumerate(ordered) if event["status"] == "complete"]
@@ -448,7 +456,10 @@ def project_friends(events):
         item, latest_link = entries[-1]
         links = list({canonical(link): link for _, link in entries}.values())
         methods = {link["method"] for link in links}
-        items.append({"id": user_id, "username": item.get("username") or "", "display_name": item.get("display_name") or item.get("username") or "",
+        name_item = next((candidate for candidate, link in reversed(entries)
+                          if (candidate.get("username") or candidate.get("display_name"))
+                          and not is_website_name_placeholder(candidate, link["method"])), {})
+        items.append({"id": user_id, "username": name_item.get("username") or "", "display_name": name_item.get("display_name") or name_item.get("username") or "",
                       "profile_url": item["profile_url"], "observed_at": latest_link["observed_at"], "source_url": latest_link["source_url"],
                       "method": next(iter(methods)) if len(methods) == 1 else "mixed",
                       "source_label": " + ".join(LABELS[method] for method in sorted(methods)), "evidence": links})
@@ -569,6 +580,8 @@ def merge_snapshot(snapshot, records):
                 nodes[event["source_id"]]["aliases"].append(source_name)
         for item in event["items"]:
             node = nodes.setdefault(item["id"], {"id": item["id"], "username": "", "display_name": "", "profile_url": item["profile_url"], "ledger": False, "target": False, "external": True, "aliases": []})
+            if is_website_name_placeholder(item, event["method"]):
+                continue
             if item.get("username"):
                 if item["username"] not in node["aliases"]:
                     node["aliases"].append(item["username"])
