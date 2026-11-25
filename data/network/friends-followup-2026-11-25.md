@@ -91,3 +91,9 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 
 - [zackbourbon](https://www.roblox.com/users/3293820394/friends#!/friends): verified the saved HTTPS profile, exact handle and 169 Friends. One normal reload recovered the list from a zero-count shell. At 19:17:24.229 UTC checked the first row at scroll top and read 17 exact page-one IDs, all previously recorded, plus one anonymous **Unavailable** card. Next did not advance; retained the earlier 52/169 partial evidence across three pages. No journal or export changes.
 - Next: Erutobi, Fischerwunk and other unrechecked partial lists.
+
+### 19:32 UTC — Erutobi recheck
+
+- Erutobi (`2464539843`): People search opened a Chrome internal error; the saved canonical HTTPS profile showed a blank account section initially and recovered after one ordinary reload. Exact `@Erutobi` and 168 Friends were confirmed.
+- Opened the visible Friends link; verified the first row from scroll position zero on pages 1–3. The 54 card positions had 46 exact IDs, all already recorded, plus seven anonymous Unavailable cards and one anonymous Account Deleted card. The move to page 4 did not advance. Retained the earlier 62/168 partial with four documented pages; did not infer an identity or termination for any anonymous card. No new edges or export changes.
+- Next prioritized recheck: Fischerwunk (`7867477313`), then zerealali and sanguifereum.
