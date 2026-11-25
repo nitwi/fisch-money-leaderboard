@@ -248,16 +248,16 @@ test('Top 50 avatar list is ranked, searchable and synchronized with selected ma
   const history = account('3', {username: 'Historic', ledger: true, latest_rank: null});
   const {elements, location, graphCalls} = await renderSnapshot([top2, history, top1], '?target=2');
   const list = elements.get('top50-target');
-  assert.equal(elements.get('top50-count').textContent, '2 / 2');
+  assert.equal(elements.get('top50-count').textContent, '2 of 2 shown');
   assert.deepEqual(list.children.map(child => child.textContent.match(/#\d+/)[0]), ['#1', '#2']);
   assert.equal(list.children[1].attributes['aria-pressed'], 'true');
   assert.equal(list.children[1].className, 'nw-candidate nw-main-account-card');
-  assert.match(list.children[1].textContent, /Friend list:/);
+  assert.doesNotMatch(list.children[1].textContent, /Friend list:/);
   assert.ok(descendants(list.children[1]).some(child => child.tagName === 'img' && child.src === top2.avatar_thumbnail));
   assert.ok(descendants(list.children[0]).some(child => child.tagName === 'img' && child.src === top1.headshot));
   elements.get('target-input').value = 'Fir';
   elements.get('target-input').listeners.input[0]({target: {value: 'Fir'}});
-  assert.equal(elements.get('top50-count').textContent, '1 / 2');
+  assert.equal(elements.get('top50-count').textContent, '1 of 1 shown');
   assert.match(list.children[0].textContent, /@First/);
   list.children[0].listeners.click[0]();
   assert.equal(elements.get('target-input').value, 'First');
@@ -272,6 +272,28 @@ test('Top 50 avatar list is ranked, searchable and synchronized with selected ma
   elements.get('target-input').value = 'ZZZ';
   elements.get('target-input').listeners.input[0]({target: {value: 'ZZZ'}});
   assert.match(list.textContent, /No Top 50 accounts match/);
+});
+
+test('compact main picker shows nine initially, expands all and searches beyond initial cards', async () => {
+  const accounts = Array.from({length: 20}, (_, i) => account(String(i + 1), {username: `Account${i + 1}`, ledger: true, latest_rank: i + 1}));
+  const {elements, location} = await renderSnapshot(accounts, '?target=15');
+  const list = elements.get('top50-target'), more = elements.get('top50-more');
+  assert.equal(list.children.length, 9);
+  assert.equal(elements.get('top50-count').textContent, '9 of 20 shown');
+  assert.equal(more.hidden, false);
+  assert.equal(more.attributes['aria-expanded'], 'false');
+  more.listeners.click[0]();
+  assert.equal(list.children.length, 20);
+  assert.equal(more.attributes['aria-expanded'], 'true');
+  more.listeners.click[0]();
+  assert.equal(list.children.length, 9);
+  elements.get('target-input').listeners.input[0]({target: {value: 'Account18'}});
+  assert.equal(list.children.length, 1);
+  assert.match(list.children[0].textContent, /Account18/);
+  assert.equal(more.hidden, true);
+  list.children[0].listeners.click[0]();
+  assert.equal(new URL(location.href).searchParams.get('target'), '18');
+  assert.equal(list.children.length, 9);
 });
 
 test('missing target deep links show a clear empty state without substituting or rewriting the target', async () => {

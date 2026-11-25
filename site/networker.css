@@ -23,11 +23,16 @@
 .nw-controls .nw-target-control{grid-column:1/-1;min-width:0}
 .nw-controls .nw-target-control.nw-candidates{padding:19px}
 .nw-controls .nw-target-control .nw-section-head{margin-bottom:14px}
-.nw-main-account-list{grid-template-columns:repeat(3,minmax(0,1fr));max-height:680px;align-content:start}
-.nw-main-account-card{min-width:0}
-.nw-main-account-card .nw-candidate-metrics{grid-template-columns:1fr}
+.nw-main-account-list{grid-template-columns:repeat(3,minmax(0,1fr));max-height:360px;align-content:start;gap:7px}
+.nw-main-account-card{min-width:0;padding:9px 10px}
+.nw-main-account-card .nw-candidate-head{gap:8px}
+.nw-main-account-card .nw-candidate-head img,.nw-main-account-card .nw-avatar-placeholder{width:36px;height:36px}
+.nw-main-account-card .nw-candidate-name{font-size:.86rem}
+.nw-main-account-card .nw-candidate-name small{font-size:.69rem}
+.nw-top50-more{width:100%;margin-top:10px}
+.nw-top50-more[hidden]{display:none}
 @media(max-width:1050px){.nw-main-account-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:650px){.nw-main-account-list{grid-template-columns:1fr;max-height:560px}}
+@media(max-width:650px){.nw-main-account-list{grid-template-columns:1fr;max-height:330px}}
 .nw-input-action{display:flex;gap:8px}
 .nw-input-action input{flex:1}
 .nw-primary,.nw-quiet{font:inherit;font-size:.875rem;font-weight:750;min-height:43px;border-radius:9px;padding:9px 14px;cursor:pointer}
