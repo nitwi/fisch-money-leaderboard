@@ -8,7 +8,7 @@
 
   const SVG_NS = "http://www.w3.org/2000/svg";
   const NODE_WIDTH = 224, NODE_HEIGHT = 72, MAX_NODES = 120;
-  const DEFAULT_LANE_LIMITS = Object.freeze({up: 4, right: 8, down: 4, left: 5});
+  const DEFAULT_LANE_LIMITS = Object.freeze({up: 4, right: 6, down: 4, left: 5});
   const LANE_NAMES = Object.freeze({up: "↑ Following", right: "→ Leaderboard", down: "↓ Followers", left: "← External leads"});
   let instanceCount = 0;
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
