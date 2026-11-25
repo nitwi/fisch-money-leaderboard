@@ -110,3 +110,10 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 - zerealali (`3510772801`): People search ended at a Chrome internal error. The saved HTTPS profile then failed with `net::ERR_HTTP_RESPONSE_CODE_FAILURE` and remained on Chrome’s internal error page. No site-served denial or 404 was verified. Preserved the earlier 16/103 partial.
 - sanguifereum (`8804353958`): saved HTTPS profile verified the handle and 103 Friends. Verified all 18 exact IDs on page one from scroll position zero, including the first row; no anonymous cards. Next did not advance to page two, and all 18 IDs were already recorded. Preserved the earlier 18/103 partial.
 - No new IDs, journal or export changes. Next largest remaining documented page gaps: Zantrille (14/97), ForcePush_Sith (16/92), SelenaTatsukii (70/134), zNaN_Rot (34/90), then Canizan (88/140).
+
+### 20:16 UTC — Zantrille recheck
+
+- Zantrille (`5088236758`): verified the saved HTTPS profile after one ordinary reload of its incomplete shell; confirmed `@Zantrille` and 97 Friends. The linked Friends page initially showed a contradictory zero shell; a normal reload then exposed the real 97-count list.
+- Checked the first rows from the top of pages 1–2. Found 31 exact IDs and five anonymous Unavailable positions. Next did not advance to page 3. Improved from 14 to 31/97, still partial, adding 17 distinct verified site friendships and no new ledger-to-ledger edges.
+- This branch now has 202 new distinct verified site friendships since PR #4 and 3,203 external nodes. Journal has 81 rows, digest `53a1b985d6157513f8ca2380184d6db274ddb9855e473fc01fe8ca46607319cc`; both exports match, SQLite checks and all 142 focused tests passed. No new avatar scans or directed follows.
+- Next: ForcePush_Sith, SelenaTatsukii, zNaN_Rot and Canizan.
