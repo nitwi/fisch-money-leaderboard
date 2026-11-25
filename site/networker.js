@@ -77,6 +77,7 @@
     state.targetId = account.id;
     state.friendFilter = ""; state.friendLimit = 50; byId("friend-search").value = "";
     byId("target-input").value = account.username || account.id;
+    byId("top50-target").value = account.ledger && Number.isInteger(account.latest_rank) && account.latest_rank >= 1 && account.latest_rank <= 50 ? account.id : "";
     ensureComparison(); state.assetFilter = "all";
     setStatus(""); updateUrl(); renderReference(); renderReviewOverview(); renderSocialGraph(); renderCandidates(); renderComparison();
   }
@@ -556,6 +557,11 @@
       for (const account of [...state.accounts].sort((a, b) => a.username.localeCompare(b.username))) {
         const option = node("option"); option.value = account.username; option.label = `ID ${account.id}${account.latest_rank ? ` · latest #${account.latest_rank}` : account.ledger ? " · ledger history" : " · reference"}`; byId("target-options").append(option);
       }
+      const top50 = state.accounts.filter(account => account.ledger && Number.isInteger(account.latest_rank) && account.latest_rank >= 1 && account.latest_rank <= 50).sort((a, b) => a.latest_rank - b.latest_rank || a.id.localeCompare(b.id));
+      for (const account of top50) {
+        const option = node("option", "", `#${account.latest_rank} · @${account.username}`);
+        option.value = account.id; byId("top50-target").append(option);
+      }
       const params = new URLSearchParams(location.search), requestedTarget = core.normalizeId(params.get("target")), requestedCompare = core.normalizeId(params.get("compare"));
       if (["avatar", "name", "social", "review"].includes(params.get("sort"))) state.sort = params.get("sort");
       if (["full", "partial", "none", "unknown"].includes(params.get("review"))) state.reviewFilter = params.get("review");
@@ -567,10 +573,13 @@
       byId("candidate-sort").value = state.sort;
       byId("candidate-review-filter").value = state.reviewFilter;
       ensureComparison(); byId("target-input").value = referenceAccount()?.username || requestedTarget || "";
+      const initial = referenceAccount();
+      byId("top50-target").value = initial?.ledger && Number.isInteger(initial.latest_rank) && initial.latest_rank >= 1 && initial.latest_rank <= 50 ? initial.id : "";
       byId("networker-app").hidden = false; setStatus("");
       if (params.has("target") && !state.targetId) setStatus(requestedTarget ? `Roblox account ID ${requestedTarget} is not in this snapshot. Select another cached reference account, or return after the snapshot is refreshed.` : "The requested reference ID is invalid. Select a cached account to begin.", true);
       updateUrl(); renderPresetLibrary(); renderReference(); renderReviewOverview(); renderSocialGraph(); renderCandidates(); renderComparison();
 
+      byId("top50-target").addEventListener("change", event => { const account = state.byId.get(event.target.value); if (account) chooseTarget(account); });
       byId("target-form").addEventListener("submit", event => { event.preventDefault(); chooseTarget(accountFromInput(byId("target-input").value)); });
       byId("target-input").addEventListener("change", () => { const account = accountFromInput(byId("target-input").value); if (account) chooseTarget(account); });
       byId("candidate-scope").addEventListener("change", event => { state.scope = event.target.value; ensureComparison(); updateUrl(); renderReviewOverview(); renderCandidates(); renderComparison(); });
