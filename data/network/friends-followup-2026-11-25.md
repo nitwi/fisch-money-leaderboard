@@ -157,3 +157,9 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 
 - Matched all saved avatar evidence against the 22 definitions pinned to RBI `v0.18.1.1-beta`, including GreenBean's single required asset `617605556`. The six existing scans are five partial and one unavailable; no saved asset overlaps the required assets in a preset. This is not evidence of six nonmatches: no scan is complete.
 - No avatar evidence or relationship data changed. The 3,203 external nodes are a network export count, not verified avatar coverage. Once collection resumes and the directional pass is prioritized, scan exact linked IDs in descending number of observed source connections, skipping complete scans and keeping unavailable assets separate from verified missing assets.
+
+### 22:10 UTC — Stage the follow and avatar collection queues
+
+- The 70-source plan has 3 complete, 1 partial, and 66 uninspected Followers lists; 4 complete, 1 partial, and 65 uninspected Following lists. Keep the two directions independent. Start with missing directions in plan order once the prioritized Friends rechecks finish.
+- The website Friends journal identifies 3,169 distinct non-leaderboard friend endpoints; none have a saved avatar observation. This narrower queue excludes external nodes known only from follows or other evidence. Of these, 161 occur in at least two source lists. To maximize coverage per scan, start with the shared IDs `590207822` (8 sources), `1925600487` (7), and `772900511` (6), then the four with five source lists. Shared-list frequency is a scan priority only, not evidence of outfit matches or misconduct.
+- No browser navigation during the cooldown, no new observations, and no changes to production. The first ordinary Friends recheck remains due no earlier than 22:30 UTC.
