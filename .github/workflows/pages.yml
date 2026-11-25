@@ -5,6 +5,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
   pages: write
   id-token: write
 concurrency:
@@ -37,6 +38,44 @@ jobs:
         with:
           name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
           path: site
+      - name: Wait for the uploaded Pages artifact to become visible
+        timeout-minutes: 2
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PAGES_ARTIFACT: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          python - <<'PYTHON'
+          import json
+          import os
+          import time
+          from urllib.error import HTTPError, URLError
+          from urllib.parse import urlencode
+          from urllib.request import Request, urlopen
+
+          name = os.environ["PAGES_ARTIFACT"]
+          api, repo, run = (os.environ[k] for k in ("GITHUB_API_URL", "GITHUB_REPOSITORY", "GITHUB_RUN_ID"))
+          url = f"{api}/repos/{repo}/actions/runs/{run}/artifacts?{urlencode({'name': name})}"
+          request = Request(url, headers={
+              "Accept": "application/vnd.github+json",
+              "Authorization": "Bearer " + os.environ["GH_TOKEN"],
+          })
+          for attempt in range(12):
+              try:
+                  with urlopen(request, timeout=5) as response:
+                      artifacts = json.load(response)["artifacts"]
+                  if any(a["name"] == name and not a["expired"] for a in artifacts):
+                      print(f"Pages artifact {name} is ready.")
+                      break
+              except HTTPError as error:
+                  if error.code not in (429, 500, 502, 503, 504):
+                      raise
+              except (URLError, TimeoutError):
+                  pass
+              if attempt < 11:
+                  time.sleep(5)
+          else:
+              raise SystemExit(f"Pages artifact {name} was not visible after 12 checks.")
+          PYTHON
       - id: deployment
         uses: actions/deploy-pages@v4
         with:
