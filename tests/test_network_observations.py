@@ -294,5 +294,44 @@ class ObservationTests(unittest.TestCase):
                 self.assertEqual(db.execute("PRAGMA foreign_key_check").fetchall(), [])
 
 
+    def test_directional_lists_stay_separate_from_friendship(self):
+        followers = record(source="1", targets=("3",), status="complete", total=1)
+        followers.update(relation="followers", page_url="https://www.roblox.com/users/1/friends#!/followers")
+        followers["followers"] = followers.pop("friends")
+        following = record(source="1", targets=("2",), status="complete", total=1)
+        following.update(relation="following", page_url="https://www.roblox.com/users/1/friends#!/following")
+        following["following"] = following.pop("friends")
+        entries = list(map(obs.normalize_observation, (followers, following)))
+        merged, events = obs.merge_snapshot(snapshot(), entries)
+        again, _ = obs.merge_snapshot(merged, entries)
+        self.assertEqual(merged["accounts"], again["accounts"])
+        with self.assertRaisesRegex(ValueError, "previously retained website observations"):
+            obs.merge_snapshot(merged, entries[:1])
+        self.assertEqual(merged["website_observations"]["source_account_count"], 0)
+        self.assertEqual(merged["website_observations"]["follow_source_count"], 1)
+        account = merged["accounts"][0]
+        self.assertEqual(account["friends"]["status"], "unavailable")
+        self.assertEqual(account["followers"]["items"][0]["id"], "3")
+        self.assertEqual(account["following"]["items"][0]["id"], "2")
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "network.sqlite"
+            obs.build_database(path, merged, events)
+            with sqlite3.connect(path) as db:
+                self.assertEqual(db.execute("SELECT follower_id,followed_id FROM follow_evidence ORDER BY 1").fetchall(), [("1", "2"), ("3", "1")])
+                self.assertEqual(db.execute("SELECT COUNT(*) FROM friendship_evidence").fetchone(), (0,))
+                self.assertEqual(db.execute("PRAGMA foreign_key_check").fetchall(), [])
+
+    def test_follow_list_evidence_must_match_its_exact_route(self):
+        wrong = record()
+        wrong["relation"] = "followers"
+        wrong["followers"] = wrong.pop("friends")
+        with self.assertRaises(ValueError):
+            obs.normalize_observation(wrong)
+        wrong["page_url"] = wrong["page_url"].replace("#!/friends", "#!/followers")
+        wrong["followers"][0]["source_url"] = wrong["page_url"].replace("#!/followers", "#!/following")
+        with self.assertRaises(ValueError):
+            obs.normalize_observation(wrong)
+
+
 if __name__ == "__main__":
     unittest.main()

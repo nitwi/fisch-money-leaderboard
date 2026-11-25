@@ -115,6 +115,10 @@ Tests run entirely offline:
 python -m unittest discover -s tests -p test_network_observations.py -v
 ```
 
+## Import observed directional follows
+
+The same append-only website journal accepts `relation: "followers"` and `relation: "following"`. Use a list field with the same name as the relation and retain the exact observed Roblox list URL ending `#!/followers` or `#!/following`, including on per-item evidence. The observed account is the destination for `followers` and the origin for `following`. The SQLite `follow_evidence` table stores that direction explicitly, apart from friendships. The top-level friend coverage totals still count only sources whose friend lists have been recorded. Both follow types use the same conservative complete/partial/unavailable coverage rules as friends.
+
 ## Import observed equipped avatar assets
 
 The optional `avatar-observations.jsonl` journal preserves equipped-asset observations independently of website relationship observations. Record only exact equipped asset IDs actually visible in a permitted interface; never infer an asset from a picture, name, similarity score, friend relationship, or inaccessible page.

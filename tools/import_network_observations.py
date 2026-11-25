@@ -91,7 +91,7 @@ def profile_url(user_id):
     return f"https://www.roblox.com/users/{exact_id(user_id)}/profile"
 
 
-def website_url(value, user_id, *, profile=False):
+def website_url(value, user_id, *, profile=False, relation="friends"):
     if not isinstance(value, str) or len(value) > 1000:
         raise ValueError("A normal Roblox profile/friends page URL is required")
     parsed = urlsplit(value)
@@ -102,7 +102,8 @@ def website_url(value, user_id, *, profile=False):
         raise ValueError("Page/profile URL must contain its exact corresponding Roblox user ID")
     if profile and (parsed.query or parsed.fragment):
         raise ValueError("Friend profile URLs must be plain profile links")
-    if parsed.fragment not in ("", "!/friends", "/friends", "friends", "!/connections", "/connections", "connections"):
+    permitted = ("", "!/friends", "/friends", "friends", "!/connections", "/connections", "connections") if relation == "friends" else (f"!/{relation}",)
+    if parsed.fragment not in permitted or (relation != "friends" and match[2] not in ("friends", "connections")):
         raise ValueError("Unexpected website fragment; do not include session or tracking context")
     for key, val in parse_qsl(parsed.query, keep_blank_values=True):
         if key not in ("page", "pageNumber") or not re.fullmatch(r"[1-9][0-9]*", val):
@@ -111,18 +112,23 @@ def website_url(value, user_id, *, profile=False):
 
 
 def normalize_observation(record):
+    if not isinstance(record, dict):
+        raise ValueError("observation must be an object")
+    relation = record.get("relation", "friends")
+    if relation not in ("friends", "followers", "following"):
+        raise ValueError("Relationship must be friends, followers, or following")
     allowed_keys(record, {
         "schema_version", "method", "relation", "source_id", "source_username", "source_profile_url",
-        "observed_at", "page_url", "source_url", "displayed_total_count", "coverage", "friends", "observation_id",
+        "observed_at", "page_url", "source_url", "displayed_total_count", "coverage", relation, "observation_id",
     }, "observation")
-    if record.get("schema_version", 1) != 1 or record.get("method", WEBSITE) != WEBSITE or record.get("relation", "friends") != "friends":
-        raise ValueError("Only schema_version 1, method roblox_website, direct friends observations are accepted")
+    if record.get("schema_version", 1) != 1 or record.get("method", WEBSITE) != WEBSITE:
+        raise ValueError("Only schema_version 1, method roblox_website, direct relationship observations are accepted")
     source_id = exact_id(record.get("source_id"))
     observed_at = timestamp(record.get("observed_at"))
     page = record.get("page_url", record.get("source_url"))
     if "page_url" in record and "source_url" in record and record["page_url"] != record["source_url"]:
         raise ValueError("page_url and source_url disagree")
-    page = website_url(page, source_id)
+    page = website_url(page, source_id, relation=relation)
     source_profile = website_url(record.get("source_profile_url"), source_id, profile=True)
     total = record.get("displayed_total_count")
     if total is not None and (isinstance(total, bool) or not isinstance(total, int) or not 0 <= total <= 10_000_000):
@@ -141,7 +147,7 @@ def normalize_observation(record):
     pages = coverage.get("pages_observed", [1])
     if not isinstance(pages, list) or not pages or len(pages) > 1000 or any(isinstance(p, bool) or not isinstance(p, int) or p < 1 for p in pages) or len(set(pages)) != len(pages):
         raise ValueError("pages_observed must contain unique positive view/page numbers")
-    friends = record.get("friends")
+    friends = record.get(relation)
     if not isinstance(friends, list) or len(friends) > 10_000:
         raise ValueError("friends must be a bounded list of actually visible profile links")
     normalized = []
@@ -158,7 +164,7 @@ def normalize_observation(record):
             "id": target_id, "username": safe_text(friend.get("username"), username=True),
             "display_name": safe_text(friend.get("display_name")),
             "profile_url": website_url(friend.get("profile_url"), target_id, profile=True),
-            "observed_at": item_time, "source_url": website_url(friend.get("source_url", page), source_id),
+            "observed_at": item_time, "source_url": website_url(friend.get("source_url", page), source_id, relation=relation),
         }
         signature = canonical(item)
         if signature not in seen_evidence:
@@ -175,12 +181,12 @@ def normalize_observation(record):
     if status == "unavailable" and normalized:
         raise ValueError("An observation containing visible friends must be partial or complete, not unavailable")
     result = {
-        "schema_version": 1, "method": WEBSITE, "relation": "friends", "source_id": source_id,
+        "schema_version": 1, "method": WEBSITE, "relation": relation, "source_id": source_id,
         "source_username": safe_text(record.get("source_username"), username=True),
         "source_profile_url": source_profile, "observed_at": observed_at, "page_url": page,
         "displayed_total_count": total,
         "coverage": {"status": status, "full_list_verified": verified, "pages_observed": sorted(pages), "termination": ending},
-        "friends": sorted(normalized, key=lambda item: (int(item["id"]), item["observed_at"], item["source_url"], item["username"] or "")),
+        relation: sorted(normalized, key=lambda item: (int(item["id"]), item["observed_at"], item["source_url"], item["username"] or "")),
     }
     result["observation_id"] = "web_" + digest(result)[:32]
     if record.get("observation_id") not in (None, result["observation_id"]):
@@ -385,9 +391,13 @@ def apply_avatar_scans(merged, scans, rules):
         "preset_version": rules["version"], "latest_observed_at": max((scan["observed_at"] for scan in scans), default=None)}
 
 
-def api_event(account):
-    original = copy.deepcopy(account.get("friend_evidence", {}).get("api", account.get("friends", {})))
-    event_id = "api_" + digest({"source_id": account["id"], "record": original})[:32]
+def api_event(account, relation="friends"):
+    saved = account.get("friend_evidence", {}) if relation == "friends" else account.get("follow_evidence", {}).get(relation, {})
+    original = copy.deepcopy(saved.get("api", account.get(relation, {})))
+    identity = {"source_id": account["id"], "record": original}
+    if relation != "friends":
+        identity["relation"] = relation
+    event_id = "api_" + digest(identity)[:32]
     when = original.get("fetched_at") or original.get("checked_at")
     when = timestamp(when) if when else "0001-01-01T00:00:00.000Z"
     checked = timestamp(original["checked_at"]) if original.get("checked_at") else when
@@ -402,15 +412,15 @@ def api_event(account):
                 "profile_url": profile_url(target), "observed_at": timestamp(item.get("observed_at") or original.get("fetched_at")),
                 "source_url": item.get("source_url") or original.get("source_url"),
             })
-    return {"id": event_id, "source_id": account["id"], "method": "roblox_api", "at": when, "checked_at": checked,
+    return {"id": event_id, "source_id": account["id"], "method": "roblox_api", "relation": relation, "at": when, "checked_at": checked,
             "status": original.get("status", "unavailable"), "source_url": original.get("source_url"),
             "items": items, "raw": original, "index": -1}
 
 
 def website_event(record, index):
-    return {"id": record["observation_id"], "source_id": record["source_id"], "method": WEBSITE,
+    return {"id": record["observation_id"], "source_id": record["source_id"], "method": WEBSITE, "relation": record["relation"],
             "at": record["observed_at"], "checked_at": record["observed_at"], "status": record["coverage"]["status"], "source_url": record["page_url"],
-            "items": record["friends"], "raw": record, "index": index}
+            "items": record[record["relation"]], "raw": record, "index": index}
 
 
 def project_friends(events):
@@ -504,14 +514,20 @@ def merge_snapshot(snapshot, records):
     supplied_ids = {record["observation_id"] for record in records}
     required_ids = {observation_id for account in accounts.values()
                     for observation_id in account.get("friend_evidence", {}).get("website_observation_ids", [])}
+    required_ids.update(observation_id for account in accounts.values()
+                        for saved in account.get("follow_evidence", {}).values()
+                        for observation_id in saved.get("website_observation_ids", []))
     missing_ids = required_ids - supplied_ids
     if missing_ids:
         raise ValueError(f"Cannot rebuild the merged snapshot: {len(missing_ids)} previously retained website observations are missing from the supplied journal; restore the complete journal")
-    by_source = {}
+    by_source, by_follow = {}, {}
     for index, record in enumerate(records):
         if record["source_id"] not in accounts:
             raise ValueError("Website source is not a resolved account in the snapshot: " + record["source_id"])
-        by_source.setdefault(record["source_id"], []).append(website_event(record, index))
+        if record["relation"] == "friends":
+            by_source.setdefault(record["source_id"], []).append(website_event(record, index))
+        else:
+            by_follow.setdefault((record["source_id"], record["relation"]), []).append(website_event(record, index))
     all_events = []
     historical_friends = []
     nodes = {}
@@ -534,6 +550,17 @@ def merge_snapshot(snapshot, records):
                                           "projection_policy": "latest_complete_then_later_positive"}
             account["friends"] = project_friends(events)
             historical_friends.extend(project_historical_friends(events))
+        for relation in ("followers", "following"):
+            observed = by_follow.get((account["id"], relation), [])
+            if not observed:
+                continue
+            prior = api_event(account, relation)
+            events = [prior, *observed]
+            account.setdefault("follow_evidence", {})[relation] = {
+                "api": prior["raw"], "website_observation_ids": [event["id"] for event in observed],
+            }
+            account[relation] = project_friends(events)
+            all_events.extend(events)
     # External neighbors live here and in SQLite, never in avatar candidates.
     for event in sorted(all_events, key=lambda e: (e["at"], e["index"])):
         if event["method"] == WEBSITE:
@@ -566,11 +593,13 @@ def merge_snapshot(snapshot, records):
         "journal_hash_format": "canonical_jsonl_v1",
         "observation_count": len(records), "source_account_count": len(by_source),
         "latest_observed_at": max((r["observed_at"] for r in records), default=None),
+        "follow_observation_count": sum(len(events) for events in by_follow.values()),
+        "follow_source_count": len({user_id for user_id, _ in by_follow}),
         "ledger_source_count": sum(bool(accounts[user_id].get("ledger")) for user_id in by_source),
         **{f"{status}_source_count": sum(accounts[user_id]["friend_evidence"]["latest_website"]["coverage"]["status"] == status for user_id in by_source)
            for status in ("complete", "partial", "unavailable")},
         "external_node_count": sum(node["external"] for node in nodes.values()),
-        "scope": "Directly visible friends only; no recursive collection. API capabilities remain unchanged and separately attributable.",
+        "scope": "Directly visible friend and follow lists only; no recursive collection. API capabilities remain unchanged and separately attributable.",
     }
     return merged, all_events
 
@@ -604,6 +633,8 @@ def build_database(path, merged, events, *, avatar_scans=(), avatar_rules=None):
                 CREATE TABLE account_coverage(account_id TEXT PRIMARY KEY REFERENCES nodes(id),checkpoint_id TEXT REFERENCES checkpoints(id),latest_rank INTEGER,last_seen_day TEXT,website_observations INTEGER NOT NULL,friend_status TEXT NOT NULL,last_checked_at TEXT,last_complete_at TEXT);
                 CREATE TABLE observations(id TEXT PRIMARY KEY,source_id TEXT NOT NULL REFERENCES nodes(id),method TEXT NOT NULL,relation TEXT NOT NULL,observed_at TEXT,checked_at TEXT,source_url TEXT,coverage_status TEXT NOT NULL,displayed_total_count INTEGER,raw_json TEXT NOT NULL);
                 CREATE TABLE friendship_evidence(observation_id TEXT NOT NULL REFERENCES observations(id),source_id TEXT NOT NULL REFERENCES nodes(id),target_id TEXT NOT NULL REFERENCES nodes(id),observed_at TEXT NOT NULL,source_url TEXT,target_profile_url TEXT NOT NULL,target_username TEXT,method TEXT NOT NULL,PRIMARY KEY(observation_id,source_id,target_id,observed_at,source_url));
+                CREATE TABLE follow_evidence(observation_id TEXT NOT NULL REFERENCES observations(id),follower_id TEXT NOT NULL REFERENCES nodes(id),followed_id TEXT NOT NULL REFERENCES nodes(id),observed_at TEXT NOT NULL,source_url TEXT,PRIMARY KEY(observation_id,follower_id,followed_id,observed_at,source_url));
+                CREATE INDEX follow_evidence_direction ON follow_evidence(follower_id,followed_id);
                 CREATE TABLE friendship_current(source_id TEXT NOT NULL REFERENCES nodes(id),target_id TEXT NOT NULL REFERENCES nodes(id),observed_at TEXT,source_url TEXT,source_label TEXT,coverage_status TEXT NOT NULL,evidence_json TEXT NOT NULL,PRIMARY KEY(source_id,target_id));
                 CREATE TABLE avatar_observations(scan_id TEXT PRIMARY KEY,user_id TEXT NOT NULL REFERENCES nodes(id),observed_at TEXT NOT NULL,source_url TEXT NOT NULL,scan_status TEXT NOT NULL,asset_ids_json TEXT NOT NULL,preset_review_json TEXT NOT NULL);
                 CREATE INDEX avatar_observations_user_time ON avatar_observations(user_id,observed_at);
@@ -632,8 +663,13 @@ def build_database(path, merged, events, *, avatar_scans=(), avatar_rules=None):
                 when = None if event["at"].startswith("0001-") else event["at"]
                 checked = None if event["checked_at"].startswith("0001-") else event["checked_at"]
                 count = raw.get("displayed_total_count") if event["method"] == WEBSITE else raw.get("total_count")
-                connection.execute("INSERT INTO observations VALUES(?,?,?,?,?,?,?,?,?,?)", (event["id"], event["source_id"], event["method"], "friends", when, checked, event["source_url"], event["status"], count, canonical(raw)))
+                connection.execute("INSERT INTO observations VALUES(?,?,?,?,?,?,?,?,?,?)", (event["id"], event["source_id"], event["method"], event["relation"], when, checked, event["source_url"], event["status"], count, canonical(raw)))
                 for item in event["items"]:
+                    if event["relation"] != "friends":
+                        follower, followed = ((item["id"], event["source_id"]) if event["relation"] == "followers"
+                                             else (event["source_id"], item["id"]))
+                        connection.execute("INSERT OR IGNORE INTO follow_evidence VALUES(?,?,?,?,?)", (event["id"], follower, followed, item["observed_at"], item["source_url"]))
+                        continue
                     connection.execute("INSERT OR IGNORE INTO friendship_evidence VALUES(?,?,?,?,?,?,?,?)", (event["id"], event["source_id"], item["id"], item["observed_at"], item["source_url"], item["profile_url"], item.get("username"), event["method"]))
             for account in merged["accounts"]:
                 friend = account.get("friends", {})
