@@ -277,3 +277,9 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 - Skip both Followers and Following for `0egoistic` (`2730453267`) for this pass. Keep the original plan and all previously verified observations intact. Neither direction is verified empty or marked unavailable. No inference about follower automation was recorded.
 - Of the original 140 directions, 52 have recorded outcomes, two are deferred, and 86 in scope remain. No journal or export changes. The two deferred directions do not block release after the remaining in-scope outcomes have been documented and the census validated.
 - Resume no earlier than 03:30 UTC with a normal check on `DerpyPoopManXD` (`1631997852`), followed by `JPaltaa` (`209160228`) and `zerealali` (`3510772801`) if collection recovers. Stop if rate-limited again rather than cycling accounts or routes.
+
+### 2026-11-26 03:30 UTC — Native Followers route again rate-limited
+
+- The signed-in profile for `DerpyPoopManXD` (`1631997852`, display name `bearattacker009`) showed 12 Followers and 54 Following. Clicking its native Followers link returned document HTTP 429. That confirms the obstruction is not isolated to `0egoistic`; it does not establish a ban or a private or empty list. No alternate route or account was attempted after the response.
+- No journal, export, or production change. Still 52 recorded outcomes, 2 deferred, and 86 remaining in scope. Both directions for this source remain pending.
+- Pause Roblox requests until at least 05:30 UTC, then make one ordinary retry. If 429 persists, stop automatic Roblox access attempts and report the census blocker; keep PR #5 review-only.
