@@ -260,3 +260,8 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 - Eight observations add 85 distinct follow edges, no new Friends edges, leaderboard cross-links, or avatar scans. This PR adds 346 follow edges (391 in the journal) and 254 earlier friendships; 3,544 external nodes. Outcomes cover 52/140 directions across 26 accounts. Followers: 14 complete, 9 partial, 3 unavailable, 44 uninspected; Following: 17 complete, 6 partial, 3 unavailable, 44 uninspected.
 - All 142 focused tests passed; append-only prefix, SQLite integrity and foreign keys verified. Both exports match journal SHA-256 `f02b7abce5a3efdd7f0aad8e5d36cda08d60b0759170c5a2ad864534f6df3121`. Previous compatible-main preflight also passed 50 Python and 105 Node tests on main's newer UI.
 - Next: `0egoistic` (`2730453267`), `DerpyPoopManXD` (`1631997852`), `JPaltaa` (`209160228`), and `zerealali` (`3510772801`), then plan order, skipping completed `johncenagaming347v2`. No deployment yet.
+
+### 2026-11-26 01:46 UTC — Rate limit recurred
+
+- Verified exact `0egoistic` profile (`2730453267`): approximate 1K Followers, 0 Following on the header. Its public Followers route returned document HTTP 429 at 01:45:45 UTC. Stopped site requests without opening an alternate route. Neither direction was recorded as empty or unavailable.
+- No journal or export changes: 52/140 outcomes remain. Allow a longer cooldown; no further browser attempt before 02:30 UTC. Resume `0egoistic`, then `DerpyPoopManXD`, `JPaltaa`, and `zerealali`. No deployment yet.
