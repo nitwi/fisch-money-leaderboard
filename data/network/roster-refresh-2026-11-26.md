@@ -110,3 +110,23 @@ The 214-row journal is append-only; the two exports match its SHA-256
 SQLite integrity and foreign-key checks and all 128 tests passed.
 Cumulative unique additions remain 16 friendships and 99 follows.
 No new avatar records or production changes.
+
+## Checkpoint 5: xNnoel (2586153890), 14:20–14:23 UTC
+
+Confirmed the exact People result and read each first page from its top.
+Friends: 18/393 exact profile links, partial. Followers: 18 exact links,
+partial; profile showed 1.9K and the list header showed 500+. Both
+Next controls stayed on page one; diagnostics reported HTTP 200 with no
+observed failed requests, not a confirmed block. Following: explicitly
+0 with “No results found” and a matching profile count, complete.
+
+Three append-only observations, one new distinct friendship, no new
+follows or avatar observations. Cumulative refresh: 17 new friendships
+and 99 new directed follows; 4,220 external graph nodes. Post-capture
+journal coverage for 6 Friends, 26 Followers, and 26 Following lists.
+Next: untoldmemoria and other reachable stale partials.
+
+Both exports match the 217-row journal SHA-256
+`795107174d2e7fc942b80196f5ef04bc0c44d8a53e62e7bc8f731fdab83343f4`.
+SQLite integrity, foreign-key checks, and all 128 tests passed.
+No production changes.
