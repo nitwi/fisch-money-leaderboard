@@ -364,3 +364,14 @@ journal SHA-256
 SQLite integrity and foreign-key checks and all 128 tests passed.
 No production or avatar changes. Next: injurylowk and Renvuz;
 13 reachable stale Friends sources remain.
+
+## Checkpoint 20: injurylowk Friends, 19:42 UTC
+
+Matched the exact People result (10092025879) and read the first row
+at scroll position zero. 16/22 exact IDs, partial; Next did not
+advance (HTTP 200, no failed requests observed). No new unique links.
+Both exports match the 259-row journal, SHA-256
+`5818b02c1f33ea6b4b5c9818cda9520968f19f89b94f50aeb2a19667c875e94d`.
+SQLite checks and all 128 tests passed. Cumulative totals remain
+23 new friendships and 134 directed follows. Next: Renvuz and anyokc;
+12 reachable stale Friends sources remain. Production unchanged.
