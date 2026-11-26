@@ -283,3 +283,9 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 - The signed-in profile for `DerpyPoopManXD` (`1631997852`, display name `bearattacker009`) showed 12 Followers and 54 Following. Clicking its native Followers link returned document HTTP 429. That confirms the obstruction is not isolated to `0egoistic`; it does not establish a ban or a private or empty list. No alternate route or account was attempted after the response.
 - No journal, export, or production change. Still 52 recorded outcomes, 2 deferred, and 86 remaining in scope. Both directions for this source remain pending.
 - Pause Roblox requests until at least 05:30 UTC, then make one ordinary retry. If 429 persists, stop automatic Roblox access attempts and report the census blocker; keep PR #5 review-only.
+
+### 2026-11-26 05:30 UTC — Collection paused after final retry
+
+- One ordinary retry of the native `DerpyPoopManXD` Followers page returned document HTTP 429 after the two-hour cooldown. No alternate routes were attempted and no new relationship evidence was available. This is not a verified empty list or a confirmed ban.
+- The saved review batch remains at 52 outcomes out of the original 140, with two owner-deferred and 86 still in scope. PR #5 adds 346 verified directed follow edges and 254 earlier Friends edges. The journal and both exports are unchanged. No merge or production deployment.
+- Stop automatic Roblox access attempts. If normal access is restored and work resumes, start with `DerpyPoopManXD` before continuing the remaining queue.
