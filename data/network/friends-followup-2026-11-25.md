@@ -307,3 +307,8 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 
 - Used on-site People search and the exact username and ID match for both accounts; clicked native list controls. `zerealali` (`3510772801`): complete Followers 13/13 and Following 8/8 after one ordinary reload of an incomplete profile (document HTTP 200). `injurylowk` (`10092025879`): both directions verified complete 0/0, corroborated by the exact profile counts and named native tabs. All four lists verified from the top. No 429 or other restriction on the completed list reads.
 - Added 21 distinct follow edges, making 430 new follow edges and 254 earlier new Friends edges over the published census. 60/140 directional outcomes are recorded, two deferred, 78 in scope still pending; 3,616 external nodes in exports. All 142 focused tests, both export digests, SQLite integrity and foreign-key checks passed. Journal SHA-256 `d5997c393f7adecf771a9ea1964a670760773f643fdb429e20be706035aaaaaa`. Production unchanged. Next: `Renvuz`, then plan order.
+
+### 2026-11-26 06:45 UTC — Cloud Browser navigation error
+
+- Attempted the planned `Renvuz` (`1529100107`) check using Roblox People search only. The browser entered `chrome-error://chromewebdata/`, which its URL policy could not inspect. One ordinary attempt using the search field in an already-open signed-in Roblox tab also produced a browser policy error. No Roblox response status was verified, so this is not evidence of rate limiting, an account ban, or an empty/private list.
+- No data or export changes: 60 outcomes, 2 deferred, 78 remaining in scope. `Renvuz` remains next. Keep the site unchanged and use only standard search-and-click navigation when the browser recovers.
