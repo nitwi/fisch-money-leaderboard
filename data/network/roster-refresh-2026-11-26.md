@@ -332,3 +332,18 @@ journal SHA-256
 SQLite integrity and foreign-key checks and all 128 tests passed.
 No production or avatar changes. Next: zerealali, JPaltaa, and other
 reachable stale Friends lists.
+
+## Checkpoint 18: zerealali and JPaltaa Friends, 18:28–18:34 UTC
+
+Verified each exact People result and first row at scroll position
+zero. zerealali (3510772801): 18/108; JPaltaa (209160228): 18/225.
+Both partial; Next stayed on page one, with HTTP 200 and no failed
+request observed. Earlier deeper observations remain available.
+
+Five new unique friendships, no new follows. Cumulative additions:
+23 friendships and 134 directed follows. Both exports match the 256-row
+append-only journal SHA-256
+`4253b55bb811d72a09e481dcd5a720ae15ca228baab48a21b2058b2c69ffc941`.
+SQLite integrity and foreign-key checks and all 128 tests passed.
+No avatar or production changes. Next: AliceSekai and johncenagaming347v2;
+15 reachable stale Friends source lists remain.
