@@ -387,3 +387,17 @@ Both exports match the 261-row append-only journal SHA-256
 SQLite checks and all 128 tests passed. Cumulative 23 friendships
 and 134 directed follows; no production change. Next: sabbath553 and
 heanmichrkke_3. Ten reachable stale Friends samples remain.
+
+## Checkpoint 22: sabbath553 and heanmichrkke_3 Friends, 20:59–21:05 UTC
+
+Matched each exact People result and verified its first row at
+scroll position zero. sabbath553 (3611741224): 18/46; heanmichrkke_3
+(9543810680): 16/76. Both are partial: Next did not advance
+(HTTP 200, no failed request observed). No newly distinct links.
+
+Both exports match the 263-row append-only journal SHA-256
+`0d43adb88d8c2d39023efb4682857d8336d37350334a7234a7727cd110fc28da`.
+SQLite integrity and foreign-key checks and all 128 tests passed.
+Cumulative 23 friendships and 134 directed follows. No production
+or avatar changes. Next: hc2khunowpng43ntk1 and Zipidy24.
+Eight reachable stale Friends source lists remain.
