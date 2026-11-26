@@ -244,3 +244,8 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 - Ten journal observations and four documented unavailable directional outcomes bring the pass to 44/140 lists across 22 accounts. Followers: 11 complete, 8 partial, 3 unavailable, 48 uninspected. Following: 15 complete, 4 partial, 3 unavailable, 48 uninspected.
 - This batch adds 83 distinct directed follows, no new Friends edges, no new leaderboard cross-links, and no avatar observations. PR #5 now adds 261 follows (306 total in journal), 254 earlier friendships, and contains 3,479 external nodes. All 142 focused tests passed, plus append-only prefix, SQLite integrity and foreign keys. Both exports match journal SHA-256 `a4b3846b3cc53670ab8c4b71d9493b5114b84b1b1c4ab624e3d7f6e3fd07a78b`.
 - Next: `emitnick` (`1785472665`), `Canizan` (`3060545720`), and `0egoistic` (`2730453267`), then plan order. No production deployment yet.
+
+### 2026-11-26 01:03 UTC — Temporary Roblox rate limit
+
+- Still signed in. `emitnick` (`1785472665`) verified on exact HTTPS profile after a normal reload; it showed 4 Followers and 6 Following. Clicking the public Followers link returned document HTTP 429, with no readable list. Stopped the batch without switching routes. Not a confirmed ban, empty list, or account-level unavailable outcome.
+- No new observations or exports; 44/140 outcomes remain. Resume with `emitnick` after cooldown, then `Canizan` and `0egoistic`. No deployment.
