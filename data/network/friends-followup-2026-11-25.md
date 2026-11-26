@@ -334,3 +334,9 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 
 - Searched Roblox People for `Zipidy24` and clicked the exact username and ID (`1696267689`). One ordinary reload restored the profile (initial document HTTP 200). Used native Followers and Following controls. Followers: partial, 36/52 exact IDs across pages 1 and 2; clicking Next for page 3 did not advance (HTTP 200 on the document, no verified failed requests). Following: complete 3/3. Each recorded page was verified at scroll position zero. No direct URL navigation or new 429.
 - Added 39 directed follows. Review now has 66 of 140 directional outcomes, two deferred, and 72 still pending; 481 verified new follow edges and 254 earlier Friends edges over production. Both export digests, SQLite integrity, foreign keys, and 142 focused tests passed. Journal SHA-256 `6feae7f80d6cd1027cddfe0a8162a61364eaf06fa3f8d08e425384c69707d319`. Production unchanged. Continue with `minmin8280` in plan order and revisit earlier unresolved searches later.
+
+### 2026-11-26 08:01 UTC — jonnhy1835
+
+- Roblox People search returned no matches for `minmin8280` (HTTP 200); both directions remain pending, not empty. Exact People result for `jonnhy1835` (`67343676`, `pibblezilla`) worked after a normal reload of the incomplete profile. Used native list controls only.
+- Followers partial: 18 exact IDs from the first page at scroll position zero. Profile said 505, while the Followers heading abbreviated it as 500+. Following complete: named tab and profile both showed 0 and no cards.
+- Added 18 distinct follows. PR #5 now has 68 of 140 outcomes, two deferred, 70 still pending, and 499 new directed follows and 254 earlier Friends edges over production. All 142 focused tests and both export digests, SQLite integrity and foreign-key checks passed. Journal SHA-256 `fbe5b48fb3554d26cf8cef18617fb4bfd3ce91c30af3d9255cf9727dbf2a7c8f`. Production unchanged. Next: `Nnoelq`, then plan order.
