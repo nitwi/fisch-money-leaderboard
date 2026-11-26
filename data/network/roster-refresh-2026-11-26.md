@@ -281,3 +281,18 @@ Both exports match the 247-row append-only journal SHA-256
 `bc963c6a91b1aa47b4beabd478a0b661c29f08f251d8135de24a56f2ce575b40`.
 SQLite integrity and foreign-key checks and all 128 tests passed.
 No production or avatar changes.
+
+## Checkpoint 15: LasTnIghT2011 (1844128408), 16:50–16:52 UTC
+
+Exact profile clicked from People results and all accepted pages
+verified from scroll position zero. Friends: 17/470, partial.
+Followers: 6/6, complete. Following: 36/459 across verified pages
+one and two, partial. Next stayed on page two; diagnostics showed
+HTTP 200 with no failed request observed.
+
+Three new rows add 18 directed follows. Cumulative additions:
+18 friendships and 134 directed follows. External graph nodes:
+4,252, not an avatar scan count. No production or avatar changes.
+Both exports match the 250-row append-only journal SHA-256
+`87033fbed760f966465128f23bb1764a232e3913d20c2f51c462998f09f9da71`.
+SQLite integrity and foreign-key checks and all 128 tests passed.
