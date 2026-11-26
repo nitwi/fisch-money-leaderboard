@@ -416,3 +416,24 @@ append-only journal SHA-256
 SQLite integrity, foreign-key checks, and all 128 tests passed.
 Six reachable stale Friends lists remain, starting with jonnhy1835
 and ewoofs.
+
+## Checkpoint 24: ewoofs and Tbpoqqq Friends, 22:49 UTC
+
+Friends browsing resumed after the 21:47 UTC HTTP 429. Both accounts were
+opened from exact People results and the first rows checked at scroll
+position zero. ewoofs (200918130): 15/19 readable IDs across two pages.
+Page 2 showed an Account Deleted card with no readable ID. The list
+remains partial, and no deletion was attributed to a specific ID.
+Tbpoqqq (1481603669): 9/55 readable IDs on page 1; the right button
+left the paginator on page 1 (HTTP 200 with no observed failed requests).
+
+jonnhy1835 stays pending: one cloud-browser navigation error was followed
+by a fresh-tab People search that showed no matches (HTTP 200);
+the earlier exact ID and prior relationship evidence remain intact.
+The other pending reachable lists are zNaN_Rot, pflugerson, and Minkib7661.
+
+No newly distinct edges. Cumulative 23 friendships and 134 follows;
+no avatar or production changes. Both exports match the 267-row
+append-only journal SHA-256
+`7c927bdbe165da02d72c5a3be642c18e03443cff2710f7339534a136fb540679`.
+SQLite integrity, foreign-key checks, and all 128 tests passed.
