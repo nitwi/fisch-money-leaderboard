@@ -267,3 +267,17 @@ Both exports match the 244-row append-only journal SHA-256
 `120b8dd7532e460bd161a559a5826432b73eee62cc354f244e157f91c52184a1`.
 SQLite integrity and foreign-key checks and all 128 tests passed.
 Production unchanged.
+
+## Checkpoint 14: Aumjung8267 (3942775137), 16:36–16:38 UTC
+
+Exact People result and first rows verified at scroll position zero.
+Friends: 18/468, partial; Next stayed at page one (HTTP 200, no observed
+failed request). Followers: 3/3, complete. Following: profile count 0,
+list count 0 and “No results found,” complete. No new unique edges.
+Cumulative additions: 18 friendships and 116 directed follows.
+Next: remaining reachable gaps, including LasTnIghT2011 Following.
+
+Both exports match the 247-row append-only journal SHA-256
+`bc963c6a91b1aa47b4beabd478a0b661c29f08f251d8135de24a56f2ce575b40`.
+SQLite integrity and foreign-key checks and all 128 tests passed.
+No production or avatar changes.
