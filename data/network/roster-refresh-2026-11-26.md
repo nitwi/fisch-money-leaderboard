@@ -73,3 +73,23 @@ All 205 previously staged journal rows are unchanged, 208 total, with
 SHA-256 `37d42171fb477e2061ecb93d4898351a7cee973808f90467a842d45f613bfed6`
 verified in both exports. SQLite integrity and foreign-key checks and all
 128 regression tests passed. No production changes.
+
+## Checkpoint 3: Apathy / ismyaimbotworking (1316700350), 13:49–13:51 UTC
+
+Exact People result verified before opening native lists. All accepted
+pages were checked from scroll position zero. Friends: 31/336 exact IDs
+across two pages (pagination stayed on page two after clicking Next).
+Roblox's page returned HTTP 200 with no observed failed request; the
+stall is not evidence of rate limiting or denial. Followers: 36/314 exact
+IDs from two pages, partial. Following: 1/1, complete (leviathan2709).
+Earlier relationship evidence is unchanged. Next: ody_odinho and other
+reachable stale partials.
+
+Three new observation rows, 18 distinct directed follows, and no new
+unique friendships. Cumulative refresh: 16 new friendships and 99 new
+directed follows. No new avatar observations; 4,219 external graph nodes.
+The 211-row journal preserves the prior 208 rows byte-for-byte. JSON and
+SQLite journal SHA-256:
+`65e1055fa206f9715785c5251a0f70c04ce2d93040436c02cb84b509affb0df7`.
+SQLite integrity and foreign-key checks and all 128 tests passed.
+Production remains unchanged.
