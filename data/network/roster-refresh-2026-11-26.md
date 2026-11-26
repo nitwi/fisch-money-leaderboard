@@ -316,3 +316,19 @@ Verified 10ne17’s export status is unavailable; SQLite integrity
 and foreign-key checks and all 128 tests passed. No production changes.
 Next: Force_oNature Friends and other reachable stale Friends lists;
 known unavailable or user-deferred accounts should not be looped.
+
+## Checkpoint 17: Force_oNature and emitnick Friends, 17:39–17:43 UTC
+
+Verified both exact People results and checked each list from its first
+row at scroll position zero. Force_oNature (1295019815): 18/26.
+emitnick (1785472665): 14/55. Both partial: Next stayed on page one
+with HTTP 200 and no failed request observed. Retained earlier, deeper
+coverage. Directional lists were not rescanned this batch.
+
+No new unique links; cumulative additions remain 18 friendships and
+134 directed follows. Both exports match the 254-row append-only
+journal SHA-256
+`936ca872605a7bfa7677bb2b4f800ea6fedd05b64778ec5f9cc9c4daa46e21ad`.
+SQLite integrity and foreign-key checks and all 128 tests passed.
+No production or avatar changes. Next: zerealali, JPaltaa, and other
+reachable stale Friends lists.
