@@ -347,3 +347,20 @@ append-only journal SHA-256
 SQLite integrity and foreign-key checks and all 128 tests passed.
 No avatar or production changes. Next: AliceSekai and johncenagaming347v2;
 15 reachable stale Friends source lists remain.
+
+## Checkpoint 19: AliceSekai and Sune’s Friends, 19:15–19:20 UTC
+
+Matched exact People results for AliceSekai (3747162372) and
+johncenagaming347v2 (2246025273, display name Sune). First rows
+were verified at scroll position zero with settled counts; no initial
+zero shell was recorded. AliceSekai: 18/91; Sune: 18/135. Both partial,
+with Next failing to advance (HTTP 200, no failed request observed).
+Prior deeper observations remain available.
+
+No new unique links. Cumulative additions remain 23 friendships and
+134 directed follows. Both exports match the 258-row append-only
+journal SHA-256
+`b825c1c1a3e680266da4addf5fc6e00275888c482b986fee1b246fe535efff0b`.
+SQLite integrity and foreign-key checks and all 128 tests passed.
+No production or avatar changes. Next: injurylowk and Renvuz;
+13 reachable stale Friends sources remain.
