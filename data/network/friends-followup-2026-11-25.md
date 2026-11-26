@@ -340,3 +340,9 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 - Roblox People search returned no matches for `minmin8280` (HTTP 200); both directions remain pending, not empty. Exact People result for `jonnhy1835` (`67343676`, `pibblezilla`) worked after a normal reload of the incomplete profile. Used native list controls only.
 - Followers partial: 18 exact IDs from the first page at scroll position zero. Profile said 505, while the Followers heading abbreviated it as 500+. Following complete: named tab and profile both showed 0 and no cards.
 - Added 18 distinct follows. PR #5 now has 68 of 140 outcomes, two deferred, 70 still pending, and 499 new directed follows and 254 earlier Friends edges over production. All 142 focused tests and both export digests, SQLite integrity and foreign-key checks passed. Journal SHA-256 `fbe5b48fb3554d26cf8cef18617fb4bfd3ce91c30af3d9255cf9727dbf2a7c8f`. Production unchanged. Next: `Nnoelq`, then plan order.
+
+### 2026-11-26 08:15 UTC batch — Nnoelq and Hxtaroo unresolved
+
+- `Nnoelq` (`8503122110`): ordinary People search reached an internal Chrome error page. The browser would not read that page or return a site response status. This is not a verified Roblox denial.
+- `Hxtaroo` (`8504842261`, `tarobatagor`): exact search result matched both ID and handle. Clicking it opened an incomplete profile (document HTTP 200, no observed failed requests). One ordinary reload left it without the handle or list controls. The three apparent zero counts in the shell are not evidence of empty lists.
+- Both accounts remain pending. No new observations or changes to exports, coverage or production. Still 68/140 recorded, two deferred and 70 pending. Continue with the next distinct planned source, `ewoofs`, using the same on-site search and click workflow. Revisit these two only after normal access is shown to work.
