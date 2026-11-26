@@ -164,3 +164,19 @@ No new avatars or production changes. Cumulative additions remain
 append-only journal SHA-256
 `0ccf440f5feec54ddac6dfa601fb122b69dab6d9ef5eb197b97086bf5e933187`.
 SQLite integrity and foreign-key checks and all 128 tests passed.
+
+## Checkpoint 8: TheDanishPlays (1579077690), 15:05–15:08 UTC
+
+Verified the exact People result and each list from scroll position zero.
+Friends: 17/381 exact links. Followers: 18/19. Next stayed on the first
+page for both; diagnostics returned HTTP 200, with no failed request
+observed. Following: 4/6 exact links after reaching the end. All three
+remain partial; no newly distinct links or avatar observations. Post-capture
+journal coverage: 9 Friends, 29 Followers, 29 Following lists. Next:
+reachable stale sources such as Sylilia and Canizan, and remaining roster gaps.
+
+Cumulative additions remain 17 friendships and 99 directed follows.
+Both exports match the 226-row append-only journal SHA-256
+`ad13f4d552cd860fde361bc4bef872ae2d7aba3de4cf8bb21adffb6c2709e503`.
+SQLite integrity and foreign-key checks and all 128 tests passed.
+No production changes.
