@@ -265,3 +265,9 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 
 - Verified exact `0egoistic` profile (`2730453267`): approximate 1K Followers, 0 Following on the header. Its public Followers route returned document HTTP 429 at 01:45:45 UTC. Stopped site requests without opening an alternate route. Neither direction was recorded as empty or unavailable.
 - No journal or export changes: 52/140 outcomes remain. Allow a longer cooldown; no further browser attempt before 02:30 UTC. Resume `0egoistic`, then `DerpyPoopManXD`, `JPaltaa`, and `zerealali`. No deployment yet.
+
+### 2026-11-26 02:31 UTC — Cooldown retry did not recover
+
+- The signed-in exact profile for `0egoistic` still rendered 1K Followers and 0 Following. The one normal retry of its native Followers link after a 45-minute cooldown again returned document HTTP 429. No alternate routes or further Roblox requests were made. Neither direction is a verified zero.
+- Keep `0egoistic` queued, with repeated 429 as a specific obstacle. Do not retry that account in a loop. Take a longer site-wide cooldown through at least **03:30 UTC**. After that pause, one normal check on the next independently planned account (`DerpyPoopManXD`, then `JPaltaa` and `zerealali`) can establish whether routine collection has recovered. If the next planned account also hits 429, pause again rather than cycling through accounts. Return to `0egoistic` only once routine collection has recovered, or document the endpoint as unavailable after the pass if this specific obstacle persists. 
+- No journal or export changes: 52/140 directional outcomes, 346 new verified follows and 254 earlier new Friends edges. Production census unchanged.
