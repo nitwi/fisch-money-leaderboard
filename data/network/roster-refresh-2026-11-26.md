@@ -93,3 +93,20 @@ SQLite journal SHA-256:
 `65e1055fa206f9715785c5251a0f70c04ce2d93040436c02cb84b509affb0df7`.
 SQLite integrity and foreign-key checks and all 128 tests passed.
 Production remains unchanged.
+
+## Checkpoint 4: ody_odinho (5118740924), 14:03–14:06 UTC
+
+Verified the exact People result and the first row of each list from
+scroll position zero. Friends: 17/40 exact IDs on page one (Next did not
+advance; HTTP 200 and no failed request were observed). Followers: 13/13,
+complete. Following: 5/7, partial, despite reaching the end. All exact
+IDs were already in the journal; newer observations did not replace
+older coverage. The roster now has dated journal evidence at or after
+capture for 5 Friends, 25 Followers, and 25 Following lists. Next
+priority: xNnoel, then untoldmemoria and other reachable stale partials.
+
+The 214-row journal is append-only; the two exports match its SHA-256
+`117d66b118f00db866671745c77af22000572d67ad19dc0383f676cb9fc3c19f`.
+SQLite integrity and foreign-key checks and all 128 tests passed.
+Cumulative unique additions remain 16 friendships and 99 follows.
+No new avatar records or production changes.
