@@ -202,3 +202,21 @@ Both exports match the 232-row journal SHA-256
 `7c681e9a6608a41070c87d59933062bc00ca9638d038de9db8f27df3890e9f01`.
 SQLite integrity and foreign-key checks and all 128 tests passed.
 Production is unchanged.
+
+## Checkpoint 10: SelenaTatsukii (362858829), 15:34–15:36 UTC
+
+Verified the exact People result and the first row from scroll position
+zero on every inspected page. Friends: 17/134. Followers: 18/134.
+Following: 34/145 across the first two pages, with a verified page
+and first-row change. All three are partial. This batch adds 16 new
+directed follows, zero new friendships, and no avatar observations.
+
+The refresh now adds 17 friendships and 116 directed follows. There
+are 4,237 external graph nodes. Post-capture journal coverage:
+12 Friends, 32 Followers, and 32 Following lists. Next: continue with
+reachable profile gaps; retain earlier evidence and the 0egoistic deferral.
+
+The 235-row journal is append-only. Both exports match SHA-256
+`e0841619cab713ba877358e6a6910764620e662cf6e83c90526944ee2e9c5bf2`.
+SQLite integrity, foreign-key checks, and all 128 tests passed.
+Production is unchanged.
