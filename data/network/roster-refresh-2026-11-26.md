@@ -220,3 +220,20 @@ The 235-row journal is append-only. Both exports match SHA-256
 `e0841619cab713ba877358e6a6910764620e662cf6e83c90526944ee2e9c5bf2`.
 SQLite integrity, foreign-key checks, and all 128 tests passed.
 Production is unchanged.
+
+## Checkpoint 11: Myvexxx (8805316504), 15:51–15:53 UTC
+
+Clicked the exact People result and checked each first row at scroll
+position zero. Friends: 17/21, partial; Next stayed on page one
+(HTTP 200, no observed failed request). Followers: 16/16, complete.
+Following: 9/9, complete. These three rows refresh existing edges
+without adding new ones. Post-capture journal coverage: 13 Friends,
+33 Followers, and 33 Following lists. Next: YptSehjZiEs and the other
+reachable stale Friends lists.
+
+Cumulative additions remain 17 friendships and 116 directed follows.
+The prior 235 rows are unchanged. Both exports match the 238-row
+journal SHA-256
+`ea1e1213db9bdecd368a49e3599ad26efe3f2141694a1f2575dc2de8d9acb096`.
+SQLite integrity, foreign-key checks, and all 128 tests passed.
+No production or avatar changes.
