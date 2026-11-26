@@ -237,3 +237,20 @@ journal SHA-256
 `ea1e1213db9bdecd368a49e3599ad26efe3f2141694a1f2575dc2de8d9acb096`.
 SQLite integrity, foreign-key checks, and all 128 tests passed.
 No production or avatar changes.
+
+## Checkpoint 12: YptSehjZiEs (7259361593), 16:13–16:15 UTC
+
+Exact People result and first rows verified at scroll position zero.
+Friends: 18/104, partial; Next stayed on page one (HTTP 200 and no
+observed failed request). Followers 6/6 and Following 7/7, both
+complete. One new friendship; cumulative 18 friendships and 116
+directed follows. Post-capture journal coverage: 14 Friends,
+34 Followers, and 34 Following lists. No avatar or production changes.
+
+Graph regression check: Yippz_gg is a single selectable root; the
+sebax4514 friendship remains visible with its original source and
+November 25 04:51:23.219 UTC evidence despite the later partial sample.
+
+Both exports match the 241-row append-only journal SHA-256
+`58de514bc0dd08a37d2e11cdc6acbc24520d4815cb5a22454c8f8bfe7cffb1ea`.
+SQLite integrity and foreign-key checks and all 128 tests passed.
