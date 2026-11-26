@@ -249,3 +249,14 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 
 - Still signed in. `emitnick` (`1785472665`) verified on exact HTTPS profile after a normal reload; it showed 4 Followers and 6 Following. Clicking the public Followers link returned document HTTP 429, with no readable list. Stopped the batch without switching routes. Not a confirmed ban, empty list, or account-level unavailable outcome.
 - No new observations or exports; 44/140 outcomes remain. Resume with `emitnick` after cooldown, then `Canizan` and `0egoistic`. No deployment.
+
+### 2026-11-26 01:32 UTC — Directional collection resumed
+
+- The rate limit cleared on normal retry. `emitnick` (`1785472665`): complete Followers 4/4 and Following 6/6.
+- `Canizan` (`3060545720`): 18 readable Followers, displayed profile total not an exact integer; Following 17/49 with one ID-less card on page 1. Both partial: Next stalled.
+- `0egoistic` (`2730453267`): fresh HTTPS tab recovered an internal Chrome navigation error. The named Followers tab then showed an empty shell, contradictory to the positive profile indication; HTTP 200. No entries were imported or interpreted as verified zero. Both directions remain on the queue.
+- `LasTnIghT2011` (`1844128408`): complete Followers 6/6; Following partial 18/459, Next stalled.
+- `johncenagaming347v2` (`2246025273`): complete Followers 6/6 and Following 10/10. All captured pages were verified at scroll position zero.
+- Eight observations add 85 distinct follow edges, no new Friends edges, leaderboard cross-links, or avatar scans. This PR adds 346 follow edges (391 in the journal) and 254 earlier friendships; 3,544 external nodes. Outcomes cover 52/140 directions across 26 accounts. Followers: 14 complete, 9 partial, 3 unavailable, 44 uninspected; Following: 17 complete, 6 partial, 3 unavailable, 44 uninspected.
+- All 142 focused tests passed; append-only prefix, SQLite integrity and foreign keys verified. Both exports match journal SHA-256 `f02b7abce5a3efdd7f0aad8e5d36cda08d60b0759170c5a2ad864534f6df3121`. Previous compatible-main preflight also passed 50 Python and 105 Node tests on main's newer UI.
+- Next: `0egoistic` (`2730453267`), `DerpyPoopManXD` (`1631997852`), `JPaltaa` (`209160228`), and `zerealali` (`3510772801`), then plan order, skipping completed `johncenagaming347v2`. No deployment yet.
