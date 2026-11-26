@@ -254,3 +254,16 @@ November 25 04:51:23.219 UTC evidence despite the later partial sample.
 Both exports match the 241-row append-only journal SHA-256
 `58de514bc0dd08a37d2e11cdc6acbc24520d4815cb5a22454c8f8bfe7cffb1ea`.
 SQLite integrity and foreign-key checks and all 128 tests passed.
+
+## Checkpoint 13: Erutobi (2464539843), 16:21 UTC
+
+Verified the exact People result and each first row at scroll position
+zero. Friends: 16/168 exact links from the first page, partial.
+Followers: 4/4; Following: 2/2, both complete. No new unique edges.
+Cumulative additions remain 18 friendships and 116 directed follows.
+Next: Aumjung8267 and remaining reachable stale lists.
+
+Both exports match the 244-row append-only journal SHA-256
+`120b8dd7532e460bd161a559a5826432b73eee62cc354f244e157f91c52184a1`.
+SQLite integrity and foreign-key checks and all 128 tests passed.
+Production unchanged.
