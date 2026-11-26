@@ -147,3 +147,20 @@ The 220-row append-only journal and both exports match SHA-256
 SQLite integrity and foreign-key checks and all 128 tests passed.
 Cumulative additions remain 17 friendships and 99 directed follows.
 No production changes.
+
+## Checkpoint 7: shatter_yourselfgrgr (8794906806), 14:49–14:51 UTC
+
+Confirmed the exact People result; checked each list at scroll position
+zero. Friends: 18/53, partial; Next did not advance (HTTP 200, no failed
+request observed). Followers: explicitly 0/0 with “No results found”
+and a matching profile count, complete. Following: 6/6, complete. All
+readable relationships already existed in the journal. Post-capture
+journal coverage: 8 Friends, 28 Followers, and 28 Following lists in the
+resolved current roster. Next: TheDanishPlays, then reachable stale
+partials and newly identified roster gaps.
+
+No new avatars or production changes. Cumulative additions remain
+17 friendships and 99 directed follows. Both exports match the 223-row
+append-only journal SHA-256
+`0ccf440f5feec54ddac6dfa601fb122b69dab6d9ef5eb197b97086bf5e933187`.
+SQLite integrity and foreign-key checks and all 128 tests passed.
