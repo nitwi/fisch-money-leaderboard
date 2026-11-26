@@ -51,3 +51,25 @@ SQLite integrity and foreign-key checks passed; 50 Python and 78 Node
 tests passed. The avatar regression fixture distinguishes roster changes
 from scan changes. No new live viewport or deployment verification applies
 to this draft.
+
+## Checkpoint 2: n6sy (137607436), 13:31–13:32 UTC
+
+Verified the exact People search result, opened native lists, and verified
+each page from scroll position zero before collecting IDs. Friends: 73/84
+exact IDs across all five pages. Following: 24/39 exact IDs across all
+three pages. Both remain partial despite reaching the last page; some
+cards did not expose an exact profile link. Followers: 54 exact IDs on
+the first three pages, partial; the profile showed 699 and the list
+header showed 500+. The current sample does not replace older evidence.
+
+Appended three rows: 28 new directed follows, no new unique friendships
+or leaderboard links. Cumulative refresh: 16 new friendships and
+81 new follows. No new avatars; 4,204 external graph nodes. Current
+roster source-list journal counts at or after capture: Friends 3,
+Followers 23, Following 23. Next: reachable stale partials including
+ismyaimbotworking and ody_odinho; continue bounded checks.
+
+All 205 previously staged journal rows are unchanged, 208 total, with
+SHA-256 `37d42171fb477e2061ecb93d4898351a7cee973808f90467a842d45f613bfed6`
+verified in both exports. SQLite integrity and foreign-key checks and all
+128 regression tests passed. No production changes.
