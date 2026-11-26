@@ -375,3 +375,15 @@ Both exports match the 259-row journal, SHA-256
 SQLite checks and all 128 tests passed. Cumulative totals remain
 23 new friendships and 134 directed follows. Next: Renvuz and anyokc;
 12 reachable stale Friends sources remain. Production unchanged.
+
+## Checkpoint 21: Renvuz and anyokc Friends, 20:16–20:21 UTC
+
+Matched exact People results and verified the first row at scroll
+position zero. Renvuz (1529100107): 18/317, including Yippz_gg;
+anyokc (7897184784): 17/24. Both partial: Next did not advance
+(HTTP 200, no failed request observed). No newly distinct edges.
+Both exports match the 261-row append-only journal SHA-256
+`c53e733a71dde0f2684a0717d2f6dfe7bc7798fb5198d85e3a817fbd26fa399b`.
+SQLite checks and all 128 tests passed. Cumulative 23 friendships
+and 134 directed follows; no production change. Next: sabbath553 and
+heanmichrkke_3. Ten reachable stale Friends samples remain.
