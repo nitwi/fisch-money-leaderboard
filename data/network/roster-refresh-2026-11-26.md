@@ -130,3 +130,20 @@ Both exports match the 217-row journal SHA-256
 `795107174d2e7fc942b80196f5ef04bc0c44d8a53e62e7bc8f731fdab83343f4`.
 SQLite integrity, foreign-key checks, and all 128 tests passed.
 No production changes.
+
+## Checkpoint 6: untoldmemoria (128840304), 14:34–14:37 UTC
+
+Confirmed the exact People result and all first rows at scroll position
+zero. Friends: 18/134, partial. Followers: 18/51, partial. Next stayed
+on page one for both lists; HTTP 200 diagnostics showed no failed
+request. Following: 2/2, complete. No newly distinct links or avatar
+observations; older deeper coverage remains intact. The 49 resolved
+current ranks now have journal evidence dated at or after capture for
+7 Friends, 27 Followers, and 27 Following lists. Next reachable stale
+partials include shatter_yourselfgrgr and TheDanishPlays.
+
+The 220-row append-only journal and both exports match SHA-256
+`59870f7256625b0f694d2e93b0f2973d0261d2294b7f80a54f3cc8eea4fa3a39`.
+SQLite integrity and foreign-key checks and all 128 tests passed.
+Cumulative additions remain 17 friendships and 99 directed follows.
+No production changes.
