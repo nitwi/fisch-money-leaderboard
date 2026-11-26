@@ -457,3 +457,44 @@ no avatar or production changes. Both exports match the 269-row
 append-only journal SHA-256
 `c3ae585fc84e1d0445c2a9d167bfe714655bc2f459351e5d29f344f4e73a21ad`.
 SQLite integrity, foreign-key checks, and all 128 tests passed.
+
+## Checkpoint 26: final bounded roster rechecks, 23:17 UTC
+
+Exact People-result links resolved jonnhy1835 (67343676) and pflugerson
+(987922899). The first rows were read at scroll position zero. The
+lists are partial: jonnhy1835 17/22 and pflugerson 17/39. A normal reload
+cleared pflugerson's initial zero-card shell. Both paginators stayed on
+page 1 (HTTP 200, no observed failed requests). No fresh cases remain
+in the bounded recheck queue. Older and deeper evidence is preserved.
+
+Coverage of the 49 exact-ID accounts in the photographed Top 50, by
+latest journal outcome plus documented unavailable and deferred cases:
+
+| Relation | Fresh complete | Fresh partial | Retained complete | Unavailable | Deferred |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Friends | 0 | 36 | 9 | 4 | 0 |
+| Followers | 20 | 18 | 6 | 4 | 1 |
+| Following | 24 | 13 | 7 | 4 | 1 |
+
+Fresh means on or after the November 26 06:10 UTC roster handoff.
+Friends unavailable: 10ne17 (fresh zero-card shell inconsistent with
+the profile), metbepol, Luwuma, and m1_zm (retained documented
+exceptions). Directional unavailable: Nexvolt00, metbepol, Luwuma,
+and m1_zm. Both 0egoistic directions are deferred by request.
+Holladayyyyyyy remains identity-pending and outside the 49 resolved
+denominator. Unavailable, deferred, and identity-pending are not empty
+lists; no new termination was confirmed.
+
+Relative to the 202-row published journal, this refresh adds 69
+dated observations, 23 distinct friendships and 134 directed follows.
+No previously unrecorded edge has both endpoints in the historical
+leaderboard roster; adding Yippz_gg to the roster makes existing edges
+eligible without counting them as new observations. No new avatar
+observations or preset matches were added; the six historical avatar
+observations are preserved. The exports contain 4,252 external
+nodes, not an avatar-scan count.
+
+Both exports match the append-only 271-row journal SHA-256
+`564324c41533d5cb5bf4e4d1917c6dcfd34abf5d6b62a2f278bdcec0ac3bb90d`.
+SQLite integrity, foreign-key checks, 50 Python tests and 78 Node tests
+passed. Review only; no production merge or deployment.
