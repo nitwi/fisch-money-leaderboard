@@ -437,3 +437,23 @@ no avatar or production changes. Both exports match the 267-row
 append-only journal SHA-256
 `7c927bdbe165da02d72c5a3be642c18e03443cff2710f7339534a136fb540679`.
 SQLite integrity, foreign-key checks, and all 128 tests passed.
+
+## Checkpoint 25: zNaN_Rot and Minkib7661 Friends, 23:03 UTC
+
+Matched exact People results and checked the top of each scanned page.
+zNaN_Rot (3228802017): 17/90, page 1; pagination did not advance
+(HTTP 200, no observed failed requests). Minkib7661 (1528395974):
+51/160 across pages 1–3. The initial zero-card shell contradicted the
+profile; on a normal reload, the list rendered and settled at 160.
+Both remain partial; existing evidence was preserved.
+
+pflugerson (987922899) matched an exact People result before a cloud
+browser navigation error. The fresh-tab search returned no matches
+(HTTP 200), not a confirmed deletion or empty Friends list.
+jonnhy1835 and pflugerson are the only outstanding bounded rechecks.
+
+No newly distinct edges. Cumulative 23 friendships and 134 follows;
+no avatar or production changes. Both exports match the 269-row
+append-only journal SHA-256
+`c3ae585fc84e1d0445c2a9d167bfe714655bc2f459351e5d29f344f4e73a21ad`.
+SQLite integrity, foreign-key checks, and all 128 tests passed.
