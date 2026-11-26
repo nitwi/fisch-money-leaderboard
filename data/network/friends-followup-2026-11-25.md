@@ -312,3 +312,8 @@ The published first pass attempted all 70 planned source IDs: 12 complete, 52 pa
 
 - Attempted the planned `Renvuz` (`1529100107`) check using Roblox People search only. The browser entered `chrome-error://chromewebdata/`, which its URL policy could not inspect. One ordinary attempt using the search field in an already-open signed-in Roblox tab also produced a browser policy error. No Roblox response status was verified, so this is not evidence of rate limiting, an account ban, or an empty/private list.
 - No data or export changes: 60 outcomes, 2 deferred, 78 remaining in scope. `Renvuz` remains next. Keep the site unchanged and use only standard search-and-click navigation when the browser recovers.
+
+### 2026-11-26 07:00 UTC — Renvuz search still unresolved
+
+- A fresh signed-in Roblox homepage loaded, but the Renvuz People search again ended at Chrome's internal error page, which the browser policy cannot read. No verified Roblox response status or relationship outcome. Keep Renvuz pending, not empty or unavailable on Roblox. No direct profile or list URLs were used.
+- Avoid repeatedly retrying this search. At the next scheduled batch, try the next independently planned source, `anyokc` (`7897184784`), using the same People search and click workflow. If that also fails with the same browser error, pause collection rather than cycling accounts and revisit browser recovery. Return to Renvuz after normal search demonstrably recovers. No journal, export, or production changes.
