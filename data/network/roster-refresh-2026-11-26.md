@@ -401,3 +401,18 @@ SQLite integrity and foreign-key checks and all 128 tests passed.
 Cumulative 23 friendships and 134 directed follows. No production
 or avatar changes. Next: hc2khunowpng43ntk1 and Zipidy24.
 Eight reachable stale Friends source lists remain.
+
+## Checkpoint 23: hc2khunowpng43ntk1 and Zipidy24 Friends, 21:30 UTC
+
+Matched both exact People results and verified the first rows at
+scroll position zero. hc2khunowpng43ntk1 (11482999303): 16/40;
+Zipidy24 (1696267689): 18/268. Both are partial: Next stayed on page
+one (HTTP 200, no observed failed requests). Prior evidence retained.
+
+No newly distinct edges. Cumulative 23 friendships and 134 follows;
+no avatar or production changes. Both exports match the 265-row
+append-only journal SHA-256
+`d11ca370dc4b705a996939284655c94860a589bcb5b5109ea615065df29c4c1d`.
+SQLite integrity, foreign-key checks, and all 128 tests passed.
+Six reachable stale Friends lists remain, starting with jonnhy1835
+and ewoofs.
