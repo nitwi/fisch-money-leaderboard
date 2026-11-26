@@ -180,3 +180,25 @@ Both exports match the 226-row append-only journal SHA-256
 `ad13f4d552cd860fde361bc4bef872ae2d7aba3de4cf8bb21adffb6c2709e503`.
 SQLite integrity and foreign-key checks and all 128 tests passed.
 No production changes.
+
+## Checkpoint 9: Sylilia and Canizan, 15:20–15:25 UTC
+
+Verified both exact People results and each list from scroll position
+zero. Sylilia: Friends 17/55 and Followers 18/31, both partial; the
+next page did not advance. Following was explicitly empty (0/0,
+complete). Canizan: Friends 17/140, partial because Next did not
+advance; Followers 18 exact links (3K on profile, 500+ on the list,
+exact total unknown); Following 18/49. Both Canizan directional
+samples are partial. Stalled pages reported HTTP 200 with no failed
+request observed, not a verified rate limit or denial.
+
+Six append-only rows added one distinct follow and no new friendships
+or avatar observations. Cumulative additions: 17 friendships and 100
+directed follows; 4,221 external graph nodes. Post-capture journal
+coverage: 11 Friends, 31 Followers, and 31 Following lists. Next:
+SelenaTatsukii and remaining reachable gaps.
+
+Both exports match the 232-row journal SHA-256
+`7c681e9a6608a41070c87d59933062bc00ca9638d038de9db8f27df3890e9f01`.
+SQLite integrity and foreign-key checks and all 128 tests passed.
+Production is unchanged.
