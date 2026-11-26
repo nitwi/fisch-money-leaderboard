@@ -296,3 +296,23 @@ Three new rows add 18 directed follows. Cumulative additions:
 Both exports match the 250-row append-only journal SHA-256
 `87033fbed760f966465128f23bb1764a232e3913d20c2f51c462998f09f9da71`.
 SQLite integrity and foreign-key checks and all 128 tests passed.
+
+## Checkpoint 16: 10ne17 and LowTierNova, 17:12–17:15 UTC
+
+Verified both profiles through exact People results. 10ne17
+(3382416559) shows 177 Friends on the profile, but its list shows
+“Friends (0)” and “No results found.” Recorded unavailable with the
+profile count of 177, not an empty list. LowTierNova (2769135100):
+18/60 exact Followers from page one; the next page did not advance.
+Both observations were checked at scroll position zero. Diagnostics
+showed HTTP 200 with no failed request observed. Other lists have
+retained evidence and were not rescanned in this batch.
+
+No new unique edges or avatars. Cumulative additions remain 18
+friendships and 134 directed follows. Both exports match the 252-row
+append-only journal SHA-256
+`e4edda3da9511d0aa37f16c3b6d3a9d62d84b86b457a654994e5c95ed39865e4`.
+Verified 10ne17’s export status is unavailable; SQLite integrity
+and foreign-key checks and all 128 tests passed. No production changes.
+Next: Force_oNature Friends and other reachable stale Friends lists;
+known unavailable or user-deferred accounts should not be looped.
