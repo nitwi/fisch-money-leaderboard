@@ -631,6 +631,37 @@ class LedgerTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'Checkpoint already exists'):
             prepare(SimpleNamespace(date='2026-11-11',time='22:33',image=[],precision='user-supplied'))
 
+    def test_owner_november_26_mark_preserves_november_27_real_timestamp(self):
+        capture = next(cp for cp in self.data['checkpoints'] if cp['id']=='2026-11-27_0221')
+        self.assertEqual((capture['day_key'],capture['at'],capture['local']),
+                         ('2026-11-26','2026-11-27T08:21:00Z','2026-11-27T02:21:00-06:00'))
+        self.assertEqual((capture['verified'],capture['coverage'],capture['complete'],capture['early_am_rollover']),
+                         (50,50,True,True))
+        self.assertEqual(capture['primary_evidence'],['EV0236','EV0237','EV0238','EV0239'])
+        rows={r['rank']:r for r in self.data['observations'] if r['checkpoint']==capture['id']}
+        self.assertEqual(len(rows),50)
+        self.assertEqual((rows[4]['username'],rows[4]['balance']),('ismyaimbotworking','349127410768'))
+        self.assertEqual((rows[50]['username'],rows[50]['balance']),('Minkib7661','61606102687'))
+        proofs={p['id']:p for p in self.data['evidence']}
+        for image_id in capture['primary_evidence']:
+            proof=proofs[image_id]
+            self.assertEqual(proof['captured_at'],'2026-11-27T08:21:00Z')
+            self.assertEqual(hashlib.sha256((ROOT/'site'/proof['url']).read_bytes()).hexdigest(),proof['sha256'])
+
+    def test_explicit_daily_override_leaves_normal_cutoff_unchanged(self):
+        cp={'id':'manual','at':'2026-11-27T08:21:00Z','captured_from':'2026-11-27T08:21:00Z',
+            'captured_to':'2026-11-27T08:21:00Z','source_checkpoints':['manual'],
+            'evidence':['proof'],'coverage':50,'verified':50,'visible':50,'complete':True}
+        obs=[{'checkpoint':'manual','rank':rank,'id':f'manual_R{rank:02d}',
+              'status':'verified','balance':str(100-rank),'username':f'user{rank}',
+              'key':f'user:{rank}','evidence':['proof'],'at':cp['at']} for rank in range(1,51)]
+        plain,_,_,_=select_daily([cp],obs,[cp])
+        custom,_,_,_=select_daily([cp],obs,[cp],day_overrides={'manual':'2026-11-26'})
+        self.assertEqual(plain[0]['day_key'],'2026-11-27')
+        self.assertEqual((custom[0]['day_key'],custom[0]['at']),('2026-11-26',cp['at']))
+        with self.assertRaises(ValueError):
+            select_daily([cp],obs,[cp],day_overrides={'manual':'2026-11-25'})
+
     def test_rollover_synthetic_dst(self):
         dates={cp['day_key']:cp for cp in self.data['checkpoints']}
         def cp(name,at):

@@ -244,7 +244,17 @@ def build(source, copy_images=True):
     if len({cp["at"] for cp in sorted_cps}) != len(sorted_cps):
         raise ValueError("Capture timestamps must be unique")
     sessions, session_observations, session_stats = group_sessions(sorted_cps, observations)
-    daily, daily_observations, daily_stats, assignment = select_daily(sessions, session_observations, sorted_cps)
+    # A signed-off, session-specific daily-label exception leaves real timestamps unchanged.
+    overrides_path = ROOT / "data/day_overrides.csv"
+    day_overrides = {}
+    if overrides_path.exists():
+        for override in rows(overrides_path):
+            checkpoint_id = override["checkpoint_id"].strip()
+            day_key = override["day_key"].strip()
+            if not checkpoint_id or not day_key or not override["reason"].strip() or checkpoint_id in day_overrides:
+                raise ValueError("Invalid or duplicate owner-approved daily mark override")
+            day_overrides[checkpoint_id] = day_key
+    daily, daily_observations, daily_stats, assignment = select_daily(sessions, session_observations, sorted_cps, day_overrides=day_overrides)
     profile_updates=add_profile_updates(site, ev_rows, evidence, sorted_cps, observations, sessions, daily,
                                         daily_observations, assignment, identities)
 

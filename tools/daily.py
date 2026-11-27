@@ -23,9 +23,13 @@ def local_time(utc_at):
     return instant(utc_at).astimezone(CHICAGO)
 
 
-def select_daily(sessions, session_observations, raw_captures, early_cutoff_hour=2):
+def select_daily(sessions, session_observations, raw_captures, early_cutoff_hour=2, day_overrides=None):
     if not 0 < early_cutoff_hour <= 6:
         raise ValueError("Early-AM cutoff must be between 1 and 6 local hours")
+    day_overrides = day_overrides or {}
+    unexpected = set(day_overrides) - {cp["id"] for cp in sessions}
+    if unexpected:
+        raise ValueError(f"Unknown day override sessions: {sorted(unexpected)}")
     captures_by_id = {cp["id"]: cp for cp in raw_captures}
     afternoon = {local_time(cp["at"]).date() for cp in raw_captures if local_time(cp["at"]).hour >= 12}
     sessions_by_day = defaultdict(list)
@@ -48,6 +52,11 @@ def select_daily(sessions, session_observations, raw_captures, early_cutoff_hour
             )
             if same_session_prior_afternoon or close_update or prior not in afternoon:
                 day = prior
+        if cp["id"] in day_overrides:
+            override_day = date.fromisoformat(day_overrides[cp["id"]])
+            if override_day not in (local.date(), local.date() - timedelta(days=1)):
+                raise ValueError(f"Day override must be capture date or preceding Chicago day: {cp['id']}")
+            day = override_day
         key = day.isoformat()
         assignment[cp["id"]] = key
         sessions_by_day[key].append(cp)
