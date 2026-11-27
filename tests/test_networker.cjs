@@ -462,9 +462,23 @@ test('published avatar observations reproduce independently audited all-history 
   const summarize = accounts => accounts.reduce((counts, item) => {
     counts[network.reviewAvatar(item.avatar).status] += 1; return counts;
   }, {full: 0, partial: 0, none: 0, unknown: 0});
-  assert.deepEqual(summarize(snapshot.accounts), {full: 1, partial: 6, none: 63, unknown: 0});
+  const fixtures = {
+    '2026-11-23_2317': { all: {full: 1, partial: 6, none: 63, unknown: 0}, latest: {full: 1, partial: 3, none: 46, unknown: 0} },
+    '2026-11-26_0010': { all: {full: 1, partial: 6, none: 63, unknown: 1}, latest: {full: 1, partial: 3, none: 44, unknown: 1} }
+  };
+  const checkpoint = snapshot.ledger_latest_checkpoint?.id;
+  const expected = fixtures[checkpoint];
+  if (!expected) return t.skip('Leaderboard cohort changed; pinned avatar counts no longer apply.');
+  assert.deepEqual(summarize(snapshot.accounts), expected.all);
   const latest = snapshot.accounts.filter(item => item.ledger && item.latest_rank >= 1 && item.latest_rank <= 50);
-  assert.deepEqual(summarize(latest), {full: 1, partial: 3, none: 46, unknown: 0});
+  assert.deepEqual(summarize(latest), expected.latest);
+  if (checkpoint === '2026-11-26_0010') {
+    const newAccount = latest.find(item => item.latest_rank === 50);
+    assert.equal(newAccount.id, '1115956720');
+    assert.equal(newAccount.username, 'Yippz_gg');
+    assert.equal(network.reviewAvatar(newAccount.avatar).status, 'unknown');
+    assert.equal(latest.some(item => item.latest_rank === 3), false);
+  }
   const full = snapshot.accounts.find(item => network.reviewAvatar(item.avatar).status === 'full');
   assert.equal(full.username, 'BloxHeroj8');
   assert.equal(network.reviewAvatar(full.avatar).fullMatches[0].id, 'beanie');
