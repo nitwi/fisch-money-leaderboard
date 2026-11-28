@@ -10,7 +10,37 @@
   "use strict";
 
   function label(person) {
-    return person && person.username ? "@" + person.username : "ID " + (person && person.id || "unknown");
+    if (person && typeof person.username === "string" && person.username.trim())
+      return "@" + person.username;
+    // Display names are not Roblox usernames. Mark them clearly instead of
+    // turning one into a guessed @handle or showing an avoidable numeric ID.
+    if (person && typeof person.display_name === "string" && person.display_name.trim())
+      return person.display_name + " (display name)";
+    return "ID " + (person && person.id || "unknown");
+  }
+  function applyVerifiedUsernames(network, overlay, core) {
+    if (!network?.nodes || overlay?.schema_version !== 1 ||
+        overlay?.source_url !== "https://users.roblox.com/v1/users" ||
+        !overlay.users || typeof overlay.users !== "object" || Array.isArray(overlay.users)) return 0;
+    let changed = 0;
+    for (const [key, record] of Object.entries(overlay.users)) {
+      const id = core.normalizeId(key);
+      if (id !== key || !record || typeof record !== "object" ||
+          core.normalizeId(record.id) !== id ||
+          record.source_url !== overlay.source_url ||
+          !Number.isFinite(Date.parse(record.observed_at || ""))) continue;
+      const username = record.username;
+      if (typeof username !== "string" || !/^[A-Za-z0-9_]{1,20}$/.test(username)) continue;
+      const person = network.nodes.get(id);
+      if (!person || person.ledger || (typeof person.username === "string" && person.username.trim())) continue;
+      const display = typeof record.display_name === "string" && record.display_name.length <= 80 ? record.display_name : "";
+      network.nodes.set(id, {...person, username,
+        display_name: person.display_name || display,
+        username_observed_at: record.observed_at,
+        username_source_url: record.source_url});
+      changed++;
+    }
+    return changed;
   }
   function rank(person) {
     return Number.isInteger(person && person.latest_rank) && person.latest_rank > 0 ? person.latest_rank : null;
@@ -302,6 +332,13 @@
           return true;
         });
         state.network = core.socialNetwork(state.accounts, Array.isArray(data.network_nodes) ? data.network_nodes : []);
+        // Optional static overlay generated from the official Roblox Users API
+        // at publication time. GitHub Pages cannot safely rely on Roblox CORS.
+        // Missing/unavailable responses retain the original ID-only fallback.
+        try {
+          const namesResponse = await global.fetch("network-usernames.json", {cache: "no-cache"});
+          if (namesResponse.ok) applyVerifiedUsernames(state.network, await namesResponse.json(), core);
+        } catch { /* Preserve historical data when lookup is unavailable. */ }
         const params = new URLSearchParams(global.location.search);
         const requested = core.normalizeId(params.get("target"));
         const preferred = state.network.nodes.has("1316700350") ? "1316700350" :
@@ -345,5 +382,5 @@
     }
     init();
   }
-  return Object.freeze({label, matchingPeople, resolveAccount, insights, start});
+  return Object.freeze({label, applyVerifiedUsernames, matchingPeople, resolveAccount, insights, start});
 });
