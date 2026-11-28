@@ -23,6 +23,7 @@ jobs:
         run: |
           python tools/promote_photo_review.py
           python tools/build.py --no-copy
+          python tools/build_network_ranks.py
           python -m unittest discover -s tests
           node --check site/app.js
           node --check site/standouts.js
