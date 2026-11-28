@@ -59,6 +59,57 @@ test('search includes leaderboard history and connected external accounts using 
   assert.equal(focus.resolveAccount(network,'missing',core),null);
 });
 
+test('exact verified username overlay fills ID-only external accounts without rewriting evidence', () => {
+  const saved = person('1',{username:'LedgerName',ledger:true});
+  const missing = person('2',{username:'',display_name:'Friendly',ledger:false});
+  const observed = person('3',{username:'RecordedHandle',ledger:false});
+  const network=core.socialNetwork([saved],[missing,observed]);
+  const snapshot={schema_version:1,source_url:'https://users.roblox.com/v1/users',
+    users:{
+      '2':{id:'2',username:'VerifiedUser2',display_name:'Friendly',
+        observed_at:CHECKED,source_url:'https://users.roblox.com/v1/users'},
+      '3':{id:'3',username:'ChangedHandle',display_name:'',
+        observed_at:CHECKED,source_url:'https://users.roblox.com/v1/users'},
+      '1':{id:'1',username:'SpoofLedger',display_name:'',
+        observed_at:CHECKED,source_url:'https://users.roblox.com/v1/users'},
+      '44':{id:'43',username:'WrongId',observed_at:CHECKED,
+        source_url:'https://users.roblox.com/v1/users'}
+    }};
+  assert.equal(focus.applyVerifiedUsernames(network,snapshot,core),1);
+  assert.equal(network.nodes.get('2').username,'VerifiedUser2');
+  assert.equal(network.nodes.get('3').username,'RecordedHandle');
+  assert.equal(network.nodes.get('1').username,'LedgerName');
+  assert.equal(network.nodes.has('44'),false);
+  assert.equal(focus.label(network.nodes.get('2')),'@VerifiedUser2');
+  assert.equal(focus.resolveAccount(network,'VerifiedUser2',core).id,'2');
+});
+
+test('missing usernames use labeled display names, recorded aliases, then ID as last fallback', () => {
+  assert.equal(focus.label({id:'2',username:'',display_name:'VisiblePlayer'}),'VisiblePlayer (display name)');
+  assert.equal(focus.label({id:'3',username:'',aliases:['PriorExactName']}),
+    '@PriorExactName (previously observed)');
+  assert.equal(focus.label({id:'4',username:'',display_name:''}),'ID 4');
+  const net=core.socialNetwork([person('1',{username:'Root'})],[
+    {id:'2',username:'',display_name:'VisiblePlayer',ledger:false}]);
+  assert.deepEqual(focus.matchingPeople(net,'visibleplayer',20).map(x=>x.id),['2']);
+});
+
+test('untrusted or malformed username overlay is ignored',()=>{
+  const net=core.socialNetwork([person('1')],[{id:'2',username:'',ledger:false}]);
+  const source='https://users.roblox.com/v1/users';
+  const payload={schema_version:1,source_url:source,users:{
+    '2':{id:'2',username:'<script>',source_url:source,observed_at:CHECKED}
+  }};
+  assert.equal(focus.applyVerifiedUsernames(net,payload,core),0);
+  payload.users['2'].username='ValidName';
+  payload.users['2'].source_url='https://evil.example/v1/users';
+  assert.equal(focus.applyVerifiedUsernames(net,payload,core),0);
+  payload.users['2'].source_url=source;
+  payload.users['2'].observed_at='not-a-date';
+  assert.equal(focus.applyVerifiedUsernames(net,payload,core),0);
+  assert.equal(net.nodes.get('2').username,'');
+});
+
 test('page places relationship graph before compact signals and has no side-by-side comparison UI', () => {
   const html=fs.readFileSync(path.join(__dirname,'../site/networker.html'),'utf8');
   assert.match(html,/networker-focus\.js/);
