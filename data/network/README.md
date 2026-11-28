@@ -143,3 +143,60 @@ Use `complete` only when the interface confirms the entire equipped list. Use `p
 The relationship breakdown keeps direct leaderboard friends, direct friends whose outfits have known preset matches, incoming followers, and outgoing follows in four separate groups. A person can appear in more than one group, but only once in the direct-friend denominator. It uses observed positive links, not account names or outfits, to identify friends. Near means at least 80% of the exact required item IDs for a preset with at least three required IDs, on a complete avatar scan. A partial scan can establish a full match if every required item was observed; otherwise it remains unknown. The rate uses only fully scanned observed friends and reports that denominator and unknowns separately. Exact matches confirmed on partial scans remain visible but are excluded from both sides of the rate. No avatar query or inference about botting is made by this view.
 
 Workflow: finish the ranked Friends pass before starting a separate directional Followers and Following pass. A transient or incomplete Friends list remains a partial record with the next checkpoint; it does not establish an empty list. Save and push each verified batch without replacing the earlier journal.
+
+
+## Recover ID-only usernames from normal Roblox profiles (no API needed)
+
+The Networker cannot infer a real username from a Roblox ID, a display name,
+similar outfits, or similar-looking usernames. The public profile for an exact
+saved user ID may visibly show the account's username. Use a permitted
+interactive browser such as dot/ChatGPT Work, not bulk API requests.
+
+1. Open the prioritised ID-only list at
+   `https://nitwi.github.io/fisch-money-leaderboard/network-profile-queue.json`.
+   It lists exact account IDs, normal profile URLs, and already-observed ledger
+   relationship counts. Prioritize high-connection accounts rather than all
+   thousands of unknown accounts.
+2. Visit the supplied `https://www.roblox.com/users/ID/profile` using normal
+   browser navigation. Confirm that the visited profile is **the same numeric
+   user ID**, then read the exact Roblox **username** (not the display name).
+   Do not infer or create a username when it is not visible.
+3. Capture the actual UTC observation time and exact profile URL. Create an
+   input JSON array such as the following **illustration**, not real evidence:
+
+```json
+[
+  {
+    "schema_version": 1,
+    "method": "roblox_website_profile",
+    "user_id": "12345",
+    "username": "ExactVisibleUsername",
+    "display_name": "Display Name",
+    "status": "verified",
+    "observed_at": "2026-11-27T23:05:00Z",
+    "source_url": "https://www.roblox.com/users/12345/profile"
+  }
+]
+```
+
+4. Import via `python tools/import_network_profile_names.py import --input profiles.json`.
+   This verifies that each ID exists in the saved Networker, checks profile
+   URL/ID equality, validates usernames and UTC timestamps, and appends only
+   new immutable records to `data/network/profile-name-observations.jsonl`.
+   Commit that journal as a reviewable GitHub change.
+5. Deployment runs `python tools/build_network_usernames.py --profiles-only
+   --inherit-published`. This **does not call Roblox's Users API**. It joins
+   saved website-profile observations with prior verified names from the
+   already-published static Networker overlay, if that overlay is readable,
+   and publishes `site/network-usernames.json` plus an updated
+   `site/network-profile-queue.json`. The graph displays the username by
+   exact ID with observation provenance.
+
+If a profile is inaccessible, deleted, does not display the username, or has
+an access restriction, record `status: "unavailable"`, `username: ""` only
+when there was an actual attempted inspection, or skip it. Never claim an
+uninspected account is unavailable. Stop collection at restrictions: do not
+use proxies, alternate endpoints, scraping tricks, or aggressive retries to
+evade a denial. Any missing name retains the ID or a clearly marked saved
+display name/previously observed handle. Website friendships, account
+relationships, and ledger rankings are not modified by this process.

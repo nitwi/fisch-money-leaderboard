@@ -23,14 +23,15 @@
   }
   function applyVerifiedUsernames(network, overlay, core) {
     if (!network?.nodes || overlay?.schema_version !== 1 ||
-        overlay?.source_url !== "https://users.roblox.com/v1/users" ||
+        !["https://users.roblox.com/v1/users", "roblox_verified_profile_and_prior_api"].includes(overlay?.source_url) ||
         !overlay.users || typeof overlay.users !== "object" || Array.isArray(overlay.users)) return 0;
     let changed = 0;
     for (const [key, record] of Object.entries(overlay.users)) {
       const id = core.normalizeId(key);
       if (id !== key || !record || typeof record !== "object" ||
           core.normalizeId(record.id) !== id ||
-          record.source_url !== overlay.source_url ||
+          !(record.source_url === "https://users.roblox.com/v1/users" ||
+            record.source_url === `https://www.roblox.com/users/${id}/profile`) ||
           !Number.isFinite(Date.parse(record.observed_at || ""))) continue;
       const username = record.username;
       if (typeof username !== "string" || !/^[A-Za-z0-9_]{1,20}$/.test(username)) continue;
@@ -45,6 +46,61 @@
     }
     return changed;
   }
+  function ledgerRankProjection(savedAccounts, ledger, core) {
+    const byId = new Map();
+    for (const account of savedAccounts) {
+      const id = core.normalizeId(account?.id);
+      if (!id || byId.has(id) || typeof account.username !== "string") continue;
+      // Relationship exports are not a fallback for current ranks.
+      byId.set(id, {...account, id, latest_rank: null});
+    }
+    const checkpoint = Array.isArray(ledger?.checkpoints) && ledger.checkpoints.at(-1);
+    if (!checkpoint?.id || !Array.isArray(ledger.observations)) return {accounts: [...byId.values()], roster: [], checkpoint: null};
+    const canonicalName = value => /^[A-Za-z0-9_]{1,20}$/.test(value || "") ? value.toLowerCase() : "";
+    const exactId = row => typeof row.key === "string" && row.key.startsWith("id:") ? core.normalizeId(row.key.slice(3)) : null;
+    const sourceRows = ledger.observations.filter(row => row?.status === "verified" && canonicalName(row.username));
+    const playerMeta = new Map((Array.isArray(ledger.players) ? ledger.players : []).map(player => [player.key, player]));
+    // Augment saved history only with exact numeric IDs from verified ledger
+    // observations. A new identity may have no relationship records yet.
+    for (const row of sourceRows) {
+      const id = exactId(row);
+      if (!id) continue;
+      const cached = byId.get(id);
+      if (cached) { cached.ledger = true; continue; }
+      const meta = playerMeta.get(row.key);
+      byId.set(id, {id, username: meta?.roblox_name || meta?.name || row.username,
+        headshot: meta?.headshot || null, ledger: true, latest_rank: null});
+    }
+    const names = new Map();
+    for (const person of byId.values()) {
+      const name = canonicalName(person.username);
+      if (!name || !person.ledger) continue;
+      if (!names.has(name)) names.set(name, []);
+      names.get(name).push(person.id);
+    }
+    // Same default checkpoint and verified-by-photo filter used by app.js.
+    // Do not use balances, profile-balance updates or chart-only exclusions
+    // to derive order. Unresolved photo rows remain visible but cannot root a graph.
+    const rows = sourceRows.filter(row => row.checkpoint === checkpoint.id &&
+      Number.isInteger(row.rank) && row.rank >= 1 && row.rank <= 50).sort((a, b) => a.rank - b.rank);
+    const exactIds = new Set(rows.map(exactId).filter(Boolean));
+    const roster = [];
+    const assignedIds = new Set();
+    const assignedRanks = new Set();
+    for (const row of rows) {
+      if (assignedRanks.has(row.rank)) continue;
+      assignedRanks.add(row.rank);
+      const name = canonicalName(row.username);
+      const candidates = names.get(name);
+      const id = exactId(row) || (row.key === "name:" + name && candidates?.length === 1 &&
+        !exactIds.has(candidates[0]) ? candidates[0] : null);
+      const person = id && !assignedIds.has(id) ? byId.get(id) : null;
+      if (person) { person.latest_rank = row.rank; assignedIds.add(id); }
+      roster.push({id: person?.id || null, username: row.username, latest_rank: row.rank});
+    }
+    return {accounts: [...byId.values()], roster, checkpoint};
+  }
+
   function rank(person) {
     return Number.isInteger(person && person.latest_rank) && person.latest_rank > 0 ? person.latest_rank : null;
   }
@@ -122,7 +178,7 @@
     const time = global.FischTime;
     const get = id => doc.getElementById(id);
     const state = {data: null, accounts: [], network: null, rootId: null, selectedId: null,
-      view: null, model: null, allExternal: false, expandedPicker: false};
+      view: null, model: null, allExternal: false, expandedPicker: false, ledgerCheckpoint: null, ledgerRoster: []};
     function node(tag, className, content) {
       const el = doc.createElement(tag);
       if (className) el.className = className;
@@ -144,13 +200,18 @@
       const item = node("button", className || "nwf-text-button", text);
       item.type = "button"; item.addEventListener("click", handler); return item;
     }
-    function personButton(person, action, selected) {
+    function personButton(person, action, selected, boardRow) {
       const item = node("button", "nwf-person-card" + (selected ? " is-current" : ""));
       item.type = "button";
       item.setAttribute("aria-pressed", String(Boolean(selected)));
-      item.setAttribute("aria-label", "Investigate " + label(person));
+      const shownName = boardRow ? label(boardRow) : label(person);
+      const detail = person?.id ? "ID " + person.id : "Roblox ID not verified";
+      const shownRank = rank(boardRow || person);
+      item.disabled = !person?.id;
+      item.setAttribute("aria-label", item.disabled ? shownName + ", rank " + shownRank + ", Roblox ID not verified" :
+        "Investigate " + shownName + (shownRank ? ", rank " + shownRank : ""));
       const content = node("span", "nwf-person-text");
-      content.append(node("strong", "", label(person)), node("small", "", (rank(person) ? "#" + rank(person) + " · " : "") + "ID " + person.id));
+      content.append(node("strong", "", shownName), node("small", "", (shownRank ? "#" + shownRank + " · " : "") + detail));
       item.append(imageFor(person), content);
       item.addEventListener("click", () => action(person));
       return item;
@@ -195,14 +256,21 @@
     }
     function renderPicker() {
       const needle = get("nwf-target-search").value.trim();
-      const matches = matchingPeople(state.network, needle, needle ? 80 : 50);
+      const matches = needle ? matchingPeople(state.network, needle, 80) : state.ledgerRoster;
       const shown = needle || state.expandedPicker ? matches : matches.slice(0, 9);
-      get("nwf-picker-heading").textContent = needle ? "Saved matching identities" : "Latest photographed Top 50";
+      get("nwf-picker-heading").textContent = needle ? "Saved matching identities" :
+        state.ledgerCheckpoint ? "Latest photographed Top 50 · " + (state.ledgerCheckpoint.day_key || state.ledgerCheckpoint.id) :
+        "Current ledger rankings unavailable";
       get("nwf-picker-count").textContent = shown.length + (needle ? " matches shown" : " of " + matches.length);
       const grid = get("nwf-account-grid");
       grid.replaceChildren();
-      for (const item of shown) grid.append(personButton(item, chooseRoot, item.id === state.rootId));
-      if (!shown.length) grid.append(node("p", "nwf-help", "No saved account matches. Unscanned accounts cannot be invented."));
+      for (const item of shown) {
+        const person = needle ? item : state.network.nodes.get(item.id);
+        grid.append(personButton(person, chooseRoot, Boolean(person) && person.id === state.rootId, needle ? null : item));
+      }
+      if (!shown.length) grid.append(node("p", "nwf-help", needle ? "No saved account matches." :
+        state.ledgerCheckpoint ? "The latest ledger checkpoint has no photo-verified ranks." :
+        "The main ledger list could not be loaded. You can still search saved accounts; outdated ranks are not shown."));
       const more = get("nwf-more-accounts");
       more.hidden = Boolean(needle) || matches.length <= 9;
       more.textContent = state.expandedPicker ? "Show fewer" : "Show all " + matches.length;
@@ -322,19 +390,19 @@
     }
     async function init() {
       try {
-        const response = await global.fetch("network-data.json", {cache:"no-cache"});
-        if (!response.ok) throw new Error("HTTP " + response.status);
-        const data = await response.json();
+        const networkRequest = global.fetch("network-data.json", {cache:"no-cache"}).then(response => {
+          if (!response.ok) throw new Error("HTTP " + response.status);
+          return response.json();
+        });
+        const ledgerRequest = global.fetch("data.json", {cache:"no-cache"}).then(response =>
+          response.ok ? response.json() : null).catch(() => null);
+        const [data, ledger] = await Promise.all([networkRequest, ledgerRequest]);
         if (data.schema_version !== 1 || !Array.isArray(data.accounts)) throw new Error("Unsupported network snapshot");
         state.data = data;
-        const seen = new Set();
-        state.accounts = data.accounts.filter(account => {
-          const id = core.normalizeId(account && account.id);
-          if (!id || seen.has(id) || typeof account.username !== "string") return false;
-          seen.add(id);
-          account.id = id;
-          return true;
-        });
+        const projection = ledgerRankProjection(data.accounts, ledger, core);
+        state.accounts = projection.accounts;
+        state.ledgerCheckpoint = projection.checkpoint;
+        state.ledgerRoster = projection.roster;
         state.network = core.socialNetwork(state.accounts, Array.isArray(data.network_nodes) ? data.network_nodes : []);
         // Optional static overlay generated from the official Roblox Users API
         // at publication time. GitHub Pages cannot safely rely on Roblox CORS.
@@ -346,7 +414,7 @@
         const params = new URLSearchParams(global.location.search);
         const requested = core.normalizeId(params.get("target"));
         const preferred = state.network.nodes.has("1316700350") ? "1316700350" :
-          (state.accounts.find(account => account.ledger && rank(account) === 1) || state.accounts[0]).id;
+          (state.accounts.find(account => account.ledger && rank(account) === 1) || state.accounts[0])?.id || null;
         state.rootId = params.has("target") ? state.network.nodes.has(requested) ? requested : null : preferred;
         state.selectedId = state.rootId;
         state.allExternal = Boolean(getRoot() && !getRoot().ledger);
@@ -354,7 +422,8 @@
         const cacheTime = data.generated_at ? new Date(data.generated_at) : null;
         get("cache-time").textContent = cacheTime && Number.isFinite(cacheTime.getTime()) ?
           cacheTime.toLocaleString() : "Timestamp unavailable";
-        get("cache-coverage").textContent = state.accounts.length + " cached ledger/reference accounts";
+        get("cache-coverage").textContent = state.accounts.length + " ledger/reference accounts · ranks " +
+          (state.ledgerCheckpoint ? "from the main ledger" : "unavailable");
         get("networker-app").hidden = false;
         setStatus("");
         if (params.has("target") && !state.rootId) setStatus("Requested ID is not present in the saved network. Choose another root.", true);
@@ -386,5 +455,5 @@
     }
     init();
   }
-  return Object.freeze({label, applyVerifiedUsernames, matchingPeople, resolveAccount, insights, start});
+  return Object.freeze({label, applyVerifiedUsernames, ledgerRankProjection, matchingPeople, resolveAccount, insights, start});
 });

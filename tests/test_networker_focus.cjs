@@ -84,6 +84,21 @@ test('exact verified username overlay fills ID-only external accounts without re
   assert.equal(focus.resolveAccount(network,'VerifiedUser2',core).id,'2');
 });
 
+test('website profile observations label graph nodes by exact ID only', () => {
+  const net=core.socialNetwork([person('1',{username:'Root'})],[
+    {id:'2',username:'',ledger:false},{id:'3',username:'',ledger:false}]);
+  const overlay={schema_version:1,source_url:'roblox_verified_profile_and_prior_api',users:{
+    '2':{id:'2',username:'ProfileConfirmed',display_name:'NiceName',
+      observed_at:CHECKED,source_url:'https://www.roblox.com/users/2/profile'},
+    '3':{id:'3',username:'WrongProfile',observed_at:CHECKED,
+      source_url:'https://www.roblox.com/users/2/profile'}
+  }};
+  assert.equal(focus.applyVerifiedUsernames(net,overlay,core),1);
+  assert.equal(focus.label(net.nodes.get('2')),'@ProfileConfirmed');
+  assert.equal(focus.label(net.nodes.get('3')),'ID 3');
+  assert.equal(net.nodes.get('2').username_source_url,overlay.users['2'].source_url);
+});
+
 test('missing usernames use labeled display names, recorded aliases, then ID as last fallback', () => {
   assert.equal(focus.label({id:'2',username:'',display_name:'VisiblePlayer'}),'VisiblePlayer (display name)');
   assert.equal(focus.label({id:'3',username:'',aliases:['PriorExactName']}),
@@ -135,7 +150,7 @@ class Element {
   scrollIntoView(){}
   replaceWith(){}
 }
-async function renderSnapshot(accounts, extra={}) {
+async function renderSnapshot(accounts, extra={}, ledger=null) {
   const elements=new Map();
   const document={
     getElementById(id){if(!elements.has(id))elements.set(id,new Element());return elements.get(id)},
@@ -150,8 +165,9 @@ async function renderSnapshot(accounts, extra={}) {
   const browser={document,location,FischNetworker:core,FischNetworkGraph:simulatedGraph,
     FischUsernamePatterns:patterns,URL,URLSearchParams,Date,Intl,
     history:{replaceState(_s,_unused,url){location.href=String(url);location.search=new URL(url).search}},
-    fetch:async()=>({ok:true,json:async()=>({schema_version:1,generated_at:CHECKED,
-      accounts,network_nodes:[],historical_friend_edges:[],...extra})})};
+    fetch:async url=> { if (url === 'data.json') return {ok: Boolean(ledger), json:async()=>ledger};
+      return {ok:true,json:async()=>({schema_version:1,generated_at:CHECKED,
+        accounts,network_nodes:[],historical_friend_edges:[],...extra})}; }};
   focus.start(browser);
   await new Promise(resolve=>setImmediate(resolve));
   return {elements,calls,location};
@@ -160,18 +176,36 @@ async function renderSnapshot(accounts, extra={}) {
 test('browser controller renders relationship counts and syncs root and inspected node without comparison panel',async()=>{
   const one=person(1,{username:'Main',latest_rank:1});
   const two=person(2,{username:'Another',latest_rank:2});
-  const {elements,calls,location}=await renderSnapshot([one,two]);
+  const {elements,calls,location}=await renderSnapshot([one,two],{}, {
+    checkpoints:[{id:'current',day_key:'2026-11-27'}], observations:[
+      {checkpoint:'current',status:'verified',rank:2,username:'Main',key:'id:1'},
+      {checkpoint:'current',status:'verified',rank:1,username:'Another',key:'id:2'},
+      {checkpoint:'current',status:'verified',rank:3,username:'Unresolved',key:'name:unresolved'},
+    ]
+  });
   assert.equal(elements.get('networker-app').hidden,false,elements.get('network-status').textContent);
   assert.equal(calls.length,1);
-  assert.equal(elements.get('nwf-root-label').textContent.includes('@Main'),true);
-  assert.match(elements.get('nwf-inspected-label').textContent,/@Main/);
+  assert.match(elements.get('nwf-root-label').textContent,/@Another#1/);
+  assert.match(elements.get('nwf-inspected-label').textContent,/@Another#1/);
   assert.match(elements.get('nwf-network-counts').textContent,/Direct ledger accounts/);
   assert.match(elements.get('nwf-pattern-flags').textContent,/Username patterns/);
   assert.equal(elements.get('comparison-panel'),undefined);
   const list=elements.get('nwf-account-grid');
-  assert.equal(list.children.length,2);
+  assert.equal(list.children.length,3);
+  assert.match(list.children[0].textContent,/@Another#1/);
+  assert.match(list.children[2].textContent,/@Unresolved#3 · Roblox ID not verified/);
+  assert.equal(list.children[2].disabled,true);
   list.children[1].listeners.click[0]();
-  assert.equal(new URL(location.href).searchParams.get('target'),'2');
-  assert.match(elements.get('nwf-root-label').textContent,/@Another/);
-  assert.equal(calls.at(-1).focusId,'2');
+  assert.equal(new URL(location.href).searchParams.get('target'),'1');
+  assert.match(elements.get('nwf-root-label').textContent,/@Main#2/);
+  assert.equal(calls.at(-1).focusId,'1');
+});
+
+
+test('browser controller leaves the historical root available without exposing stale ranks',async()=>{
+  const {elements}=await renderSnapshot([person(1,{username:'Saved',latest_rank:27})]);
+  assert.equal(elements.get('networker-app').hidden,false);
+  assert.match(elements.get('nwf-picker-heading').textContent,/rankings unavailable/);
+  assert.match(elements.get('nwf-root-label').textContent,/@Saved.*ID 1/);
+  assert.doesNotMatch(elements.get('nwf-root-label').textContent,/#27/);
 });
