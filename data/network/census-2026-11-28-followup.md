@@ -16,3 +16,11 @@ This checkpoint does not change the leaderboard, prior observations, avatar evid
 All three profiles were reached through the exact People search result and their own Friends link. The next uncompleted Friends checks can prioritize other stale partials without immediately repeating these pages.
 
 Saved positive-ID unions (not current list counts): ewoofs 16 unchanged, zNaN_Rot 34 → 82, Minkib7661 68 unchanged. Journal: 275 rows; 83 Python and 136 Node tests passed; SQLite integrity and foreign keys passed.
+
+## 17:04 UTC Friends continuation
+
+- **emitnick (1785472665):** Exact People result and profile Friends control clicked. One reload recovered the 55-count panel after an initial contradictory zero. Page one was inspected from scroll zero: 14 exact IDs, all previously known, and four unavailable cards without a valid ID. The next-page control stayed on page one. This is a new partial observation, not a reduction of the 45 historically observed IDs. No new relationship edge or avatar finding.
+- **Force_oNature (1295019815):** Exact People result and profile confirmed 26 Friends. The list still reported zero after one reload. Retain prior evidence; no empty list or new observation recorded.
+- **Tbpoqqq:** People returned no exact match on this attempt; retain prior evidence, with no termination or zero inferred.
+
+The journal now has 276 observations and preserves all 275 prior rows. 95 Python and 139 Node tests passed, with SQLite integrity and foreign-key checks clean. This new check is not in production.
