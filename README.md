@@ -39,6 +39,26 @@ Run `node --test tests/test_timestamp.cjs tests/test_ledger_timestamp.cjs` for c
 
 ## Account Networker
 
+### Keeping Networker ranks current
+
+The relationship census in `site/network-data.json` records historical
+friendships, follow links, and profile observations. Its `latest_rank` fields
+are a snapshot from the time that census was generated, **not a live Roblox
+leaderboard**.
+
+Every GitHub Pages publication now runs `python tools/build_network_ranks.py`
+after rebuilding the photo-verified dashboard. This emits a small
+`site/network-ranks.json` overlay from the latest *complete, verified* 50-rank
+screenshot session in `site/data.json`. Networker loads this separately,
+matches accounts by exact Roblox ID, clears obsolete Top-50 ranks, and includes
+newly ranked identities when their ID was resolved. It leaves the original
+network evidence untouched. The header shows the leaderboard as-of day.
+
+A player moving from #27 to #25 appears as #25 **once that move is present in
+the most recently published verified leaderboard screenshots**. These rankings
+do not update from live Roblox without new reviewed screenshots.
+
+
 `site/networker.html` compares exact Roblox accounts from the ledger and any explicitly resolved reference accounts in `site/network-data.json`. Dashboard and Standout Analysis link a selected account directly to the viewer. The first snapshot includes all 69 ledger accounts and the exact reference account `Lunary810` (12013950464); the reference label carries no automated allegation.
 
 The viewer separates direct social observations, shared friends, explained username patterns, and equipped-avatar asset overlap. Username comparisons look for distinctive shared stems, numbered variants, separators, token patterns and common character substitutions. Generic words, short fragments, digit-only overlap and weak random-string resemblance are suppressed. Each positive result explains its rule; the label is a review hint, not an ownership probability. These deterministic comparisons run locally with no live AI call, and they never merge identities or create graph edges. The older edit-distance helper remains only for compatibility; it no longer ranks or labels the review queue. Avatar overlap is shared exact asset IDs divided by the union of equipped IDs, with clothing/accessories shown separately from body and animation assets. Matching equipped item sets are not sufficient to establish an identical rendered avatar or common ownership. Side-by-side thumbnails and item/profile links let a reviewer inspect the actual comparison. Avatars are current at their own scan timestamps, not at the historical board photo time.
