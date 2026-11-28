@@ -46,6 +46,57 @@
     }
     return changed;
   }
+  // The leaderboard and social-census snapshots are updated separately.
+  // Reconcile ranks by exact stable Roblox IDs from a small, photo-verified
+  // overlay emitted alongside each site publication. Never infer identities,
+  // and never change the actual social edges or observation timestamps.
+  function applyLeaderboardRanks(accounts, overlay, previousCheckpoint, core) {
+    if (!Array.isArray(accounts) || overlay?.schema_version !== 1 ||
+        overlay?.source !== "photo_verified_ledger" ||
+        overlay?.checkpoint?.complete !== true ||
+        overlay?.verified_rank_slots !== 50 ||
+        !Array.isArray(overlay.entries) || !overlay.entries.length || overlay.entries.length > 50) return null;
+    const incoming = Date.parse(overlay.checkpoint.at || "");
+    const previous = Date.parse(previousCheckpoint?.at || "");
+    if (!Number.isFinite(incoming) || (Number.isFinite(previous) && incoming < previous) ||
+        typeof overlay.checkpoint.id !== "string" || !overlay.checkpoint.id.trim()) return null;
+    const byId = new Map(), usedRanks = new Set();
+    for (const row of overlay.entries) {
+      const id = core.normalizeId(row?.id);
+      const number = row?.rank;
+      if (!id || String(row.id) !== id ||
+          !Number.isInteger(number) || number < 1 || number > 50 ||
+          byId.has(id) || usedRanks.has(number)) return null;
+      if (row.username !== undefined && (typeof row.username !== "string" ||
+          (row.username && !/^[A-Za-z0-9_]{1,20}$/.test(row.username)))) return null;
+      byId.set(id, row); usedRanks.add(number);
+    }
+    let added = 0;
+    const existing = new Set();
+    for (const account of accounts) {
+      existing.add(account.id);
+      const current = byId.get(account.id);
+      account.latest_rank = current ? current.rank : null;
+      if (current) {
+        account.ledger = true;
+        account.last_seen_day = overlay.checkpoint.day_key || account.last_seen_day;
+      }
+    }
+    for (const [id, row] of byId) {
+      if (existing.has(id)) continue;
+      const username = row.username || "";
+      const headshot = core.thumbnailUrl(row.headshot);
+      accounts.push({id, username, display_name: username, aliases: [], ledger: true,
+        latest_rank: row.rank, last_seen_day: overlay.checkpoint.day_key || null,
+        headshot, avatar: {status: "unavailable"},
+        friends: {status: "unavailable", items: []},
+        followers: {status: "unavailable", items: []},
+        following: {status: "unavailable", items: []}});
+      added++;
+    }
+    return {checkpoint: {...overlay.checkpoint}, ranked: byId.size, added};
+  }
+
   function rank(person) {
     return Number.isInteger(person && person.latest_rank) && person.latest_rank > 0 ? person.latest_rank : null;
   }
@@ -336,6 +387,13 @@
           account.id = id;
           return true;
         });
+        let currentRanks = null;
+        try {
+          const ranksResponse = await global.fetch("network-ranks.json", {cache: "no-cache"});
+          if (ranksResponse.ok) currentRanks = applyLeaderboardRanks(
+            state.accounts, await ranksResponse.json(), data.ledger_latest_checkpoint, core);
+        } catch { /* Older published sites keep their saved as-of rank snapshot. */ }
+        if (currentRanks) data.ledger_latest_checkpoint = currentRanks.checkpoint;
         state.network = core.socialNetwork(state.accounts, Array.isArray(data.network_nodes) ? data.network_nodes : []);
         // Optional static overlay generated from the official Roblox Users API
         // at publication time. GitHub Pages cannot safely rely on Roblox CORS.
@@ -355,7 +413,10 @@
         const cacheTime = data.generated_at ? new Date(data.generated_at) : null;
         get("cache-time").textContent = cacheTime && Number.isFinite(cacheTime.getTime()) ?
           cacheTime.toLocaleString() : "Timestamp unavailable";
-        get("cache-coverage").textContent = state.accounts.length + " cached ledger/reference accounts";
+        const rankCheckpoint = currentRanks?.checkpoint || data.ledger_latest_checkpoint;
+        get("cache-coverage").textContent = state.accounts.length + " saved network accounts · leaderboard ranks as of " +
+          (rankCheckpoint?.day_key || "last saved network snapshot") +
+          (currentRanks ? " (photo-verified)" : " (cached)");
         get("networker-app").hidden = false;
         setStatus("");
         if (params.has("target") && !state.rootId) setStatus("Requested ID is not present in the saved network. Choose another root.", true);
@@ -387,5 +448,5 @@
     }
     init();
   }
-  return Object.freeze({label, applyVerifiedUsernames, matchingPeople, resolveAccount, insights, start});
+  return Object.freeze({label, applyVerifiedUsernames, applyLeaderboardRanks, matchingPeople, resolveAccount, insights, start});
 });

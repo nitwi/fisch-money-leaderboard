@@ -150,7 +150,7 @@ class Element {
   scrollIntoView(){}
   replaceWith(){}
 }
-async function renderSnapshot(accounts, extra={}) {
+async function renderSnapshot(accounts, extra={}, rankOverlay=null) {
   const elements=new Map();
   const document={
     getElementById(id){if(!elements.has(id))elements.set(id,new Element());return elements.get(id)},
@@ -165,12 +165,53 @@ async function renderSnapshot(accounts, extra={}) {
   const browser={document,location,FischNetworker:core,FischNetworkGraph:simulatedGraph,
     FischUsernamePatterns:patterns,URL,URLSearchParams,Date,Intl,
     history:{replaceState(_s,_unused,url){location.href=String(url);location.search=new URL(url).search}},
-    fetch:async()=>({ok:true,json:async()=>({schema_version:1,generated_at:CHECKED,
+    fetch:async(url)=>url==='network-ranks.json' ?
+      ({ok:rankOverlay !== null,json:async()=>rankOverlay}) :
+      ({ok:true,json:async()=>({schema_version:1,generated_at:CHECKED,
       accounts,network_nodes:[],historical_friend_edges:[],...extra})})};
   focus.start(browser);
   await new Promise(resolve=>setImmediate(resolve));
   return {elements,calls,location};
 }
+
+test('reconciles current rank 25 for the same exact ID previously at rank 27', async()=>{
+  const ali=person('27',{username:'AliAccount',ledger:true,latest_rank:27});
+  const displaced=person('25',{username:'OtherAccount',ledger:true,latest_rank:25});
+  const historical=person('40',{username:'FormerTop',ledger:true,latest_rank:3});
+  const newer={schema_version:1,source:'photo_verified_ledger',
+    verified_rank_slots:50,
+    checkpoint:{id:'new-verified-photo',at:'2026-11-27T20:57:00Z',day_key:'2026-11-27',complete:true},
+    entries:[{id:'27',rank:25,username:'AliAccount'},
+             {id:'25',rank:27,username:'OtherAccount'},
+             {id:'50',rank:1,username:'NewEntrant'}]};
+  const {elements,calls}=await renderSnapshot([ali,displaced,historical],
+    {ledger_latest_checkpoint:{id:'old-photo',at:'2026-11-23T18:00:00Z',day_key:'2026-11-23'}},newer);
+  assert.equal(elements.get('networker-app').hidden,false);
+  const rootAccounts=calls[0].accounts;
+  assert.equal(rootAccounts.find(p=>p.id==='27').latest_rank,25);
+  assert.equal(rootAccounts.find(p=>p.id==='25').latest_rank,27);
+  assert.equal(rootAccounts.find(p=>p.id==='40').latest_rank,null);
+  assert.equal(rootAccounts.find(p=>p.id==='50').latest_rank,1);
+  assert.equal(calls[0].network.nodes.get('27').latest_rank,25);
+  assert.equal(calls[0].network.nodes.get('50').ledger,true);
+  assert.match(elements.get('cache-coverage').textContent,/2026-11-27.*photo-verified/);
+  assert.match(elements.get('nwf-account-grid').textContent,/#25/);
+});
+
+test('rank overlays are atomic, reject duplicates and cannot downgrade newer capture',()=>{
+  const data=[person('27',{latest_rank:27}),person('25',{latest_rank:25})];
+  const stamp={id:'new',at:'2026-11-27T20:57:00Z'};
+  const good={schema_version:1,source:'photo_verified_ledger',verified_rank_slots:50,
+    checkpoint:{id:'current',at:'2026-11-28T08:00:00Z',complete:true,day_key:'2026-11-28'},
+    entries:[{id:'27',rank:25,username:'AliAccount'},{id:'25',rank:27,username:'Other'}]};
+  assert.equal(focus.applyLeaderboardRanks(data,{...good,entries:[good.entries[0],
+    {...good.entries[1],rank:25}]},stamp,core),null);
+  assert.equal(data[0].latest_rank,27);
+  assert.equal(focus.applyLeaderboardRanks(data,{...good,checkpoint:{...good.checkpoint,at:'2026-11-20T08:00:00Z'}},stamp,core),null);
+  assert.equal(data[0].latest_rank,27);
+  assert.ok(focus.applyLeaderboardRanks(data,good,stamp,core));
+  assert.equal(data[0].latest_rank,25);
+});
 
 test('browser controller renders relationship counts and syncs root and inspected node without comparison panel',async()=>{
   const one=person(1,{username:'Main',latest_rank:1});
