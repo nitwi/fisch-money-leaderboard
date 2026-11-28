@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-26T23:17:41.733Z",
+  "generated_at": "2026-11-27T08:32:38.649Z",
   "scan_started_at": "2026-11-24T08:34:44Z",
   "ledger_latest_checkpoint": {
     "id": "2026-11-26_0010",
@@ -136641,7 +136641,582 @@
       "external": true,
       "aliases": [
         "Daawiid"
-      ]
+      ],
+      "avatar": {
+        "status": "partial",
+        "assets": [
+          {
+            "id": "1046283703"
+          },
+          {
+            "id": "3360692915"
+          },
+          {
+            "id": "3576717965"
+          },
+          {
+            "id": "3696757129"
+          },
+          {
+            "id": "3696759798"
+          },
+          {
+            "id": "3696763549"
+          },
+          {
+            "id": "3696764866"
+          },
+          {
+            "id": "3716636630"
+          },
+          {
+            "id": "4794157187"
+          },
+          {
+            "id": "5917570207"
+          },
+          {
+            "id": "7028683238"
+          },
+          {
+            "id": "8229869986"
+          },
+          {
+            "id": "14618207727"
+          },
+          {
+            "id": "18558315079"
+          },
+          {
+            "id": "18647692063"
+          }
+        ],
+        "fetched_at": "2026-11-27T08:31:38.238Z",
+        "checked_at": "2026-11-27T08:31:38.238Z",
+        "source_url": "https://www.roblox.com/users/37219128/profile"
+      },
+      "avatar_preset_review": {
+        "user_id": "37219128",
+        "scanned_at": "2026-11-27T08:31:38.238Z",
+        "source_url": "https://www.roblox.com/users/37219128/profile",
+        "scan_id": "avatar_da95cd24bca4681281628e9735d595e4",
+        "status": "unknown",
+        "scan_status": "partial",
+        "preset_version": "v0.18.1.1-beta",
+        "preset_source_url": "https://github.com/nitwi/Roblox-Bot-Investigator/blob/3b3f4e40a9ce3a258f3dac6584add47959a9a980/RBI_Bot.py",
+        "presets": [
+          {
+            "id": "bacon",
+            "name": "Bacon",
+            "category": "defaultcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "144076760",
+              "144076358",
+              "63690008"
+            ],
+            "requiredCount": 3,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "144076760",
+              "144076358",
+              "63690008"
+            ]
+          },
+          {
+            "id": "beanie",
+            "name": "Beanie",
+            "category": "defaultcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "382537569",
+              "4047884939",
+              "1772336109"
+            ],
+            "requiredCount": 3,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "382537569",
+              "4047884939",
+              "1772336109"
+            ]
+          },
+          {
+            "id": "acorn",
+            "name": "Acorn",
+            "category": "defaultcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "62724852",
+              "144076512",
+              "144076436"
+            ],
+            "requiredCount": 3,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "62724852",
+              "144076512",
+              "144076436"
+            ]
+          },
+          {
+            "id": "john",
+            "name": "John",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301809996",
+              "301811279",
+              "301819845",
+              "301820684"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301809996",
+              "301811279",
+              "301819845",
+              "301820684"
+            ]
+          },
+          {
+            "id": "oakley",
+            "name": "Oakley",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301810204",
+              "301811432",
+              "301819935",
+              "301820724"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301810204",
+              "301811432",
+              "301819935",
+              "301820724"
+            ]
+          },
+          {
+            "id": "greenbean",
+            "name": "GreenBean",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "617605556"
+            ],
+            "requiredCount": 1,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "617605556"
+            ]
+          },
+          {
+            "id": "claire",
+            "name": "Claire",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301820599",
+              "301819020"
+            ],
+            "requiredCount": 2,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301820599",
+              "301819020"
+            ]
+          },
+          {
+            "id": "casey",
+            "name": "Casey",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301819154",
+              "301820642",
+              "301809497",
+              "301811027"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301819154",
+              "301820642",
+              "301809497",
+              "301811027"
+            ]
+          },
+          {
+            "id": "lin",
+            "name": "Lin",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301820310",
+              "301818464",
+              "301806786",
+              "301810423"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301820310",
+              "301818464",
+              "301806786",
+              "301810423"
+            ]
+          },
+          {
+            "id": "serena",
+            "name": "Serena",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301818806",
+              "301820523",
+              "301807898",
+              "301810602"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301818806",
+              "301820523",
+              "301807898",
+              "301810602"
+            ]
+          },
+          {
+            "id": "junkbot",
+            "name": "Junkbot",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "12724232885",
+              "4381832739",
+              "4381828509",
+              "4381823417",
+              "4381821661",
+              "4381819685",
+              "4381817635",
+              "4381815211"
+            ],
+            "requiredCount": 8,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "12724232885",
+              "4381832739",
+              "4381828509",
+              "4381823417",
+              "4381821661",
+              "4381819685",
+              "4381817635",
+              "4381815211"
+            ]
+          },
+          {
+            "id": "knightsofredcliff",
+            "name": "Knights of Redcliff",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "2493559059",
+              "2493559856",
+              "2493586650",
+              "2493590711",
+              "2493776828",
+              "2493786076",
+              "137831860413813"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "2493559059",
+              "2493559856",
+              "2493586650",
+              "2493590711",
+              "2493776828",
+              "2493786076",
+              "137831860413813"
+            ]
+          },
+          {
+            "id": "dennis",
+            "name": "Dennis",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "11822635053",
+              "4637596615",
+              "4637601297",
+              "4637254498"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "11822635053",
+              "4637596615",
+              "4637601297",
+              "4637254498"
+            ]
+          },
+          {
+            "id": "lindsey",
+            "name": "Lindsey",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "12945228337",
+              "4637605284",
+              "4637267557",
+              "4637603462"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "12945228337",
+              "4637605284",
+              "4637267557",
+              "4637603462"
+            ]
+          },
+          {
+            "id": "denny",
+            "name": "Denny",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "128985581083096",
+              "6445270994",
+              "6445268819",
+              "6445265102",
+              "6445263379",
+              "6445262286",
+              "6445260402"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "128985581083096",
+              "6445270994",
+              "6445268819",
+              "6445265102",
+              "6445263379",
+              "6445262286",
+              "6445260402"
+            ]
+          },
+          {
+            "id": "linlin",
+            "name": "Linlin",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "85216210917123",
+              "6494077172",
+              "6494056892",
+              "6494055897",
+              "6494055013",
+              "6494053789",
+              "6494051962"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "85216210917123",
+              "6494077172",
+              "6494056892",
+              "6494055897",
+              "6494055013",
+              "6494053789",
+              "6494051962"
+            ]
+          },
+          {
+            "id": "kenneth",
+            "name": "Kenneth",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "15093144795",
+              "4637618900",
+              "4637617396",
+              "4637431811"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "15093144795",
+              "4637618900",
+              "4637617396",
+              "4637431811"
+            ]
+          },
+          {
+            "id": "oliver",
+            "name": "Oliver",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "3963861732",
+              "3963864909",
+              "3963867514",
+              "3963869770",
+              "3963871432",
+              "3963874672",
+              "3670737444",
+              "12778883791"
+            ],
+            "requiredCount": 8,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "3963861732",
+              "3963864909",
+              "3963867514",
+              "3963869770",
+              "3963871432",
+              "3963874672",
+              "3670737444",
+              "12778883791"
+            ]
+          },
+          {
+            "id": "cindy",
+            "name": "Cindy",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "13253943097",
+              "4637612548",
+              "4637611578",
+              "4637156063"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "13253943097",
+              "4637612548",
+              "4637611578",
+              "4637156063"
+            ]
+          },
+          {
+            "id": "citylifewoman",
+            "name": "City Life Woman",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "15093243863",
+              "2492675286",
+              "2492674027",
+              "2492670347",
+              "2492669375",
+              "2492671662",
+              "2492667589"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "15093243863",
+              "2492675286",
+              "2492674027",
+              "2492670347",
+              "2492669375",
+              "2492671662",
+              "2492667589"
+            ]
+          },
+          {
+            "id": "squadghoulstedd",
+            "name": "Squad Ghouls: Drop Dead Tedd",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "2499654059",
+              "112187483939951",
+              "2499646611",
+              "2499646090",
+              "2499645445",
+              "2499644791",
+              "2499643947"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "2499654059",
+              "112187483939951",
+              "2499646611",
+              "2499646090",
+              "2499645445",
+              "2499644791",
+              "2499643947"
+            ]
+          },
+          {
+            "id": "summer",
+            "name": "Summer",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "3963490791",
+              "3670737444"
+            ],
+            "requiredCount": 2,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "3963490791",
+              "3670737444"
+            ]
+          }
+        ]
+      }
     },
     {
       "id": "37603571",
@@ -140812,7 +141387,615 @@
       "external": true,
       "aliases": [
         "potatoarefunni"
-      ]
+      ],
+      "avatar": {
+        "status": "partial",
+        "assets": [
+          {
+            "id": "3576686446"
+          },
+          {
+            "id": "3576717965"
+          },
+          {
+            "id": "3716636630"
+          },
+          {
+            "id": "5915780563"
+          },
+          {
+            "id": "10941865971"
+          },
+          {
+            "id": "11706393151"
+          },
+          {
+            "id": "12656992884"
+          },
+          {
+            "id": "12878995103"
+          },
+          {
+            "id": "14618207727"
+          },
+          {
+            "id": "16112985313"
+          },
+          {
+            "id": "16553249658"
+          },
+          {
+            "id": "17384857745"
+          },
+          {
+            "id": "73073438542366"
+          },
+          {
+            "id": "79312439851071"
+          },
+          {
+            "id": "80895168889507"
+          },
+          {
+            "id": "85352389586585"
+          },
+          {
+            "id": "86328394845700"
+          },
+          {
+            "id": "87016985886252"
+          },
+          {
+            "id": "94257357547118"
+          },
+          {
+            "id": "101873719747781"
+          },
+          {
+            "id": "108046935256808"
+          },
+          {
+            "id": "112540347880956"
+          },
+          {
+            "id": "112758073578333"
+          },
+          {
+            "id": "129514837112252"
+          },
+          {
+            "id": "132678808430455"
+          },
+          {
+            "id": "138753395606793"
+          }
+        ],
+        "fetched_at": "2026-11-27T08:25:19.616Z",
+        "checked_at": "2026-11-27T08:25:19.616Z",
+        "source_url": "https://www.roblox.com/users/324522122/profile"
+      },
+      "avatar_preset_review": {
+        "user_id": "324522122",
+        "scanned_at": "2026-11-27T08:25:19.616Z",
+        "source_url": "https://www.roblox.com/users/324522122/profile",
+        "scan_id": "avatar_9d6690b47bd5d0a736e9c4a9a3633bb6",
+        "status": "unknown",
+        "scan_status": "partial",
+        "preset_version": "v0.18.1.1-beta",
+        "preset_source_url": "https://github.com/nitwi/Roblox-Bot-Investigator/blob/3b3f4e40a9ce3a258f3dac6584add47959a9a980/RBI_Bot.py",
+        "presets": [
+          {
+            "id": "bacon",
+            "name": "Bacon",
+            "category": "defaultcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "144076760",
+              "144076358",
+              "63690008"
+            ],
+            "requiredCount": 3,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "144076760",
+              "144076358",
+              "63690008"
+            ]
+          },
+          {
+            "id": "beanie",
+            "name": "Beanie",
+            "category": "defaultcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "382537569",
+              "4047884939",
+              "1772336109"
+            ],
+            "requiredCount": 3,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "382537569",
+              "4047884939",
+              "1772336109"
+            ]
+          },
+          {
+            "id": "acorn",
+            "name": "Acorn",
+            "category": "defaultcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "62724852",
+              "144076512",
+              "144076436"
+            ],
+            "requiredCount": 3,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "62724852",
+              "144076512",
+              "144076436"
+            ]
+          },
+          {
+            "id": "john",
+            "name": "John",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301809996",
+              "301811279",
+              "301819845",
+              "301820684"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301809996",
+              "301811279",
+              "301819845",
+              "301820684"
+            ]
+          },
+          {
+            "id": "oakley",
+            "name": "Oakley",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301810204",
+              "301811432",
+              "301819935",
+              "301820724"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301810204",
+              "301811432",
+              "301819935",
+              "301820724"
+            ]
+          },
+          {
+            "id": "greenbean",
+            "name": "GreenBean",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "617605556"
+            ],
+            "requiredCount": 1,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "617605556"
+            ]
+          },
+          {
+            "id": "claire",
+            "name": "Claire",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301820599",
+              "301819020"
+            ],
+            "requiredCount": 2,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301820599",
+              "301819020"
+            ]
+          },
+          {
+            "id": "casey",
+            "name": "Casey",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301819154",
+              "301820642",
+              "301809497",
+              "301811027"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301819154",
+              "301820642",
+              "301809497",
+              "301811027"
+            ]
+          },
+          {
+            "id": "lin",
+            "name": "Lin",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301820310",
+              "301818464",
+              "301806786",
+              "301810423"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301820310",
+              "301818464",
+              "301806786",
+              "301810423"
+            ]
+          },
+          {
+            "id": "serena",
+            "name": "Serena",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301818806",
+              "301820523",
+              "301807898",
+              "301810602"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301818806",
+              "301820523",
+              "301807898",
+              "301810602"
+            ]
+          },
+          {
+            "id": "junkbot",
+            "name": "Junkbot",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "12724232885",
+              "4381832739",
+              "4381828509",
+              "4381823417",
+              "4381821661",
+              "4381819685",
+              "4381817635",
+              "4381815211"
+            ],
+            "requiredCount": 8,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "12724232885",
+              "4381832739",
+              "4381828509",
+              "4381823417",
+              "4381821661",
+              "4381819685",
+              "4381817635",
+              "4381815211"
+            ]
+          },
+          {
+            "id": "knightsofredcliff",
+            "name": "Knights of Redcliff",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "2493559059",
+              "2493559856",
+              "2493586650",
+              "2493590711",
+              "2493776828",
+              "2493786076",
+              "137831860413813"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "2493559059",
+              "2493559856",
+              "2493586650",
+              "2493590711",
+              "2493776828",
+              "2493786076",
+              "137831860413813"
+            ]
+          },
+          {
+            "id": "dennis",
+            "name": "Dennis",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "11822635053",
+              "4637596615",
+              "4637601297",
+              "4637254498"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "11822635053",
+              "4637596615",
+              "4637601297",
+              "4637254498"
+            ]
+          },
+          {
+            "id": "lindsey",
+            "name": "Lindsey",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "12945228337",
+              "4637605284",
+              "4637267557",
+              "4637603462"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "12945228337",
+              "4637605284",
+              "4637267557",
+              "4637603462"
+            ]
+          },
+          {
+            "id": "denny",
+            "name": "Denny",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "128985581083096",
+              "6445270994",
+              "6445268819",
+              "6445265102",
+              "6445263379",
+              "6445262286",
+              "6445260402"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "128985581083096",
+              "6445270994",
+              "6445268819",
+              "6445265102",
+              "6445263379",
+              "6445262286",
+              "6445260402"
+            ]
+          },
+          {
+            "id": "linlin",
+            "name": "Linlin",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "85216210917123",
+              "6494077172",
+              "6494056892",
+              "6494055897",
+              "6494055013",
+              "6494053789",
+              "6494051962"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "85216210917123",
+              "6494077172",
+              "6494056892",
+              "6494055897",
+              "6494055013",
+              "6494053789",
+              "6494051962"
+            ]
+          },
+          {
+            "id": "kenneth",
+            "name": "Kenneth",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "15093144795",
+              "4637618900",
+              "4637617396",
+              "4637431811"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "15093144795",
+              "4637618900",
+              "4637617396",
+              "4637431811"
+            ]
+          },
+          {
+            "id": "oliver",
+            "name": "Oliver",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "3963861732",
+              "3963864909",
+              "3963867514",
+              "3963869770",
+              "3963871432",
+              "3963874672",
+              "3670737444",
+              "12778883791"
+            ],
+            "requiredCount": 8,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "3963861732",
+              "3963864909",
+              "3963867514",
+              "3963869770",
+              "3963871432",
+              "3963874672",
+              "3670737444",
+              "12778883791"
+            ]
+          },
+          {
+            "id": "cindy",
+            "name": "Cindy",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "13253943097",
+              "4637612548",
+              "4637611578",
+              "4637156063"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "13253943097",
+              "4637612548",
+              "4637611578",
+              "4637156063"
+            ]
+          },
+          {
+            "id": "citylifewoman",
+            "name": "City Life Woman",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "15093243863",
+              "2492675286",
+              "2492674027",
+              "2492670347",
+              "2492669375",
+              "2492671662",
+              "2492667589"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "15093243863",
+              "2492675286",
+              "2492674027",
+              "2492670347",
+              "2492669375",
+              "2492671662",
+              "2492667589"
+            ]
+          },
+          {
+            "id": "squadghoulstedd",
+            "name": "Squad Ghouls: Drop Dead Tedd",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "2499654059",
+              "112187483939951",
+              "2499646611",
+              "2499646090",
+              "2499645445",
+              "2499644791",
+              "2499643947"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "2499654059",
+              "112187483939951",
+              "2499646611",
+              "2499646090",
+              "2499645445",
+              "2499644791",
+              "2499643947"
+            ]
+          },
+          {
+            "id": "summer",
+            "name": "Summer",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "3963490791",
+              "3670737444"
+            ],
+            "requiredCount": 2,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "3963490791",
+              "3670737444"
+            ]
+          }
+        ]
+      }
     },
     {
       "id": "325666434",
@@ -143117,7 +144300,585 @@
       "external": true,
       "aliases": [
         "Jeromifyish"
-      ]
+      ],
+      "avatar": {
+        "status": "partial",
+        "assets": [
+          {
+            "id": "1241185542"
+          },
+          {
+            "id": "6007998297"
+          },
+          {
+            "id": "6148885088"
+          },
+          {
+            "id": "14353423348"
+          },
+          {
+            "id": "14618207727"
+          },
+          {
+            "id": "18129484136"
+          },
+          {
+            "id": "79017619155911"
+          },
+          {
+            "id": "88859617281337"
+          },
+          {
+            "id": "94292601332790"
+          },
+          {
+            "id": "99660741162664"
+          },
+          {
+            "id": "102610758906338"
+          },
+          {
+            "id": "106367055475970"
+          },
+          {
+            "id": "106370760824973"
+          },
+          {
+            "id": "106580964581555"
+          },
+          {
+            "id": "124893737419785"
+          },
+          {
+            "id": "132367660388476"
+          }
+        ],
+        "fetched_at": "2026-11-27T08:25:38.708Z",
+        "checked_at": "2026-11-27T08:25:38.708Z",
+        "source_url": "https://www.roblox.com/users/605397849/profile"
+      },
+      "avatar_preset_review": {
+        "user_id": "605397849",
+        "scanned_at": "2026-11-27T08:25:38.708Z",
+        "source_url": "https://www.roblox.com/users/605397849/profile",
+        "scan_id": "avatar_b210cc24fe7d8e776d3586739c7e5767",
+        "status": "unknown",
+        "scan_status": "partial",
+        "preset_version": "v0.18.1.1-beta",
+        "preset_source_url": "https://github.com/nitwi/Roblox-Bot-Investigator/blob/3b3f4e40a9ce3a258f3dac6584add47959a9a980/RBI_Bot.py",
+        "presets": [
+          {
+            "id": "bacon",
+            "name": "Bacon",
+            "category": "defaultcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "144076760",
+              "144076358",
+              "63690008"
+            ],
+            "requiredCount": 3,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "144076760",
+              "144076358",
+              "63690008"
+            ]
+          },
+          {
+            "id": "beanie",
+            "name": "Beanie",
+            "category": "defaultcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "382537569",
+              "4047884939",
+              "1772336109"
+            ],
+            "requiredCount": 3,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "382537569",
+              "4047884939",
+              "1772336109"
+            ]
+          },
+          {
+            "id": "acorn",
+            "name": "Acorn",
+            "category": "defaultcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "62724852",
+              "144076512",
+              "144076436"
+            ],
+            "requiredCount": 3,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "62724852",
+              "144076512",
+              "144076436"
+            ]
+          },
+          {
+            "id": "john",
+            "name": "John",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301809996",
+              "301811279",
+              "301819845",
+              "301820684"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301809996",
+              "301811279",
+              "301819845",
+              "301820684"
+            ]
+          },
+          {
+            "id": "oakley",
+            "name": "Oakley",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301810204",
+              "301811432",
+              "301819935",
+              "301820724"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301810204",
+              "301811432",
+              "301819935",
+              "301820724"
+            ]
+          },
+          {
+            "id": "greenbean",
+            "name": "GreenBean",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "617605556"
+            ],
+            "requiredCount": 1,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "617605556"
+            ]
+          },
+          {
+            "id": "claire",
+            "name": "Claire",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301820599",
+              "301819020"
+            ],
+            "requiredCount": 2,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301820599",
+              "301819020"
+            ]
+          },
+          {
+            "id": "casey",
+            "name": "Casey",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301819154",
+              "301820642",
+              "301809497",
+              "301811027"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301819154",
+              "301820642",
+              "301809497",
+              "301811027"
+            ]
+          },
+          {
+            "id": "lin",
+            "name": "Lin",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301820310",
+              "301818464",
+              "301806786",
+              "301810423"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301820310",
+              "301818464",
+              "301806786",
+              "301810423"
+            ]
+          },
+          {
+            "id": "serena",
+            "name": "Serena",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301818806",
+              "301820523",
+              "301807898",
+              "301810602"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301818806",
+              "301820523",
+              "301807898",
+              "301810602"
+            ]
+          },
+          {
+            "id": "junkbot",
+            "name": "Junkbot",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "12724232885",
+              "4381832739",
+              "4381828509",
+              "4381823417",
+              "4381821661",
+              "4381819685",
+              "4381817635",
+              "4381815211"
+            ],
+            "requiredCount": 8,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "12724232885",
+              "4381832739",
+              "4381828509",
+              "4381823417",
+              "4381821661",
+              "4381819685",
+              "4381817635",
+              "4381815211"
+            ]
+          },
+          {
+            "id": "knightsofredcliff",
+            "name": "Knights of Redcliff",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "2493559059",
+              "2493559856",
+              "2493586650",
+              "2493590711",
+              "2493776828",
+              "2493786076",
+              "137831860413813"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "2493559059",
+              "2493559856",
+              "2493586650",
+              "2493590711",
+              "2493776828",
+              "2493786076",
+              "137831860413813"
+            ]
+          },
+          {
+            "id": "dennis",
+            "name": "Dennis",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "11822635053",
+              "4637596615",
+              "4637601297",
+              "4637254498"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "11822635053",
+              "4637596615",
+              "4637601297",
+              "4637254498"
+            ]
+          },
+          {
+            "id": "lindsey",
+            "name": "Lindsey",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "12945228337",
+              "4637605284",
+              "4637267557",
+              "4637603462"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "12945228337",
+              "4637605284",
+              "4637267557",
+              "4637603462"
+            ]
+          },
+          {
+            "id": "denny",
+            "name": "Denny",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "128985581083096",
+              "6445270994",
+              "6445268819",
+              "6445265102",
+              "6445263379",
+              "6445262286",
+              "6445260402"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "128985581083096",
+              "6445270994",
+              "6445268819",
+              "6445265102",
+              "6445263379",
+              "6445262286",
+              "6445260402"
+            ]
+          },
+          {
+            "id": "linlin",
+            "name": "Linlin",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "85216210917123",
+              "6494077172",
+              "6494056892",
+              "6494055897",
+              "6494055013",
+              "6494053789",
+              "6494051962"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "85216210917123",
+              "6494077172",
+              "6494056892",
+              "6494055897",
+              "6494055013",
+              "6494053789",
+              "6494051962"
+            ]
+          },
+          {
+            "id": "kenneth",
+            "name": "Kenneth",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "15093144795",
+              "4637618900",
+              "4637617396",
+              "4637431811"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "15093144795",
+              "4637618900",
+              "4637617396",
+              "4637431811"
+            ]
+          },
+          {
+            "id": "oliver",
+            "name": "Oliver",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "3963861732",
+              "3963864909",
+              "3963867514",
+              "3963869770",
+              "3963871432",
+              "3963874672",
+              "3670737444",
+              "12778883791"
+            ],
+            "requiredCount": 8,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "3963861732",
+              "3963864909",
+              "3963867514",
+              "3963869770",
+              "3963871432",
+              "3963874672",
+              "3670737444",
+              "12778883791"
+            ]
+          },
+          {
+            "id": "cindy",
+            "name": "Cindy",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "13253943097",
+              "4637612548",
+              "4637611578",
+              "4637156063"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "13253943097",
+              "4637612548",
+              "4637611578",
+              "4637156063"
+            ]
+          },
+          {
+            "id": "citylifewoman",
+            "name": "City Life Woman",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "15093243863",
+              "2492675286",
+              "2492674027",
+              "2492670347",
+              "2492669375",
+              "2492671662",
+              "2492667589"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "15093243863",
+              "2492675286",
+              "2492674027",
+              "2492670347",
+              "2492669375",
+              "2492671662",
+              "2492667589"
+            ]
+          },
+          {
+            "id": "squadghoulstedd",
+            "name": "Squad Ghouls: Drop Dead Tedd",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "2499654059",
+              "112187483939951",
+              "2499646611",
+              "2499646090",
+              "2499645445",
+              "2499644791",
+              "2499643947"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "2499654059",
+              "112187483939951",
+              "2499646611",
+              "2499646090",
+              "2499645445",
+              "2499644791",
+              "2499643947"
+            ]
+          },
+          {
+            "id": "summer",
+            "name": "Summer",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "3963490791",
+              "3670737444"
+            ],
+            "requiredCount": 2,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "3963490791",
+              "3670737444"
+            ]
+          }
+        ]
+      }
     },
     {
       "id": "607249713",
@@ -151784,7 +153545,612 @@
       "external": true,
       "aliases": [
         "Anxiety_washere"
-      ]
+      ],
+      "avatar": {
+        "status": "partial",
+        "assets": [
+          {
+            "id": "48474356"
+          },
+          {
+            "id": "973766674"
+          },
+          {
+            "id": "973767371"
+          },
+          {
+            "id": "973768058"
+          },
+          {
+            "id": "973770652"
+          },
+          {
+            "id": "973771666"
+          },
+          {
+            "id": "973772659"
+          },
+          {
+            "id": "973773170"
+          },
+          {
+            "id": "3716633898"
+          },
+          {
+            "id": "4102315500"
+          },
+          {
+            "id": "4391208058"
+          },
+          {
+            "id": "5915780563"
+          },
+          {
+            "id": "5938394742"
+          },
+          {
+            "id": "10159600649"
+          },
+          {
+            "id": "12142438478"
+          },
+          {
+            "id": "12507097350"
+          },
+          {
+            "id": "12874468267"
+          },
+          {
+            "id": "14263753928"
+          },
+          {
+            "id": "14618207727"
+          },
+          {
+            "id": "75797914247714"
+          },
+          {
+            "id": "80923445784018"
+          },
+          {
+            "id": "85114085813460"
+          },
+          {
+            "id": "101873719747781"
+          },
+          {
+            "id": "102265951968788"
+          },
+          {
+            "id": "110312863372588"
+          }
+        ],
+        "fetched_at": "2026-11-27T08:31:45.816Z",
+        "checked_at": "2026-11-27T08:31:45.816Z",
+        "source_url": "https://www.roblox.com/users/1835982118/profile"
+      },
+      "avatar_preset_review": {
+        "user_id": "1835982118",
+        "scanned_at": "2026-11-27T08:31:45.816Z",
+        "source_url": "https://www.roblox.com/users/1835982118/profile",
+        "scan_id": "avatar_dbb94638f9e41a8fbba125a0283c9edc",
+        "status": "unknown",
+        "scan_status": "partial",
+        "preset_version": "v0.18.1.1-beta",
+        "preset_source_url": "https://github.com/nitwi/Roblox-Bot-Investigator/blob/3b3f4e40a9ce3a258f3dac6584add47959a9a980/RBI_Bot.py",
+        "presets": [
+          {
+            "id": "bacon",
+            "name": "Bacon",
+            "category": "defaultcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "144076760",
+              "144076358",
+              "63690008"
+            ],
+            "requiredCount": 3,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "144076760",
+              "144076358",
+              "63690008"
+            ]
+          },
+          {
+            "id": "beanie",
+            "name": "Beanie",
+            "category": "defaultcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "382537569",
+              "4047884939",
+              "1772336109"
+            ],
+            "requiredCount": 3,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "382537569",
+              "4047884939",
+              "1772336109"
+            ]
+          },
+          {
+            "id": "acorn",
+            "name": "Acorn",
+            "category": "defaultcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "62724852",
+              "144076512",
+              "144076436"
+            ],
+            "requiredCount": 3,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "62724852",
+              "144076512",
+              "144076436"
+            ]
+          },
+          {
+            "id": "john",
+            "name": "John",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301809996",
+              "301811279",
+              "301819845",
+              "301820684"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301809996",
+              "301811279",
+              "301819845",
+              "301820684"
+            ]
+          },
+          {
+            "id": "oakley",
+            "name": "Oakley",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301810204",
+              "301811432",
+              "301819935",
+              "301820724"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301810204",
+              "301811432",
+              "301819935",
+              "301820724"
+            ]
+          },
+          {
+            "id": "greenbean",
+            "name": "GreenBean",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "617605556"
+            ],
+            "requiredCount": 1,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "617605556"
+            ]
+          },
+          {
+            "id": "claire",
+            "name": "Claire",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301820599",
+              "301819020"
+            ],
+            "requiredCount": 2,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301820599",
+              "301819020"
+            ]
+          },
+          {
+            "id": "casey",
+            "name": "Casey",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301819154",
+              "301820642",
+              "301809497",
+              "301811027"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301819154",
+              "301820642",
+              "301809497",
+              "301811027"
+            ]
+          },
+          {
+            "id": "lin",
+            "name": "Lin",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301820310",
+              "301818464",
+              "301806786",
+              "301810423"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301820310",
+              "301818464",
+              "301806786",
+              "301810423"
+            ]
+          },
+          {
+            "id": "serena",
+            "name": "Serena",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301818806",
+              "301820523",
+              "301807898",
+              "301810602"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301818806",
+              "301820523",
+              "301807898",
+              "301810602"
+            ]
+          },
+          {
+            "id": "junkbot",
+            "name": "Junkbot",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "12724232885",
+              "4381832739",
+              "4381828509",
+              "4381823417",
+              "4381821661",
+              "4381819685",
+              "4381817635",
+              "4381815211"
+            ],
+            "requiredCount": 8,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "12724232885",
+              "4381832739",
+              "4381828509",
+              "4381823417",
+              "4381821661",
+              "4381819685",
+              "4381817635",
+              "4381815211"
+            ]
+          },
+          {
+            "id": "knightsofredcliff",
+            "name": "Knights of Redcliff",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "2493559059",
+              "2493559856",
+              "2493586650",
+              "2493590711",
+              "2493776828",
+              "2493786076",
+              "137831860413813"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "2493559059",
+              "2493559856",
+              "2493586650",
+              "2493590711",
+              "2493776828",
+              "2493786076",
+              "137831860413813"
+            ]
+          },
+          {
+            "id": "dennis",
+            "name": "Dennis",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "11822635053",
+              "4637596615",
+              "4637601297",
+              "4637254498"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "11822635053",
+              "4637596615",
+              "4637601297",
+              "4637254498"
+            ]
+          },
+          {
+            "id": "lindsey",
+            "name": "Lindsey",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "12945228337",
+              "4637605284",
+              "4637267557",
+              "4637603462"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "12945228337",
+              "4637605284",
+              "4637267557",
+              "4637603462"
+            ]
+          },
+          {
+            "id": "denny",
+            "name": "Denny",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "128985581083096",
+              "6445270994",
+              "6445268819",
+              "6445265102",
+              "6445263379",
+              "6445262286",
+              "6445260402"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "128985581083096",
+              "6445270994",
+              "6445268819",
+              "6445265102",
+              "6445263379",
+              "6445262286",
+              "6445260402"
+            ]
+          },
+          {
+            "id": "linlin",
+            "name": "Linlin",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "85216210917123",
+              "6494077172",
+              "6494056892",
+              "6494055897",
+              "6494055013",
+              "6494053789",
+              "6494051962"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "85216210917123",
+              "6494077172",
+              "6494056892",
+              "6494055897",
+              "6494055013",
+              "6494053789",
+              "6494051962"
+            ]
+          },
+          {
+            "id": "kenneth",
+            "name": "Kenneth",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "15093144795",
+              "4637618900",
+              "4637617396",
+              "4637431811"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "15093144795",
+              "4637618900",
+              "4637617396",
+              "4637431811"
+            ]
+          },
+          {
+            "id": "oliver",
+            "name": "Oliver",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "3963861732",
+              "3963864909",
+              "3963867514",
+              "3963869770",
+              "3963871432",
+              "3963874672",
+              "3670737444",
+              "12778883791"
+            ],
+            "requiredCount": 8,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "3963861732",
+              "3963864909",
+              "3963867514",
+              "3963869770",
+              "3963871432",
+              "3963874672",
+              "3670737444",
+              "12778883791"
+            ]
+          },
+          {
+            "id": "cindy",
+            "name": "Cindy",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "13253943097",
+              "4637612548",
+              "4637611578",
+              "4637156063"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "13253943097",
+              "4637612548",
+              "4637611578",
+              "4637156063"
+            ]
+          },
+          {
+            "id": "citylifewoman",
+            "name": "City Life Woman",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "15093243863",
+              "2492675286",
+              "2492674027",
+              "2492670347",
+              "2492669375",
+              "2492671662",
+              "2492667589"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "15093243863",
+              "2492675286",
+              "2492674027",
+              "2492670347",
+              "2492669375",
+              "2492671662",
+              "2492667589"
+            ]
+          },
+          {
+            "id": "squadghoulstedd",
+            "name": "Squad Ghouls: Drop Dead Tedd",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "2499654059",
+              "112187483939951",
+              "2499646611",
+              "2499646090",
+              "2499645445",
+              "2499644791",
+              "2499643947"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "2499654059",
+              "112187483939951",
+              "2499646611",
+              "2499646090",
+              "2499645445",
+              "2499644791",
+              "2499643947"
+            ]
+          },
+          {
+            "id": "summer",
+            "name": "Summer",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "3963490791",
+              "3670737444"
+            ],
+            "requiredCount": 2,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "3963490791",
+              "3670737444"
+            ]
+          }
+        ]
+      }
     },
     {
       "id": "1836015127",
@@ -162339,7 +164705,558 @@
       "external": true,
       "aliases": [
         "igotaskill9"
-      ]
+      ],
+      "avatar": {
+        "status": "partial",
+        "assets": [
+          {
+            "id": "3360686498"
+          },
+          {
+            "id": "3576686446"
+          },
+          {
+            "id": "3576823880"
+          },
+          {
+            "id": "3576968026"
+          },
+          {
+            "id": "13547442934"
+          },
+          {
+            "id": "18601246741"
+          },
+          {
+            "id": "137268682270383"
+          }
+        ],
+        "fetched_at": "2026-11-27T08:31:49.756Z",
+        "checked_at": "2026-11-27T08:31:49.756Z",
+        "source_url": "https://www.roblox.com/users/4001331807/profile"
+      },
+      "avatar_preset_review": {
+        "user_id": "4001331807",
+        "scanned_at": "2026-11-27T08:31:49.756Z",
+        "source_url": "https://www.roblox.com/users/4001331807/profile",
+        "scan_id": "avatar_1974ca257e35e140c2e14561c64d1818",
+        "status": "unknown",
+        "scan_status": "partial",
+        "preset_version": "v0.18.1.1-beta",
+        "preset_source_url": "https://github.com/nitwi/Roblox-Bot-Investigator/blob/3b3f4e40a9ce3a258f3dac6584add47959a9a980/RBI_Bot.py",
+        "presets": [
+          {
+            "id": "bacon",
+            "name": "Bacon",
+            "category": "defaultcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "144076760",
+              "144076358",
+              "63690008"
+            ],
+            "requiredCount": 3,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "144076760",
+              "144076358",
+              "63690008"
+            ]
+          },
+          {
+            "id": "beanie",
+            "name": "Beanie",
+            "category": "defaultcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "382537569",
+              "4047884939",
+              "1772336109"
+            ],
+            "requiredCount": 3,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "382537569",
+              "4047884939",
+              "1772336109"
+            ]
+          },
+          {
+            "id": "acorn",
+            "name": "Acorn",
+            "category": "defaultcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "62724852",
+              "144076512",
+              "144076436"
+            ],
+            "requiredCount": 3,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "62724852",
+              "144076512",
+              "144076436"
+            ]
+          },
+          {
+            "id": "john",
+            "name": "John",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301809996",
+              "301811279",
+              "301819845",
+              "301820684"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301809996",
+              "301811279",
+              "301819845",
+              "301820684"
+            ]
+          },
+          {
+            "id": "oakley",
+            "name": "Oakley",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301810204",
+              "301811432",
+              "301819935",
+              "301820724"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301810204",
+              "301811432",
+              "301819935",
+              "301820724"
+            ]
+          },
+          {
+            "id": "greenbean",
+            "name": "GreenBean",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "617605556"
+            ],
+            "requiredCount": 1,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "617605556"
+            ]
+          },
+          {
+            "id": "claire",
+            "name": "Claire",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301820599",
+              "301819020"
+            ],
+            "requiredCount": 2,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301820599",
+              "301819020"
+            ]
+          },
+          {
+            "id": "casey",
+            "name": "Casey",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301819154",
+              "301820642",
+              "301809497",
+              "301811027"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301819154",
+              "301820642",
+              "301809497",
+              "301811027"
+            ]
+          },
+          {
+            "id": "lin",
+            "name": "Lin",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301820310",
+              "301818464",
+              "301806786",
+              "301810423"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301820310",
+              "301818464",
+              "301806786",
+              "301810423"
+            ]
+          },
+          {
+            "id": "serena",
+            "name": "Serena",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301818806",
+              "301820523",
+              "301807898",
+              "301810602"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301818806",
+              "301820523",
+              "301807898",
+              "301810602"
+            ]
+          },
+          {
+            "id": "junkbot",
+            "name": "Junkbot",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "12724232885",
+              "4381832739",
+              "4381828509",
+              "4381823417",
+              "4381821661",
+              "4381819685",
+              "4381817635",
+              "4381815211"
+            ],
+            "requiredCount": 8,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "12724232885",
+              "4381832739",
+              "4381828509",
+              "4381823417",
+              "4381821661",
+              "4381819685",
+              "4381817635",
+              "4381815211"
+            ]
+          },
+          {
+            "id": "knightsofredcliff",
+            "name": "Knights of Redcliff",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "2493559059",
+              "2493559856",
+              "2493586650",
+              "2493590711",
+              "2493776828",
+              "2493786076",
+              "137831860413813"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "2493559059",
+              "2493559856",
+              "2493586650",
+              "2493590711",
+              "2493776828",
+              "2493786076",
+              "137831860413813"
+            ]
+          },
+          {
+            "id": "dennis",
+            "name": "Dennis",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "11822635053",
+              "4637596615",
+              "4637601297",
+              "4637254498"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "11822635053",
+              "4637596615",
+              "4637601297",
+              "4637254498"
+            ]
+          },
+          {
+            "id": "lindsey",
+            "name": "Lindsey",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "12945228337",
+              "4637605284",
+              "4637267557",
+              "4637603462"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "12945228337",
+              "4637605284",
+              "4637267557",
+              "4637603462"
+            ]
+          },
+          {
+            "id": "denny",
+            "name": "Denny",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "128985581083096",
+              "6445270994",
+              "6445268819",
+              "6445265102",
+              "6445263379",
+              "6445262286",
+              "6445260402"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "128985581083096",
+              "6445270994",
+              "6445268819",
+              "6445265102",
+              "6445263379",
+              "6445262286",
+              "6445260402"
+            ]
+          },
+          {
+            "id": "linlin",
+            "name": "Linlin",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "85216210917123",
+              "6494077172",
+              "6494056892",
+              "6494055897",
+              "6494055013",
+              "6494053789",
+              "6494051962"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "85216210917123",
+              "6494077172",
+              "6494056892",
+              "6494055897",
+              "6494055013",
+              "6494053789",
+              "6494051962"
+            ]
+          },
+          {
+            "id": "kenneth",
+            "name": "Kenneth",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "15093144795",
+              "4637618900",
+              "4637617396",
+              "4637431811"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "15093144795",
+              "4637618900",
+              "4637617396",
+              "4637431811"
+            ]
+          },
+          {
+            "id": "oliver",
+            "name": "Oliver",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "3963861732",
+              "3963864909",
+              "3963867514",
+              "3963869770",
+              "3963871432",
+              "3963874672",
+              "3670737444",
+              "12778883791"
+            ],
+            "requiredCount": 8,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "3963861732",
+              "3963864909",
+              "3963867514",
+              "3963869770",
+              "3963871432",
+              "3963874672",
+              "3670737444",
+              "12778883791"
+            ]
+          },
+          {
+            "id": "cindy",
+            "name": "Cindy",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "13253943097",
+              "4637612548",
+              "4637611578",
+              "4637156063"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "13253943097",
+              "4637612548",
+              "4637611578",
+              "4637156063"
+            ]
+          },
+          {
+            "id": "citylifewoman",
+            "name": "City Life Woman",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "15093243863",
+              "2492675286",
+              "2492674027",
+              "2492670347",
+              "2492669375",
+              "2492671662",
+              "2492667589"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "15093243863",
+              "2492675286",
+              "2492674027",
+              "2492670347",
+              "2492669375",
+              "2492671662",
+              "2492667589"
+            ]
+          },
+          {
+            "id": "squadghoulstedd",
+            "name": "Squad Ghouls: Drop Dead Tedd",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "2499654059",
+              "112187483939951",
+              "2499646611",
+              "2499646090",
+              "2499645445",
+              "2499644791",
+              "2499643947"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "2499654059",
+              "112187483939951",
+              "2499646611",
+              "2499646090",
+              "2499645445",
+              "2499644791",
+              "2499643947"
+            ]
+          },
+          {
+            "id": "summer",
+            "name": "Summer",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "3963490791",
+              "3670737444"
+            ],
+            "requiredCount": 2,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "3963490791",
+              "3670737444"
+            ]
+          }
+        ]
+      }
     },
     {
       "id": "4004115770",
@@ -163417,7 +166334,615 @@
       "external": true,
       "aliases": [
         "Elkpay"
-      ]
+      ],
+      "avatar": {
+        "status": "partial",
+        "assets": [
+          {
+            "id": "6869813008"
+          },
+          {
+            "id": "11573370910"
+          },
+          {
+            "id": "12507097350"
+          },
+          {
+            "id": "13344121112"
+          },
+          {
+            "id": "15093053680"
+          },
+          {
+            "id": "15941229295"
+          },
+          {
+            "id": "18538164337"
+          },
+          {
+            "id": "79464789883753"
+          },
+          {
+            "id": "81173578919490"
+          },
+          {
+            "id": "86800672185924"
+          },
+          {
+            "id": "91442631640229"
+          },
+          {
+            "id": "92426097565130"
+          },
+          {
+            "id": "96754953040688"
+          },
+          {
+            "id": "99901926147031"
+          },
+          {
+            "id": "99928806802401"
+          },
+          {
+            "id": "100180606669939"
+          },
+          {
+            "id": "104406060298008"
+          },
+          {
+            "id": "110907985002120"
+          },
+          {
+            "id": "114960604520976"
+          },
+          {
+            "id": "116343198036897"
+          },
+          {
+            "id": "121013717163339"
+          },
+          {
+            "id": "123658899570270"
+          },
+          {
+            "id": "124629239800672"
+          },
+          {
+            "id": "128794725436467"
+          },
+          {
+            "id": "130815097772428"
+          },
+          {
+            "id": "132784524055242"
+          }
+        ],
+        "fetched_at": "2026-11-27T08:32:04.225Z",
+        "checked_at": "2026-11-27T08:32:04.225Z",
+        "source_url": "https://www.roblox.com/users/4292249721/profile"
+      },
+      "avatar_preset_review": {
+        "user_id": "4292249721",
+        "scanned_at": "2026-11-27T08:32:04.225Z",
+        "source_url": "https://www.roblox.com/users/4292249721/profile",
+        "scan_id": "avatar_c2dfd946c4525a716f10e4db4a522404",
+        "status": "unknown",
+        "scan_status": "partial",
+        "preset_version": "v0.18.1.1-beta",
+        "preset_source_url": "https://github.com/nitwi/Roblox-Bot-Investigator/blob/3b3f4e40a9ce3a258f3dac6584add47959a9a980/RBI_Bot.py",
+        "presets": [
+          {
+            "id": "bacon",
+            "name": "Bacon",
+            "category": "defaultcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "144076760",
+              "144076358",
+              "63690008"
+            ],
+            "requiredCount": 3,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "144076760",
+              "144076358",
+              "63690008"
+            ]
+          },
+          {
+            "id": "beanie",
+            "name": "Beanie",
+            "category": "defaultcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "382537569",
+              "4047884939",
+              "1772336109"
+            ],
+            "requiredCount": 3,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "382537569",
+              "4047884939",
+              "1772336109"
+            ]
+          },
+          {
+            "id": "acorn",
+            "name": "Acorn",
+            "category": "defaultcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "62724852",
+              "144076512",
+              "144076436"
+            ],
+            "requiredCount": 3,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "62724852",
+              "144076512",
+              "144076436"
+            ]
+          },
+          {
+            "id": "john",
+            "name": "John",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301809996",
+              "301811279",
+              "301819845",
+              "301820684"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301809996",
+              "301811279",
+              "301819845",
+              "301820684"
+            ]
+          },
+          {
+            "id": "oakley",
+            "name": "Oakley",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301810204",
+              "301811432",
+              "301819935",
+              "301820724"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301810204",
+              "301811432",
+              "301819935",
+              "301820724"
+            ]
+          },
+          {
+            "id": "greenbean",
+            "name": "GreenBean",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "617605556"
+            ],
+            "requiredCount": 1,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "617605556"
+            ]
+          },
+          {
+            "id": "claire",
+            "name": "Claire",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301820599",
+              "301819020"
+            ],
+            "requiredCount": 2,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301820599",
+              "301819020"
+            ]
+          },
+          {
+            "id": "casey",
+            "name": "Casey",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301819154",
+              "301820642",
+              "301809497",
+              "301811027"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301819154",
+              "301820642",
+              "301809497",
+              "301811027"
+            ]
+          },
+          {
+            "id": "lin",
+            "name": "Lin",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301820310",
+              "301818464",
+              "301806786",
+              "301810423"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301820310",
+              "301818464",
+              "301806786",
+              "301810423"
+            ]
+          },
+          {
+            "id": "serena",
+            "name": "Serena",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301818806",
+              "301820523",
+              "301807898",
+              "301810602"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301818806",
+              "301820523",
+              "301807898",
+              "301810602"
+            ]
+          },
+          {
+            "id": "junkbot",
+            "name": "Junkbot",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "12724232885",
+              "4381832739",
+              "4381828509",
+              "4381823417",
+              "4381821661",
+              "4381819685",
+              "4381817635",
+              "4381815211"
+            ],
+            "requiredCount": 8,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "12724232885",
+              "4381832739",
+              "4381828509",
+              "4381823417",
+              "4381821661",
+              "4381819685",
+              "4381817635",
+              "4381815211"
+            ]
+          },
+          {
+            "id": "knightsofredcliff",
+            "name": "Knights of Redcliff",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "2493559059",
+              "2493559856",
+              "2493586650",
+              "2493590711",
+              "2493776828",
+              "2493786076",
+              "137831860413813"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "2493559059",
+              "2493559856",
+              "2493586650",
+              "2493590711",
+              "2493776828",
+              "2493786076",
+              "137831860413813"
+            ]
+          },
+          {
+            "id": "dennis",
+            "name": "Dennis",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "11822635053",
+              "4637596615",
+              "4637601297",
+              "4637254498"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "11822635053",
+              "4637596615",
+              "4637601297",
+              "4637254498"
+            ]
+          },
+          {
+            "id": "lindsey",
+            "name": "Lindsey",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "12945228337",
+              "4637605284",
+              "4637267557",
+              "4637603462"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "12945228337",
+              "4637605284",
+              "4637267557",
+              "4637603462"
+            ]
+          },
+          {
+            "id": "denny",
+            "name": "Denny",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "128985581083096",
+              "6445270994",
+              "6445268819",
+              "6445265102",
+              "6445263379",
+              "6445262286",
+              "6445260402"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "128985581083096",
+              "6445270994",
+              "6445268819",
+              "6445265102",
+              "6445263379",
+              "6445262286",
+              "6445260402"
+            ]
+          },
+          {
+            "id": "linlin",
+            "name": "Linlin",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "85216210917123",
+              "6494077172",
+              "6494056892",
+              "6494055897",
+              "6494055013",
+              "6494053789",
+              "6494051962"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "85216210917123",
+              "6494077172",
+              "6494056892",
+              "6494055897",
+              "6494055013",
+              "6494053789",
+              "6494051962"
+            ]
+          },
+          {
+            "id": "kenneth",
+            "name": "Kenneth",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "15093144795",
+              "4637618900",
+              "4637617396",
+              "4637431811"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "15093144795",
+              "4637618900",
+              "4637617396",
+              "4637431811"
+            ]
+          },
+          {
+            "id": "oliver",
+            "name": "Oliver",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "3963861732",
+              "3963864909",
+              "3963867514",
+              "3963869770",
+              "3963871432",
+              "3963874672",
+              "3670737444",
+              "12778883791"
+            ],
+            "requiredCount": 8,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "3963861732",
+              "3963864909",
+              "3963867514",
+              "3963869770",
+              "3963871432",
+              "3963874672",
+              "3670737444",
+              "12778883791"
+            ]
+          },
+          {
+            "id": "cindy",
+            "name": "Cindy",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "13253943097",
+              "4637612548",
+              "4637611578",
+              "4637156063"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "13253943097",
+              "4637612548",
+              "4637611578",
+              "4637156063"
+            ]
+          },
+          {
+            "id": "citylifewoman",
+            "name": "City Life Woman",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "15093243863",
+              "2492675286",
+              "2492674027",
+              "2492670347",
+              "2492669375",
+              "2492671662",
+              "2492667589"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "15093243863",
+              "2492675286",
+              "2492674027",
+              "2492670347",
+              "2492669375",
+              "2492671662",
+              "2492667589"
+            ]
+          },
+          {
+            "id": "squadghoulstedd",
+            "name": "Squad Ghouls: Drop Dead Tedd",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "2499654059",
+              "112187483939951",
+              "2499646611",
+              "2499646090",
+              "2499645445",
+              "2499644791",
+              "2499643947"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "2499654059",
+              "112187483939951",
+              "2499646611",
+              "2499646090",
+              "2499645445",
+              "2499644791",
+              "2499643947"
+            ]
+          },
+          {
+            "id": "summer",
+            "name": "Summer",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "3963490791",
+              "3670737444"
+            ],
+            "requiredCount": 2,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "3963490791",
+              "3670737444"
+            ]
+          }
+        ]
+      }
     },
     {
       "id": "4293180277",
@@ -173235,7 +176760,558 @@
       "external": true,
       "aliases": [
         "Cuurt669"
-      ]
+      ],
+      "avatar": {
+        "status": "partial",
+        "assets": [
+          {
+            "id": "376524487"
+          },
+          {
+            "id": "376526673"
+          },
+          {
+            "id": "376531300"
+          },
+          {
+            "id": "376531703"
+          },
+          {
+            "id": "382538503"
+          },
+          {
+            "id": "10725826963"
+          },
+          {
+            "id": "10725833199"
+          }
+        ],
+        "fetched_at": "2026-11-27T08:32:22.893Z",
+        "checked_at": "2026-11-27T08:32:22.893Z",
+        "source_url": "https://www.roblox.com/users/7593104865/profile"
+      },
+      "avatar_preset_review": {
+        "user_id": "7593104865",
+        "scanned_at": "2026-11-27T08:32:22.893Z",
+        "source_url": "https://www.roblox.com/users/7593104865/profile",
+        "scan_id": "avatar_fb7ff8573a6d50c174017e66929b3504",
+        "status": "unknown",
+        "scan_status": "partial",
+        "preset_version": "v0.18.1.1-beta",
+        "preset_source_url": "https://github.com/nitwi/Roblox-Bot-Investigator/blob/3b3f4e40a9ce3a258f3dac6584add47959a9a980/RBI_Bot.py",
+        "presets": [
+          {
+            "id": "bacon",
+            "name": "Bacon",
+            "category": "defaultcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "144076760",
+              "144076358",
+              "63690008"
+            ],
+            "requiredCount": 3,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "144076760",
+              "144076358",
+              "63690008"
+            ]
+          },
+          {
+            "id": "beanie",
+            "name": "Beanie",
+            "category": "defaultcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "382537569",
+              "4047884939",
+              "1772336109"
+            ],
+            "requiredCount": 3,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "382537569",
+              "4047884939",
+              "1772336109"
+            ]
+          },
+          {
+            "id": "acorn",
+            "name": "Acorn",
+            "category": "defaultcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "62724852",
+              "144076512",
+              "144076436"
+            ],
+            "requiredCount": 3,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "62724852",
+              "144076512",
+              "144076436"
+            ]
+          },
+          {
+            "id": "john",
+            "name": "John",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301809996",
+              "301811279",
+              "301819845",
+              "301820684"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301809996",
+              "301811279",
+              "301819845",
+              "301820684"
+            ]
+          },
+          {
+            "id": "oakley",
+            "name": "Oakley",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301810204",
+              "301811432",
+              "301819935",
+              "301820724"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301810204",
+              "301811432",
+              "301819935",
+              "301820724"
+            ]
+          },
+          {
+            "id": "greenbean",
+            "name": "GreenBean",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "617605556"
+            ],
+            "requiredCount": 1,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "617605556"
+            ]
+          },
+          {
+            "id": "claire",
+            "name": "Claire",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301820599",
+              "301819020"
+            ],
+            "requiredCount": 2,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301820599",
+              "301819020"
+            ]
+          },
+          {
+            "id": "casey",
+            "name": "Casey",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301819154",
+              "301820642",
+              "301809497",
+              "301811027"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301819154",
+              "301820642",
+              "301809497",
+              "301811027"
+            ]
+          },
+          {
+            "id": "lin",
+            "name": "Lin",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301820310",
+              "301818464",
+              "301806786",
+              "301810423"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301820310",
+              "301818464",
+              "301806786",
+              "301810423"
+            ]
+          },
+          {
+            "id": "serena",
+            "name": "Serena",
+            "category": "xboxcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "301818806",
+              "301820523",
+              "301807898",
+              "301810602"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "301818806",
+              "301820523",
+              "301807898",
+              "301810602"
+            ]
+          },
+          {
+            "id": "junkbot",
+            "name": "Junkbot",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "12724232885",
+              "4381832739",
+              "4381828509",
+              "4381823417",
+              "4381821661",
+              "4381819685",
+              "4381817635",
+              "4381815211"
+            ],
+            "requiredCount": 8,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "12724232885",
+              "4381832739",
+              "4381828509",
+              "4381823417",
+              "4381821661",
+              "4381819685",
+              "4381817635",
+              "4381815211"
+            ]
+          },
+          {
+            "id": "knightsofredcliff",
+            "name": "Knights of Redcliff",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "2493559059",
+              "2493559856",
+              "2493586650",
+              "2493590711",
+              "2493776828",
+              "2493786076",
+              "137831860413813"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "2493559059",
+              "2493559856",
+              "2493586650",
+              "2493590711",
+              "2493776828",
+              "2493786076",
+              "137831860413813"
+            ]
+          },
+          {
+            "id": "dennis",
+            "name": "Dennis",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "11822635053",
+              "4637596615",
+              "4637601297",
+              "4637254498"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "11822635053",
+              "4637596615",
+              "4637601297",
+              "4637254498"
+            ]
+          },
+          {
+            "id": "lindsey",
+            "name": "Lindsey",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "12945228337",
+              "4637605284",
+              "4637267557",
+              "4637603462"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "12945228337",
+              "4637605284",
+              "4637267557",
+              "4637603462"
+            ]
+          },
+          {
+            "id": "denny",
+            "name": "Denny",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "128985581083096",
+              "6445270994",
+              "6445268819",
+              "6445265102",
+              "6445263379",
+              "6445262286",
+              "6445260402"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "128985581083096",
+              "6445270994",
+              "6445268819",
+              "6445265102",
+              "6445263379",
+              "6445262286",
+              "6445260402"
+            ]
+          },
+          {
+            "id": "linlin",
+            "name": "Linlin",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "85216210917123",
+              "6494077172",
+              "6494056892",
+              "6494055897",
+              "6494055013",
+              "6494053789",
+              "6494051962"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "85216210917123",
+              "6494077172",
+              "6494056892",
+              "6494055897",
+              "6494055013",
+              "6494053789",
+              "6494051962"
+            ]
+          },
+          {
+            "id": "kenneth",
+            "name": "Kenneth",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "15093144795",
+              "4637618900",
+              "4637617396",
+              "4637431811"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "15093144795",
+              "4637618900",
+              "4637617396",
+              "4637431811"
+            ]
+          },
+          {
+            "id": "oliver",
+            "name": "Oliver",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "3963861732",
+              "3963864909",
+              "3963867514",
+              "3963869770",
+              "3963871432",
+              "3963874672",
+              "3670737444",
+              "12778883791"
+            ],
+            "requiredCount": 8,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "3963861732",
+              "3963864909",
+              "3963867514",
+              "3963869770",
+              "3963871432",
+              "3963874672",
+              "3670737444",
+              "12778883791"
+            ]
+          },
+          {
+            "id": "cindy",
+            "name": "Cindy",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "13253943097",
+              "4637612548",
+              "4637611578",
+              "4637156063"
+            ],
+            "requiredCount": 4,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "13253943097",
+              "4637612548",
+              "4637611578",
+              "4637156063"
+            ]
+          },
+          {
+            "id": "citylifewoman",
+            "name": "City Life Woman",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "15093243863",
+              "2492675286",
+              "2492674027",
+              "2492670347",
+              "2492669375",
+              "2492671662",
+              "2492667589"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "15093243863",
+              "2492675286",
+              "2492674027",
+              "2492670347",
+              "2492669375",
+              "2492671662",
+              "2492667589"
+            ]
+          },
+          {
+            "id": "squadghoulstedd",
+            "name": "Squad Ghouls: Drop Dead Tedd",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "2499654059",
+              "112187483939951",
+              "2499646611",
+              "2499646090",
+              "2499645445",
+              "2499644791",
+              "2499643947"
+            ],
+            "requiredCount": 7,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "2499654059",
+              "112187483939951",
+              "2499646611",
+              "2499646090",
+              "2499645445",
+              "2499644791",
+              "2499643947"
+            ]
+          },
+          {
+            "id": "summer",
+            "name": "Summer",
+            "category": "freeoutfitcombos",
+            "status": "unknown",
+            "requiredIds": [
+              "3963490791",
+              "3670737444"
+            ],
+            "requiredCount": 2,
+            "matchedIds": [],
+            "matchedCount": 0,
+            "missingIds": [],
+            "unverifiedIds": [
+              "3963490791",
+              "3670737444"
+            ]
+          }
+        ]
+      }
     },
     {
       "id": "7593882424",
@@ -183850,17 +187926,24 @@
   },
   "historical_friend_edges": [],
   "avatar_observations": {
-    "count": 6,
-    "scanned_node_count": 6,
+    "count": 13,
+    "scanned_node_count": 13,
     "scan_ids": [
       "avatar_cbc1aa68da549bd27e4f4a53a9ac7a07",
       "avatar_6113dc1d1a21570efc383a63d888180a",
       "avatar_8986b40220345e1865b543013f74f5c1",
       "avatar_921d7f9b45c3772c5228bacd2e54bb97",
       "avatar_41ea120c156f35cf8f42abb41ac57282",
-      "avatar_d8f5ce580d1d22b216b90acf8de494f8"
+      "avatar_d8f5ce580d1d22b216b90acf8de494f8",
+      "avatar_9d6690b47bd5d0a736e9c4a9a3633bb6",
+      "avatar_b210cc24fe7d8e776d3586739c7e5767",
+      "avatar_da95cd24bca4681281628e9735d595e4",
+      "avatar_dbb94638f9e41a8fbba125a0283c9edc",
+      "avatar_1974ca257e35e140c2e14561c64d1818",
+      "avatar_c2dfd946c4525a716f10e4db4a522404",
+      "avatar_fb7ff8573a6d50c174017e66929b3504"
     ],
     "preset_version": "v0.18.1.1-beta",
-    "latest_observed_at": "2026-11-25T04:08:39.319Z"
+    "latest_observed_at": "2026-11-27T08:32:22.893Z"
   }
 }
