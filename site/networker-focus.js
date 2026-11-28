@@ -23,14 +23,15 @@
   }
   function applyVerifiedUsernames(network, overlay, core) {
     if (!network?.nodes || overlay?.schema_version !== 1 ||
-        overlay?.source_url !== "https://users.roblox.com/v1/users" ||
+        !["https://users.roblox.com/v1/users", "roblox_verified_profile_and_prior_api"].includes(overlay?.source_url) ||
         !overlay.users || typeof overlay.users !== "object" || Array.isArray(overlay.users)) return 0;
     let changed = 0;
     for (const [key, record] of Object.entries(overlay.users)) {
       const id = core.normalizeId(key);
       if (id !== key || !record || typeof record !== "object" ||
           core.normalizeId(record.id) !== id ||
-          record.source_url !== overlay.source_url ||
+          !(record.source_url === "https://users.roblox.com/v1/users" ||
+            record.source_url === `https://www.roblox.com/users/${id}/profile`) ||
           !Number.isFinite(Date.parse(record.observed_at || ""))) continue;
       const username = record.username;
       if (typeof username !== "string" || !/^[A-Za-z0-9_]{1,20}$/.test(username)) continue;

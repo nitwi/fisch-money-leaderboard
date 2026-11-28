@@ -574,7 +574,7 @@
       if (node.username_source_url && node.username_observed_at) {
         const origin = el("p", "fng-source-time", "Username verified: ");
         origin.append(time(node.username_observed_at), el("span", "", " · "),
-          safeLink("Roblox Users API", options.core.sourceUrl(node.username_source_url)));
+          safeLink(node.username_source_url === `https://www.roblox.com/users/${node.id}/profile` ? "Observed Roblox profile" : "Roblox Users API", options.core.sourceUrl(node.username_source_url)));
         inspector.append(origin);
       }
       const facts = el("dl", "fng-facts");

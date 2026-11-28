@@ -84,6 +84,21 @@ test('exact verified username overlay fills ID-only external accounts without re
   assert.equal(focus.resolveAccount(network,'VerifiedUser2',core).id,'2');
 });
 
+test('website profile observations label graph nodes by exact ID only', () => {
+  const net=core.socialNetwork([person('1',{username:'Root'})],[
+    {id:'2',username:'',ledger:false},{id:'3',username:'',ledger:false}]);
+  const overlay={schema_version:1,source_url:'roblox_verified_profile_and_prior_api',users:{
+    '2':{id:'2',username:'ProfileConfirmed',display_name:'NiceName',
+      observed_at:CHECKED,source_url:'https://www.roblox.com/users/2/profile'},
+    '3':{id:'3',username:'WrongProfile',observed_at:CHECKED,
+      source_url:'https://www.roblox.com/users/2/profile'}
+  }};
+  assert.equal(focus.applyVerifiedUsernames(net,overlay,core),1);
+  assert.equal(focus.label(net.nodes.get('2')),'@ProfileConfirmed');
+  assert.equal(focus.label(net.nodes.get('3')),'ID 3');
+  assert.equal(net.nodes.get('2').username_source_url,overlay.users['2'].source_url);
+});
+
 test('missing usernames use labeled display names, recorded aliases, then ID as last fallback', () => {
   assert.equal(focus.label({id:'2',username:'',display_name:'VisiblePlayer'}),'VisiblePlayer (display name)');
   assert.equal(focus.label({id:'3',username:'',aliases:['PriorExactName']}),

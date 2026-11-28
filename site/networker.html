@@ -12,8 +12,8 @@
   <script defer src="time-utils.js?v=b2a56747d852"></script>
   <script defer src="username-patterns.js?v=91044023c885"></script>
   <script defer src="networker-core.js?v=b622899f63bf"></script>
-  <script defer src="network-graph.js?v=b698a81d7a6c"></script>
-  <script defer src="networker-focus.js?v=0548b4803306"></script>
+  <script defer src="network-graph.js?v=30774f7fdc03"></script>
+  <script defer src="networker-focus.js?v=baa25218d987"></script>
   <link rel="stylesheet" href="networker-focus.css?v=b3b9f98c5179">
 </head>
 <body class="networker-page">
@@ -92,9 +92,10 @@
           <div class="nwf-data-links">
             <a href="network-database.sqlite.gz" download>SQLite evidence database</a>
             <a href="network-data.json" download>Network JSON</a>
+            <a href="network-profile-queue.json">Unresolved username profile inspection queue</a>
             <a href="https://github.com/nitwi/fisch-money-leaderboard/tree/main/data/network" target="_blank" rel="noopener noreferrer">Census journal and method</a>
           </div>
-          <p class="nwf-help">A partial observation confirms only recorded positive links; unobserved identities remain unknown. Missing usernames are matched to exact Roblox IDs at publication when the public Users API is available; display names and previously observed handles are explicitly labeled. Recorded relationships are not necessarily current.</p>
+          <p class="nwf-help">A partial observation confirms only recorded positive links; unobserved identities remain unknown. Browser-verified usernames are matched by exact Roblox ID from saved public-profile observations; previous verified names are carried forward where available, without new Roblox API requests. Display names and previously observed handles are clearly labeled. Recorded relationships are not necessarily current.</p>
         </div>
       </details>
     </div>
