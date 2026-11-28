@@ -122,7 +122,8 @@ def verified_latest(records):
             continue
         user_id = record["user_id"]
         previous = latest.get(user_id)
-        if not previous or (record["observed_at"], index) >= (previous[0]["observed_at"], previous[1]):
+        when = dt.datetime.fromisoformat(record["observed_at"].replace("Z", "+00:00"))
+        if not previous or (when, index) >= (dt.datetime.fromisoformat(previous[0]["observed_at"].replace("Z", "+00:00")), previous[1]):
             latest[user_id] = (record, index)
     return {user_id: pair[0] for user_id, pair in latest.items()}
 
