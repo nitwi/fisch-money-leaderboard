@@ -5,7 +5,9 @@ on:
       - 'site/**'
       - 'tests/*timestamp*'
       - 'tests/test_network_usernames.py'
+      - 'tests/test_network_profile_names.py'
       - 'tools/build_network_usernames.py'
+      - 'tools/import_network_profile_names.py'
       - '.github/workflows/timestamp-checks.yml'
   push:
     branches: [main]
@@ -34,3 +36,4 @@ jobs:
           node --check site/network-graph.js
           node --test tests/test_timestamp.cjs tests/test_ledger_timestamp.cjs tests/test_networker_focus.cjs tests/test_network_graph.cjs
           python -m unittest discover -s tests -p test_network_usernames.py -v
+          python -m unittest discover -s tests -p test_network_profile_names.py -v
