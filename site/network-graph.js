@@ -12,7 +12,12 @@
   const LANE_NAMES = Object.freeze({up: "↑ Following", right: "→ Leaderboard", down: "↓ Followers", left: "← External leads"});
   let instanceCount = 0;
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-  const name = node => node?.username ? `@${node.username}` : node?.display_name || `ID ${node?.id || "unknown"}`;
+  const recordedAlias = node => Array.isArray(node?.aliases) ?
+    node.aliases.find(value => typeof value === "string" && /^[A-Za-z0-9_]{1,20}$/.test(value)) : null;
+  const name = node => node?.username ? `@${node.username}` :
+    recordedAlias(node) ? `@${recordedAlias(node)} (previously observed)` :
+    node?.display_name ? `${node.display_name} (display name)` :
+    `ID ${node?.id || "unknown"}`;
   const rank = node => Number.isInteger(node?.latest_rank) && node.latest_rank > 0 ? node.latest_rank : null;
 
   // Eligibility filters nodes; it never creates a relationship between them.
@@ -566,6 +571,12 @@
       const item = model.eligibility.get(node.id), isMain = node.id === model.focusId, stats = neighborStats(node.id, model);
       inspector.append(el("p", "fng-kicker", isMain ? "MAIN ACCOUNT SELECTED" : "SELECTED ACCOUNT"), el("h3", "", name(node)));
       if (node.display_name && node.display_name !== node.username) inspector.append(el("p", "fng-display-name", `Display name: ${node.display_name}`));
+      if (node.username_source_url && node.username_observed_at) {
+        const origin = el("p", "fng-source-time", "Username verified: ");
+        origin.append(time(node.username_observed_at), el("span", "", " · "),
+          safeLink("Roblox Users API", options.core.sourceUrl(node.username_source_url)));
+        inspector.append(origin);
+      }
       const facts = el("dl", "fng-facts");
       const fact = (label, value) => { facts.append(el("dt", "", label), el("dd", "", value)); };
       fact("Roblox ID", node.id);
