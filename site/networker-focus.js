@@ -14,6 +14,9 @@
       return "@" + person.username;
     // Display names are not Roblox usernames. Mark them clearly instead of
     // turning one into a guessed @handle or showing an avoidable numeric ID.
+    const alias = Array.isArray(person?.aliases) ?
+      person.aliases.find(value => typeof value === "string" && /^[A-Za-z0-9_]{1,20}$/.test(value)) : null;
+    if (alias) return "@" + alias + " (previously observed)";
     if (person && typeof person.display_name === "string" && person.display_name.trim())
       return person.display_name + " (display name)";
     return "ID " + (person && person.id || "unknown");
@@ -57,6 +60,7 @@
     if (!needle) return people.filter(item => item.ledger && rank(item) && rank(item) <= 50).sort(sortPeople).slice(0, limit || 50);
     return people.filter(item =>
       String(item.username || "").toLowerCase().includes(needle) ||
+      String(item.display_name || "").toLowerCase().includes(needle) ||
       String(item.id || "").includes(needle) ||
       (item.aliases || []).some(alias => String(alias).toLowerCase().includes(needle)) ||
       String(rank(item) || "") === needle
