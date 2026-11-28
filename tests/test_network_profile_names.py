@@ -54,8 +54,10 @@ class ProfileNameTests(unittest.TestCase):
             normalize(bad)
 
     def test_rejects_unavailable_observation_claiming_verified_name(self):
+        record = observation(status="unavailable")
+        record["username"] = "fake"
         with self.assertRaisesRegex(ValueError, "guessed username"):
-            normalize(observation(status="unavailable", username="fake"))
+            normalize(record)
         verified = normalize(observation(status="unavailable"))
         self.assertEqual(verified["username"], "")
         self.assertEqual(verified["status"], "unavailable")
